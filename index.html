@@ -83,6 +83,12 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Custom Scrollbar pour la Modale */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.5); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.8); }
+
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
@@ -104,7 +110,6 @@
             background-image: linear-gradient(to right, #a855f7, #22d3ee);
         }
         
-        /* Spinner pour le chargement des détails */
         .spinner {
             border: 3px solid rgba(255,255,255,0.1);
             border-top-color: #22d3ee;
@@ -125,17 +130,12 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3 cursor-pointer group" onclick="location.reload()">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 shadow-glow-violet flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
-                    </svg>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
                 </div>
                 <h1 class="text-2xl font-extrabold tracking-tight">Cine<span class="text-aurora">Lume</span></h1>
             </div>
             <button id="settings-btn" class="p-2 rounded-xl hover:bg-white/10 transition-colors" aria-label="Paramètres">
-                <svg class="w-6 h-6 text-gray-300 hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
+                <svg class="w-6 h-6 text-gray-300 hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </button>
         </div>
     </nav>
@@ -147,24 +147,39 @@
             <p class="text-gray-400 text-lg md:text-xl font-light" id="date-subtitle">Découvrez les sorties de la semaine.</p>
         </div>
 
-        <div class="glass-panel p-2 rounded-2xl inline-flex flex-col md:flex-row gap-2 mb-10 w-full md:w-auto items-center">
-            <div class="flex items-center gap-1">
-                <button id="prev-year" class="p-2 rounded-lg hover:bg-white/10 text-violet-400 transition-colors">◀</button>
-                <span id="current-year-display" class="text-white font-bold text-sm w-12 text-center">2026</span>
-                <button id="next-year" class="p-2 rounded-lg hover:bg-white/10 text-violet-400 transition-colors">▶</button>
+        <div class="glass-panel p-2 rounded-2xl flex flex-wrap gap-2 mb-10 w-full items-center justify-between">
+            
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1">
+                    <button id="prev-year" class="p-2 rounded-lg hover:bg-white/10 text-violet-400 transition-colors">◀</button>
+                    <span id="current-year-display" class="text-white font-bold text-sm w-10 text-center">2026</span>
+                    <button id="next-year" class="p-2 rounded-lg hover:bg-white/10 text-violet-400 transition-colors">▶</button>
+                </div>
+                
+                <div class="hidden md:block w-px bg-white/10 my-2 mx-1 h-8"></div>
+                
+                <div class="w-full md:w-auto scroll-mask max-w-[200px] md:max-w-md">
+                    <div class="flex overflow-x-auto no-scrollbar gap-1 p-1" id="months-container"></div>
+                </div>
+                
+                <div class="hidden md:block w-px bg-white/10 my-2 mx-1 h-8"></div>
+                
+                <div class="w-full md:w-auto">
+                    <div class="flex overflow-x-auto no-scrollbar gap-2 p-1" id="weeks-container"></div>
+                </div>
             </div>
-            
-            <div class="hidden md:block w-px bg-white/10 my-2 mx-2 h-8"></div>
-            
-            <div class="w-full md:w-auto scroll-mask">
-                <div class="flex overflow-x-auto no-scrollbar gap-1 p-1 md:max-w-md lg:max-w-2xl" id="months-container"></div>
+
+            <div class="flex items-center gap-2 bg-surface-800 border border-white/10 rounded-xl px-3 py-1.5 ml-auto">
+                <span class="text-lg">🌍</span>
+                <select id="region-filter" class="bg-transparent text-white font-bold text-sm outline-none cursor-pointer">
+                    <option value="FR" class="bg-surface-900">France</option>
+                    <option value="US" class="bg-surface-900">États-Unis</option>
+                    <option value="GB" class="bg-surface-900">Royaume-Uni</option>
+                    <option value="JP" class="bg-surface-900">Japon</option>
+                    <option value="" class="bg-surface-900">Monde entier</option>
+                </select>
             </div>
-            
-            <div class="hidden md:block w-px bg-white/10 my-2 mx-2 h-8"></div>
-            
-            <div class="w-full md:w-auto">
-                <div class="flex overflow-x-auto no-scrollbar gap-2 p-1" id="weeks-container"></div>
-            </div>
+
         </div>
 
         <div id="loading" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-10"></div>
@@ -179,15 +194,9 @@
                 </div>
                 <span class="text-xl font-bold tracking-tight text-white">CineLume <span class="font-normal text-sm text-gray-500 ml-2">© 2026</span></span>
             </div>
-            
-            <div class="flex gap-6 text-sm text-gray-500">
-                <a href="#" class="hover:text-cyan-400 transition-colors">Mentions légales</a>
-                <a href="#" class="hover:text-cyan-400 transition-colors">Contact</a>
-            </div>
-            
             <div class="flex items-center gap-3 text-xs text-gray-600">
                 <span>Données fournies par</span>
-                <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" alt="TMDB Logo" class="h-3 opacity-50">
+                <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" alt="TMDB" class="h-3 opacity-50">
             </div>
         </div>
     </footer>
@@ -195,54 +204,57 @@
     <div id="movie-modal" class="fixed inset-0 z-50 hidden flex-col justify-end md:justify-center p-0 md:p-6" role="dialog" aria-modal="true">
         <div id="modal-overlay" class="absolute inset-0 bg-surface-950/80 backdrop-blur-md opacity-0" onclick="closeModal()"></div>
         
-        <div id="modal-content" class="relative w-full max-w-5xl bg-surface-900 rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl opacity-0 translate-y-full md:translate-y-0 md:scale-95 flex flex-col max-h-[90vh] border border-white/10 mx-auto">
+        <div id="modal-content" class="relative w-full max-w-5xl bg-surface-900 rounded-t-3xl md:rounded-3xl shadow-2xl opacity-0 translate-y-full md:translate-y-0 md:scale-95 flex flex-col max-h-[90vh] border border-white/10 mx-auto overflow-hidden">
             
-            <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-4 mb-2 md:hidden absolute left-1/2 -translate-x-1/2 z-20"></div>
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/60 hover:bg-violet-600 text-white backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center transition-colors z-50">✕</button>
+            
+            <div class="w-12 h-1.5 bg-white/20 rounded-full absolute top-3 left-1/2 -translate-x-1/2 md:hidden z-50"></div>
 
-            <div class="relative h-56 md:h-80 w-full shrink-0 bg-gradient-to-br from-violet-900 to-surface-800">
-                <img id="modal-backdrop" src="" alt="" class="w-full h-full object-cover opacity-60 md:opacity-100" onerror="this.style.display='none'">
-                <div class="absolute inset-0 bg-gradient-to-t from-surface-900 via-surface-900/60 to-transparent"></div>
-                <div class="absolute inset-0 bg-gradient-to-r from-surface-900 via-transparent to-transparent hidden md:block"></div>
+            <div class="overflow-y-auto w-full h-full custom-scroll relative">
                 
-                <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/40 hover:bg-violet-600 text-white backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center transition-colors z-10 hidden md:flex">✕</button>
-            </div>
-            
-            <div class="px-6 md:px-12 pb-10 pt-2 md:pt-0 flex flex-col md:flex-row gap-8 relative -mt-8 md:-mt-32 overflow-y-auto no-scrollbar">
-                
-                <div class="hidden md:block w-56 shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 z-10 bg-surface-800 self-start">
-                    <img id="modal-poster" src="" alt="Affiche" class="w-full h-full object-cover">
+                <div class="relative h-64 md:h-[400px] w-full shrink-0 bg-gradient-to-br from-violet-900 to-surface-800">
+                    <img id="modal-backdrop" src="" alt="" class="w-full h-full object-cover opacity-60 md:opacity-100" onerror="this.style.display='none'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-900 via-surface-900/50 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-surface-900 via-surface-900/60 to-transparent hidden md:block"></div>
                 </div>
                 
-                <div class="flex flex-col pt-4 w-full z-10">
-                    <div class="flex flex-wrap gap-2 mb-2 items-center">
-                        <span id="modal-date" class="bg-violet-500/20 text-violet-300 border border-violet-500/30 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase"></span>
-                        <span id="modal-runtime" class="text-xs text-gray-400 font-medium hidden border border-white/10 px-3 py-1 rounded-full"></span>
+                <div class="px-6 md:px-12 pb-12 pt-0 flex flex-col md:flex-row gap-8 relative -mt-20 md:-mt-40">
+                    
+                    <div class="hidden md:block w-60 shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 z-10 bg-surface-800 self-start sticky top-6">
+                        <img id="modal-poster" src="" alt="Affiche" class="w-full h-full object-cover">
                     </div>
                     
-                    <h2 id="modal-title" class="text-3xl md:text-5xl font-extrabold mb-1 leading-tight tracking-tight text-white drop-shadow-lg"></h2>
-                    <p id="modal-director" class="text-cyan-400 text-sm font-medium mb-4 h-5"></p>
-                    
-                    <div class="flex flex-wrap items-center gap-4 mb-6">
-                        <div class="flex items-center gap-1.5 bg-gradient-to-r from-violet-600/20 to-cyan-500/20 px-4 py-2 rounded-xl border border-white/10">
-                            <span class="text-cyan-400 font-bold text-lg">★</span>
-                            <span id="modal-rating" class="font-bold text-white text-lg"></span>
+                    <div class="flex flex-col pt-4 w-full min-w-0 z-10">
+                        <div class="flex flex-wrap gap-2 mb-2 items-center">
+                            <span id="modal-date" class="bg-violet-500/20 text-violet-300 border border-violet-500/30 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase"></span>
+                            <span id="modal-runtime" class="text-xs text-gray-400 font-medium hidden border border-white/10 px-3 py-1 rounded-full"></span>
                         </div>
-                        <div id="modal-genres" class="flex gap-2 text-xs text-gray-400"></div>
-                    </div>
-
-                    <a id="modal-trailer-btn" href="#" target="_blank" class="hidden w-fit mb-6 flex items-center gap-2 bg-white text-surface-900 px-6 py-2.5 rounded-full font-bold hover:bg-cyan-400 hover:text-white transition-colors shadow-glow-cyan">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Voir la bande-annonce
-                    </a>
-                    
-                    <h3 class="text-lg font-bold text-white mb-2">Synopsis</h3>
-                    <p id="modal-overview" class="text-gray-300 text-base md:text-lg leading-relaxed font-light mb-8"></p>
-
-                    <h3 class="text-lg font-bold text-white mb-3">Tête d'affiche</h3>
-                    <div id="modal-cast-loading" class="flex gap-2 items-center text-gray-500 text-sm">
-                        <div class="spinner"></div> Chargement du casting...
-                    </div>
-                    <div id="modal-cast" class="flex gap-4 overflow-x-auto no-scrollbar pb-2 scroll-mask">
+                        
+                        <h2 id="modal-title" class="text-3xl md:text-5xl font-extrabold mb-1 leading-tight tracking-tight text-white drop-shadow-lg break-words"></h2>
+                        <p id="modal-director" class="text-cyan-400 text-sm font-medium mb-4 h-5"></p>
+                        
+                        <div class="flex flex-wrap items-center gap-4 mb-6">
+                            <div class="flex items-center gap-1.5 bg-gradient-to-r from-violet-600/20 to-cyan-500/20 px-4 py-2 rounded-xl border border-white/10">
+                                <span class="text-cyan-400 font-bold text-lg">★</span>
+                                <span id="modal-rating" class="font-bold text-white text-lg"></span>
+                            </div>
+                            <div id="modal-genres" class="flex gap-2 text-xs text-gray-400 flex-wrap"></div>
                         </div>
+
+                        <a id="modal-trailer-btn" href="#" target="_blank" class="hidden w-fit mb-6 flex items-center gap-2 bg-white text-surface-900 px-6 py-2.5 rounded-full font-bold hover:bg-cyan-400 hover:text-white transition-colors shadow-glow-cyan">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Voir la bande-annonce
+                        </a>
+                        
+                        <h3 class="text-lg font-bold text-white mb-2">Synopsis</h3>
+                        <p id="modal-overview" class="text-gray-300 text-base md:text-lg leading-relaxed font-light mb-8 break-words"></p>
+
+                        <h3 class="text-lg font-bold text-white mb-3">Tête d'affiche</h3>
+                        <div id="modal-cast-loading" class="flex gap-2 items-center text-gray-500 text-sm">
+                            <div class="spinner"></div> Chargement du casting...
+                        </div>
+                        <div id="modal-cast" class="flex gap-4 overflow-x-auto custom-scroll pb-4 scroll-mask">
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,7 +264,7 @@
         <div class="absolute inset-0 bg-surface-950/80 backdrop-blur-sm" onclick="closeSettings()"></div>
         <div class="relative bg-surface-900 rounded-3xl p-8 max-w-md w-full border border-violet-500/30 shadow-glow-violet">
             <h3 class="text-2xl font-bold mb-6 text-white">Paramètres</h3>
-            <label class="block text-sm text-gray-400 mb-2 font-medium">Clé API TMDB <span class="text-violet-400">(Local)</span></label>
+            <label class="block text-sm text-gray-400 mb-2 font-medium">Clé API TMDB</label>
             <input type="text" id="api-key-input" class="w-full bg-surface-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition-colors mb-2">
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeSettings()" class="px-5 py-2.5 rounded-xl text-gray-400 hover:text-white transition-colors font-medium">Annuler</button>
@@ -263,7 +275,6 @@
 
     <script>
         (function() {
-            // === CONFIG ===
             const DEFAULT_API_KEY = '81f09aab8379105c078d67759877bc0b';
             const BASE_URL = 'https://api.themoviedb.org/3';
             const IMG_URL = 'https://image.tmdb.org/t/p/w500';
@@ -276,16 +287,19 @@
             let selectedMonth = today.getMonth();
             let selectedWeek = Math.min(4, Math.ceil(today.getDate() / 7));
             let selectedYear = today.getFullYear();
+            let selectedRegion = 'FR'; // Par défaut : France
+
             const minYear = today.getFullYear() - 1;
             const maxYear = today.getFullYear() + 2;
 
-            // === UI ELEMENTS ===
             const gridEl = document.getElementById('movie-grid');
             const loadingEl = document.getElementById('loading');
             const dynamicBg = document.getElementById('dynamic-bg');
             const modal = document.getElementById('movie-modal');
 
-            // === UTILS ===
+            // SVG Image de remplacement si pas de photo d'acteur
+            const fallbackAvatar = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%2318181b' width='100' height='100'/><path fill='%23ffffff30' d='M50 25c-11 0-20 9-20 20s9 20 20 20 20-9 20-20-9-20-20-20zm0 45c-15.5 0-40 7.8-40 23.3v11.7h80v-11.7c0-15.5-24.5-23.3-40-23.3z'/></svg>`;
+
             function getDatesForWeek(year, monthIndex, weekNumber) {
                 const startDay = (weekNumber - 1) * 7 + 1;
                 let endDay = weekNumber * 7;
@@ -300,13 +314,11 @@
                 return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
             }
 
-            // === INIT UI ===
             function buildUI() {
                 const mContainer = document.getElementById('months-container');
                 mContainer.innerHTML = '';
                 months.forEach((month, i) => {
                     const btn = document.createElement('button');
-                    btn.className = `px-5 py-2 rounded-xl font-bold transition-all duration-300 text-sm whitespace-nowrap`;
                     btn.textContent = month;
                     btn.onclick = () => { selectedMonth = i; selectedWeek = 1; updateUI(); };
                     mContainer.appendChild(btn);
@@ -316,11 +328,16 @@
                 wContainer.innerHTML = '';
                 for (let i = 1; i <= 4; i++) {
                     const btn = document.createElement('button');
-                    btn.className = `px-5 py-2 rounded-xl font-bold transition-all duration-300 text-sm whitespace-nowrap`;
                     btn.textContent = `Semaine ${i}`;
                     btn.onclick = () => { selectedWeek = i; updateUI(); };
                     wContainer.appendChild(btn);
                 }
+
+                // Event listener pour le filtre pays
+                document.getElementById('region-filter').addEventListener('change', (e) => {
+                    selectedRegion = e.target.value;
+                    updateUI();
+                });
             }
 
             function updateUI() {
@@ -337,14 +354,16 @@
                 fetchMovies(dates.start, dates.end);
             }
 
-            // === FETCH GRILLE (Liste légère) ===
             async function fetchMovies(startDate, endDate) {
                 gridEl.classList.add('hidden');
                 loadingEl.innerHTML = Array(10).fill(`<div class="rounded-2xl bg-surface-800 border border-white/5 aspect-[2/3] animate-shimmer"></div>`).join('');
                 loadingEl.classList.remove('hidden');
 
                 try {
-                    const url = `${BASE_URL}/discover/movie?api_key=${apiKey}&language=fr-FR&region=FR&primary_release_date.gte=${startDate}&primary_release_date.lte=${endDate}&with_release_type=2|3&sort_by=popularity.desc`;
+                    // Application dynamique du filtre Région
+                    const regionParam = selectedRegion ? `&region=${selectedRegion}` : '';
+                    const url = `${BASE_URL}/discover/movie?api_key=${apiKey}&language=fr-FR${regionParam}&primary_release_date.gte=${startDate}&primary_release_date.lte=${endDate}&with_release_type=2|3&sort_by=popularity.desc`;
+                    
                     const response = await fetch(url);
                     const data = await response.json();
                     
@@ -355,12 +374,12 @@
                         displayMovies(data.results);
                         if (data.results[0].backdrop_path) dynamicBg.style.backgroundImage = `url('${BACKDROP_URL}${data.results[0].backdrop_path}')`;
                     } else {
-                        gridEl.innerHTML = `<div class="col-span-full py-16 text-center text-gray-500 text-lg">Aucune sortie pour cette période.</div>`;
+                        gridEl.innerHTML = `<div class="col-span-full py-16 text-center text-gray-500 text-lg">Aucune sortie pour cette période et ce pays.</div>`;
                     }
                 } catch (e) {
                     loadingEl.classList.add('hidden');
                     gridEl.classList.remove('hidden');
-                    gridEl.innerHTML = `<div class="col-span-full py-16 text-center text-red-400">Erreur de chargement.</div>`;
+                    gridEl.innerHTML = `<div class="col-span-full py-16 text-center text-red-400">Erreur réseau.</div>`;
                 }
             }
 
@@ -400,7 +419,6 @@
                 });
             }
 
-            // === FETCH DETAILS (Infos Profondes) ===
             async function fetchMovieDetails(movieId) {
                 document.getElementById('modal-cast-loading').style.display = 'flex';
                 document.getElementById('modal-cast').innerHTML = '';
@@ -413,7 +431,6 @@
                     const res = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${apiKey}&language=fr-FR&append_to_response=credits,videos`);
                     const data = await res.json();
 
-                    // Durée
                     if (data.runtime) {
                         const h = Math.floor(data.runtime / 60);
                         const m = data.runtime % 60;
@@ -422,18 +439,15 @@
                         runtimeEl.classList.remove('hidden');
                     }
 
-                    // Genres
                     if (data.genres) {
                         document.getElementById('modal-genres').innerHTML = data.genres.slice(0,3).map(g => `<span>${g.name}</span>`).join('<span class="text-white/20">•</span>');
                     }
 
-                    // Réalisateur
                     if (data.credits && data.credits.crew) {
                         const director = data.credits.crew.find(c => c.job === 'Director');
                         if (director) document.getElementById('modal-director').innerHTML = `Un film de <span class="text-white">${director.name}</span>`;
                     }
 
-                    // Bande-annonce (YouTube)
                     if (data.videos && data.videos.results) {
                         const trailer = data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results.find(v => v.site === 'YouTube');
                         if (trailer) {
@@ -443,18 +457,18 @@
                         }
                     }
 
-                    // Casting
                     document.getElementById('modal-cast-loading').style.display = 'none';
                     if (data.credits && data.credits.cast && data.credits.cast.length > 0) {
                         const castHtml = data.credits.cast.slice(0, 8).map(actor => {
-                            const imgPath = actor.profile_path ? `${PROFILE_URL}${actor.profile_path}` : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="150"><rect fill="%2318181b" width="100" height="150"/><path fill="%23ffffff30" d="M50 30c-11 0-20 9-20 20s9 20 20 20 20-9 20-20-9-20-20-20zm0 45c-15.5 0-40 7.8-40 23.3v11.7h80v-11.7c0-15.5-24.5-23.3-40-23.3z"/></svg>';
+                            // Gestion de l'image ou de l'icône SVG par défaut
+                            const imgPath = actor.profile_path ? `${PROFILE_URL}${actor.profile_path}` : fallbackAvatar;
                             return `
-                                <div class="flex flex-col items-center min-w-[80px] shrink-0">
-                                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-white/10">
-                                        <img src="${imgPath}" alt="${actor.name}" class="w-full h-full object-cover">
+                                <div class="flex flex-col items-center min-w-[80px] w-20 shrink-0">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-white/10 bg-surface-800 shrink-0">
+                                        <img src="${imgPath}" alt="${actor.name}" class="w-full h-full object-cover" onerror="this.src='${fallbackAvatar}'">
                                     </div>
-                                    <span class="text-xs text-white font-bold text-center leading-tight">${actor.name}</span>
-                                    <span class="text-[10px] text-gray-500 text-center leading-tight mt-1 line-clamp-1">${actor.character}</span>
+                                    <span class="text-xs text-white font-bold text-center leading-tight w-full truncate">${actor.name}</span>
+                                    <span class="text-[10px] text-gray-500 text-center leading-tight mt-1 w-full truncate">${actor.character}</span>
                                 </div>
                             `;
                         }).join('');
@@ -463,13 +477,11 @@
                         document.getElementById('modal-cast').innerHTML = `<p class="text-sm text-gray-500">Casting non renseigné.</p>`;
                     }
                 } catch (e) {
-                    document.getElementById('modal-cast-loading').innerHTML = "Erreur lors du chargement des détails.";
+                    document.getElementById('modal-cast-loading').innerHTML = "Erreur de chargement.";
                 }
             }
 
-            // === GESTION MODALE ===
             function openModal(movie) {
-                // Remplissage infos de base immédiates
                 document.getElementById('modal-title').textContent = movie.title;
                 document.getElementById('modal-date').textContent = formatDateFR(movie.release_date);
                 document.getElementById('modal-rating').textContent = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : 'N/A';
@@ -484,7 +496,6 @@
                     backdrop.style.display = 'none';
                 }
 
-                // Affichage Modale
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
                 document.body.style.overflow = 'hidden';
@@ -496,7 +507,6 @@
                     });
                 });
 
-                // Lancement requête secondaire profonde
                 fetchMovieDetails(movie.id);
             }
 
@@ -510,7 +520,6 @@
                 }, 400);
             };
 
-            // === SETTINGS ===
             const settingsModal = document.getElementById('settings-modal');
             document.getElementById('settings-btn').onclick = () => {
                 document.getElementById('api-key-input').value = apiKey;
@@ -541,7 +550,6 @@
                 }
             });
 
-            // Lancement
             buildUI();
             updateUI();
         })();
