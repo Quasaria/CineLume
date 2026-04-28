@@ -2,78 +2,118 @@
 <html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="description" content="CineLume – Découvrez les sorties cinéma de la semaine avec une interface Aurora élégante.">
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>CineLume – L'Éclairage sur le Cinéma</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: {
                         cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
-                        violet: { 500: '#a855f7', 600: '#7c3aed', 900: '#4c1d95' },
-                        surface: { 800: '#18181b', 900: '#09090b', 950: '#050505' }
+                        violet: { 400: '#a78bfa', 500: '#a855f7', 600: '#7c3aed', 900: '#4c1d95' },
+                        surface: { 50: '#fafafa', 100: '#f4f4f5', 200: '#e4e4e7', 800: '#18181b', 900: '#09090b', 950: '#050505' }
                     },
                     boxShadow: {
                         'glow-cyan': '0 0 20px rgba(34, 211, 238, 0.4)',
                         'glow-violet': '0 0 30px rgba(124, 58, 237, 0.5)',
+                        'glow-cyan-lg': '0 0 40px rgba(34, 211, 238, 0.3)',
                     },
                     animation: {
                         'shimmer': 'shimmer 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
-                        shimmer: { '0%, 100%': { opacity: 1 }, '50%': { opacity: .3 } }
+                        shimmer: { '0%, 100%': { opacity: 1 }, '50%': { opacity: .3 } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } }
                     }
                 }
             }
         }
     </script>
-    
+
     <style>
+        :root {
+            --bg-primary: #050505;
+            --bg-secondary: #18181b;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(24, 24, 27, 0.5);
+        }
+
+        html.light {
+            --bg-primary: #fafafa;
+            --bg-secondary: #ffffff;
+            --text-primary: #18181b;
+            --text-secondary: #71717a;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #050505;
-            color: #ffffff;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
-        
+
         main { flex-grow: 1; }
-        
+
         #dynamic-bg {
             position: fixed; inset: 0; z-index: -1;
             background-size: cover; background-position: center;
-            filter: blur(40px) brightness(0.2) saturate(1.3);
-            transition: background-image 2s ease-in-out;
-            transform: scale(1.1);
+            filter: blur(60px) brightness(0.15) saturate(1.2);
+            transition: background-image 1.5s ease-in-out, opacity 0.5s ease;
+            transform: scale(1.2);
+            opacity: 0.6;
         }
+
+        html.light #dynamic-bg {
+            filter: blur(80px) brightness(0.8) saturate(1.1);
+            opacity: 0.3;
+        }
+
         #dynamic-bg::after {
             content: ''; position: absolute; inset: 0;
-            background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.15) 0%, transparent 60%),
-                        radial-gradient(circle at bottom left, rgba(34, 211, 238, 0.1) 0%, transparent 60%);
+            background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.2) 0%, transparent 60%),
+                        radial-gradient(circle at bottom left, rgba(34, 211, 238, 0.15) 0%, transparent 60%);
             z-index: -1;
         }
 
         .glass-nav {
-            background: rgba(5, 5, 5, 0.6);
+            background: var(--glass-bg);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.5s ease;
         }
-        
+
         .glass-panel {
-            background: rgba(24, 24, 27, 0.5);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        html.light .glass-panel {
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
         }
 
         .scroll-mask {
@@ -83,16 +123,21 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Custom Scrollbar pour la Modale */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.5); border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.8); }
 
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .movie-card {
             animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
             opacity: 0;
@@ -100,16 +145,27 @@
             transition: transform 0.1s ease-out, box-shadow 0.3s ease;
         }
 
+        .movie-card:hover {
+            box-shadow: 0 20px 40px -10px rgba(124, 58, 237, 0.3);
+        }
+
         #modal-overlay { transition: opacity 0.4s ease; }
         #modal-content { transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease; }
-        
+
         .text-aurora {
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            background-image: linear-gradient(to right, #a855f7, #22d3ee);
+            background-image: linear-gradient(135deg, #a855f7, #22d3ee, #a855f7);
+            background-size: 200% auto;
+            animation: aurora-shift 3s linear infinite;
         }
-        
+
+        @keyframes aurora-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
         .spinner {
             border: 3px solid rgba(255,255,255,0.1);
             border-top-color: #22d3ee;
@@ -118,81 +174,250 @@
             height: 24px;
             animation: spin 1s linear infinite;
         }
+
+        html.light .spinner {
+            border-color: rgba(0,0,0,0.1);
+            border-top-color: #7c3aed;
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .genre-pill {
+            transition: all 0.3s ease;
+        }
+
+        .genre-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+
+        .toast {
+            animation: toast-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes toast-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+        }
+
+        .favorite-btn {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .favorite-btn.active {
+            color: #ef4444;
+            transform: scale(1.1);
+        }
+
+        .favorite-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Smooth image loading */
+        img {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        img.loaded {
+            opacity: 1;
+        }
+
+        /* Swipe indicator for mobile modal */
+        .swipe-indicator {
+            animation: pulse-slow 2s ease-in-out infinite;
+        }
+
+        /* Skeleton shimmer effect */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(168, 85, 247, 0.1) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Rating circle */
+        .rating-circle {
+            background: conic-gradient(var(--rating-color) calc(var(--rating) * 10%), var(--bg-secondary) 0);
+        }
     </style>
+<base target="_blank">
 </head>
 <body class="selection:bg-violet-500 selection:text-white">
 
     <div id="dynamic-bg"></div>
-    <div class="fixed inset-0 bg-gradient-to-b from-transparent via-surface-950/80 to-surface-950 z-[-1]"></div>
+    <div class="fixed inset-0 bg-gradient-to-b from-transparent via-surface-950/80 to-surface-950 z-[-1] transition-opacity duration-500" id="bg-overlay"></div>
 
-    <nav class="fixed top-0 w-full glass-nav z-40 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer group" onclick="location.reload()">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 shadow-glow-violet flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-3 pointer-events-none"></div>
+
+    <nav class="fixed top-0 w-full glass-nav z-40 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center gap-4">
+            <div class="flex items-center gap-3 cursor-pointer group shrink-0" onclick="location.reload()">
+                <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 shadow-glow-violet flex items-center justify-center transform group-hover:scale-105 transition-all duration-300">
+                    <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
                 </div>
-                <h1 class="text-2xl font-extrabold tracking-tight">Cine<span class="text-aurora">Lume</span></h1>
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">Cine<span class="text-aurora">Lume</span></h1>
             </div>
-            <button id="settings-btn" class="p-2 rounded-xl hover:bg-white/10 transition-colors" aria-label="Paramètres">
-                <svg class="w-6 h-6 text-gray-300 hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </button>
+
+            <!-- Search Bar -->
+            <div class="hidden md:flex flex-1 max-w-md mx-4 relative">
+                <input type="text" id="search-input" placeholder="Rechercher un film..." 
+                    class="w-full bg-surface-800/50 border border-white/10 rounded-xl px-4 py-2 pl-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500/50 transition-all search-input">
+                <svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Favorites Toggle -->
+                <button id="favorites-btn" class="p-2 rounded-xl hover:bg-white/10 transition-colors relative" aria-label="Favoris" title="Mes favoris">
+                    <svg class="w-5 h-5 text-gray-300 hover:text-red-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    <span id="fav-count" class="absolute -top-1 -right-1 bg-violet-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-xl hover:bg-white/10 transition-colors" aria-label="Changer de thème">
+                    <svg id="sun-icon" class="w-5 h-5 text-gray-300 hover:text-amber-400 transition-colors hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <svg id="moon-icon" class="w-5 h-5 text-gray-300 hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                </button>
+
+                <button id="settings-btn" class="p-2 rounded-xl hover:bg-white/10 transition-colors" aria-label="Paramètres">
+                    <svg class="w-5 h-5 text-gray-300 hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search -->
+        <div class="md:hidden px-4 pb-3">
+            <div class="relative">
+                <input type="text" id="search-input-mobile" placeholder="Rechercher un film..." 
+                    class="w-full bg-surface-800/50 border border-white/10 rounded-xl px-4 py-2 pl-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500/50 transition-all search-input">
+                <svg class="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto pt-32 px-6 pb-20">
-        
-        <div class="mb-10 text-center md:text-left">
-            <h2 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">À l'affiche en <span class="text-aurora">salles.</span></h2>
-            <p class="text-gray-400 text-lg md:text-xl font-light" id="date-subtitle">Découvrez les sorties de la semaine.</p>
+    <main class="max-w-7xl mx-auto pt-36 md:pt-32 px-4 md:px-6 pb-20">
+
+        <div class="mb-8 md:mb-10 text-center md:text-left">
+            <h2 class="text-3xl md:text-5xl lg:text-6xl font-extrabold mb-3 tracking-tight">À l'affiche en <span class="text-aurora">salles.</span></h2>
+            <p class="text-gray-400 text-base md:text-xl font-light" id="date-subtitle">Découvrez les sorties de la semaine.</p>
         </div>
 
-        <div class="glass-panel p-2 rounded-2xl flex flex-wrap gap-2 mb-10 w-full items-center justify-between">
-            
+        <!-- Filters Bar -->
+        <div class="glass-panel p-3 md:p-4 rounded-2xl flex flex-col gap-3 mb-8 md:mb-10">
+
+            <div class="flex flex-wrap items-center gap-2 justify-between">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <!-- Year Selector -->
+                    <div class="flex items-center gap-1 bg-surface-800/50 rounded-xl px-2 py-1 border border-white/5">
+                        <button id="prev-year" class="p-1.5 rounded-lg hover:bg-white/10 text-violet-400 transition-colors" aria-label="Année précédente">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <span id="current-year-display" class="text-white font-bold text-sm w-12 text-center tabular-nums">2026</span>
+                        <button id="next-year" class="p-1.5 rounded-lg hover:bg-white/10 text-violet-400 transition-colors" aria-label="Année suivante">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="hidden md:block w-px bg-white/10 h-8"></div>
+
+                    <!-- Months -->
+                    <div class="scroll-mask max-w-[180px] md:max-w-md">
+                        <div class="flex overflow-x-auto no-scrollbar gap-1" id="months-container"></div>
+                    </div>
+
+                    <div class="hidden md:block w-px bg-white/10 h-8"></div>
+
+                    <!-- Weeks -->
+                    <div class="overflow-x-auto no-scrollbar">
+                        <div class="flex gap-1" id="weeks-container"></div>
+                    </div>
+                </div>
+
+                <!-- Today Button -->
+                <button id="today-btn" class="px-3 py-1.5 rounded-lg bg-violet-600/20 text-violet-300 border border-violet-500/30 text-xs font-bold hover:bg-violet-600/30 transition-all">
+                    Aujourd'hui
+                </button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 justify-between pt-2 border-t border-white/5">
+                <!-- Genre Filter -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-full" id="genre-filter-container">
+                    <span class="text-xs text-gray-500 font-medium shrink-0">Genres :</span>
+                    <div class="flex gap-1" id="genre-filters"></div>
+                </div>
+
+                <!-- Region Filter -->
+                <div class="flex items-center gap-2 bg-surface-800/50 border border-white/10 rounded-xl px-3 py-1.5 shrink-0">
+                    <span class="text-base">🌍</span>
+                    <select id="region-filter" class="bg-transparent text-white font-bold text-xs outline-none cursor-pointer">
+                        <option value="FR" class="bg-surface-900">France</option>
+                        <option value="US" class="bg-surface-900">États-Unis</option>
+                        <option value="GB" class="bg-surface-900">Royaume-Uni</option>
+                        <option value="JP" class="bg-surface-900">Japon</option>
+                        <option value="DE" class="bg-surface-900">Allemagne</option>
+                        <option value="ES" class="bg-surface-900">Espagne</option>
+                        <option value="IT" class="bg-surface-900">Italie</option>
+                        <option value="KR" class="bg-surface-900">Corée du Sud</option>
+                        <option value="" class="bg-surface-900">Monde entier</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Info -->
+        <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
-                <div class="flex items-center gap-1">
-                    <button id="prev-year" class="p-2 rounded-lg hover:bg-white/10 text-violet-400 transition-colors">◀</button>
-                    <span id="current-year-display" class="text-white font-bold text-sm w-10 text-center">2026</span>
-                    <button id="next-year" class="p-2 rounded-lg hover:bg-white/10 text-violet-400 transition-colors">▶</button>
-                </div>
-                
-                <div class="hidden md:block w-px bg-white/10 my-2 mx-1 h-8"></div>
-                
-                <div class="w-full md:w-auto scroll-mask max-w-[200px] md:max-w-md">
-                    <div class="flex overflow-x-auto no-scrollbar gap-1 p-1" id="months-container"></div>
-                </div>
-                
-                <div class="hidden md:block w-px bg-white/10 my-2 mx-1 h-8"></div>
-                
-                <div class="w-full md:w-auto">
-                    <div class="flex overflow-x-auto no-scrollbar gap-2 p-1" id="weeks-container"></div>
-                </div>
+                <span id="results-count" class="text-sm text-gray-500"></span>
+                <span id="active-filters" class="hidden flex gap-1"></span>
             </div>
-
-            <div class="flex items-center gap-2 bg-surface-800 border border-white/10 rounded-xl px-3 py-1.5 ml-auto">
-                <span class="text-lg">🌍</span>
-                <select id="region-filter" class="bg-transparent text-white font-bold text-sm outline-none cursor-pointer">
-                    <option value="FR" class="bg-surface-900">France</option>
-                    <option value="US" class="bg-surface-900">États-Unis</option>
-                    <option value="GB" class="bg-surface-900">Royaume-Uni</option>
-                    <option value="JP" class="bg-surface-900">Japon</option>
-                    <option value="" class="bg-surface-900">Monde entier</option>
-                </select>
+            <div class="flex items-center gap-2">
+                <button id="view-grid" class="p-2 rounded-lg bg-white/10 text-white" aria-label="Vue grille">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                </button>
+                <button id="view-list" class="p-2 rounded-lg hover:bg-white/10 text-gray-500 hover:text-white transition-colors" aria-label="Vue liste">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
             </div>
-
         </div>
 
-        <div id="loading" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-10"></div>
-        <div id="movie-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-10 perspective-1000"></div>
+        <!-- Loading State -->
+        <div id="loading" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 gap-y-8 md:gap-y-10"></div>
+
+        <!-- Movie Grid -->
+        <div id="movie-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 gap-y-8 md:gap-y-10 perspective-1000"></div>
+
+        <!-- Load More -->
+        <div id="load-more-container" class="hidden mt-10 text-center">
+            <button id="load-more-btn" class="px-8 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold hover:shadow-glow-violet transition-all transform hover:scale-105 active:scale-95">
+                Charger plus de films
+            </button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden col-span-full py-20 text-center">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-surface-800 flex items-center justify-center">
+                <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+            </div>
+            <p class="text-gray-500 text-lg mb-2">Aucun film trouvé</p>
+            <p class="text-gray-600 text-sm">Essayez de modifier vos filtres ou votre recherche.</p>
+        </div>
     </main>
 
-    <footer class="w-full bg-surface-950 border-t border-white/5 py-10 mt-auto relative z-10">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+    <footer class="w-full bg-surface-950 border-t border-white/5 py-8 md:py-10 mt-auto relative z-10">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
             <div class="flex items-center gap-2 opacity-80">
                 <div class="w-6 h-6 rounded-md bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center">
                     <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
                 </div>
-                <span class="text-xl font-bold tracking-tight text-white">CineLume <span class="font-normal text-sm text-gray-500 ml-2">© 2026</span></span>
+                <span class="text-lg md:text-xl font-bold tracking-tight text-white">CineLume <span class="font-normal text-xs md:text-sm text-gray-500 ml-1 md:ml-2">© 2026</span></span>
             </div>
             <div class="flex items-center gap-3 text-xs text-gray-600">
                 <span>Données fournies par</span>
@@ -201,93 +426,200 @@
         </div>
     </footer>
 
-    <div id="movie-modal" class="fixed inset-0 z-50 hidden flex-col justify-end md:justify-center p-0 md:p-6" role="dialog" aria-modal="true">
+    <!-- Movie Modal -->
+    <div id="movie-modal" class="fixed inset-0 z-50 hidden flex-col justify-end md:justify-center p-0 md:p-6" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div id="modal-overlay" class="absolute inset-0 bg-surface-950/80 backdrop-blur-md opacity-0" onclick="closeModal()"></div>
-        
-        <div id="modal-content" class="relative w-full max-w-5xl bg-surface-900 rounded-t-3xl md:rounded-3xl shadow-2xl opacity-0 translate-y-full md:translate-y-0 md:scale-95 flex flex-col max-h-[90vh] border border-white/10 mx-auto overflow-hidden">
-            
-            <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/60 hover:bg-violet-600 text-white backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center transition-colors z-50">✕</button>
-            
-            <div class="w-12 h-1.5 bg-white/20 rounded-full absolute top-3 left-1/2 -translate-x-1/2 md:hidden z-50"></div>
 
-            <div class="overflow-y-auto w-full h-full custom-scroll relative">
-                
-                <div class="relative h-64 md:h-[400px] w-full shrink-0 bg-gradient-to-br from-violet-900 to-surface-800">
-                    <img id="modal-backdrop" src="" alt="" class="w-full h-full object-cover opacity-60 md:opacity-100" onerror="this.style.display='none'">
+        <div id="modal-content" class="relative w-full max-w-5xl bg-surface-900 rounded-t-3xl md:rounded-3xl shadow-2xl opacity-0 translate-y-full md:translate-y-0 md:scale-95 flex flex-col max-h-[90vh] border border-white/10 mx-auto overflow-hidden">
+
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/60 hover:bg-violet-600 text-white backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center transition-colors z-50" aria-label="Fermer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <div class="w-12 h-1.5 bg-white/20 rounded-full absolute top-3 left-1/2 -translate-x-1/2 md:hidden z-50 swipe-indicator"></div>
+
+            <div class="overflow-y-auto w-full h-full custom-scroll relative" id="modal-scroll">
+
+                <div class="relative h-56 md:h-[400px] w-full shrink-0 bg-gradient-to-br from-violet-900 to-surface-800 overflow-hidden">
+                    <img id="modal-backdrop" src="" alt="" class="w-full h-full object-cover opacity-60 md:opacity-100" onerror="this.style.display='none'" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-surface-900 via-surface-900/50 to-transparent"></div>
                     <div class="absolute inset-0 bg-gradient-to-r from-surface-900 via-surface-900/60 to-transparent hidden md:block"></div>
+
+                    <!-- Share Button -->
+                    <button id="modal-share-btn" class="absolute top-4 left-4 bg-black/40 hover:bg-white/20 backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center transition-colors z-40" aria-label="Partager">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                    </button>
                 </div>
-                
-                <div class="px-6 md:px-12 pb-12 pt-0 flex flex-col md:flex-row gap-8 relative -mt-20 md:-mt-40">
-                    
-                    <div class="hidden md:block w-60 shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 z-10 bg-surface-800 self-start sticky top-6">
-                        <img id="modal-poster" src="" alt="Affiche" class="w-full h-full object-cover">
+
+                <div class="px-4 md:px-12 pb-10 md:pb-12 pt-0 flex flex-col md:flex-row gap-6 md:gap-8 relative -mt-16 md:-mt-40">
+
+                    <div class="hidden md:block w-48 lg:w-60 shrink-0 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 z-10 bg-surface-800 self-start sticky top-6">
+                        <img id="modal-poster" src="" alt="Affiche" class="w-full h-auto object-cover" loading="lazy">
                     </div>
-                    
-                    <div class="flex flex-col pt-4 w-full min-w-0 z-10">
+
+                    <div class="flex flex-col pt-2 md:pt-4 w-full min-w-0 z-10">
                         <div class="flex flex-wrap gap-2 mb-2 items-center">
                             <span id="modal-date" class="bg-violet-500/20 text-violet-300 border border-violet-500/30 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase"></span>
                             <span id="modal-runtime" class="text-xs text-gray-400 font-medium hidden border border-white/10 px-3 py-1 rounded-full"></span>
+                            <span id="modal-status" class="text-xs text-gray-400 font-medium hidden border border-white/10 px-3 py-1 rounded-full"></span>
                         </div>
-                        
-                        <h2 id="modal-title" class="text-3xl md:text-5xl font-extrabold mb-1 leading-tight tracking-tight text-white drop-shadow-lg break-words"></h2>
+
+                        <div class="flex items-start justify-between gap-4">
+                            <h2 id="modal-title" class="text-2xl md:text-4xl lg:text-5xl font-extrabold mb-1 leading-tight tracking-tight text-white drop-shadow-lg break-words flex-1"></h2>
+                            <button id="modal-favorite-btn" class="favorite-btn p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors shrink-0 mt-1" aria-label="Ajouter aux favoris">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                            </button>
+                        </div>
+
                         <p id="modal-director" class="text-cyan-400 text-sm font-medium mb-4 h-5"></p>
-                        
-                        <div class="flex flex-wrap items-center gap-4 mb-6">
+
+                        <div class="flex flex-wrap items-center gap-3 md:gap-4 mb-4 md:mb-6">
                             <div class="flex items-center gap-1.5 bg-gradient-to-r from-violet-600/20 to-cyan-500/20 px-4 py-2 rounded-xl border border-white/10">
                                 <span class="text-cyan-400 font-bold text-lg">★</span>
                                 <span id="modal-rating" class="font-bold text-white text-lg"></span>
+                                <span class="text-gray-500 text-xs ml-1">/10</span>
                             </div>
                             <div id="modal-genres" class="flex gap-2 text-xs text-gray-400 flex-wrap"></div>
                         </div>
 
-                        <a id="modal-trailer-btn" href="#" target="_blank" class="hidden w-fit mb-6 flex items-center gap-2 bg-white text-surface-900 px-6 py-2.5 rounded-full font-bold hover:bg-cyan-400 hover:text-white transition-colors shadow-glow-cyan">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Voir la bande-annonce
-                        </a>
-                        
-                        <h3 class="text-lg font-bold text-white mb-2">Synopsis</h3>
-                        <p id="modal-overview" class="text-gray-300 text-base md:text-lg leading-relaxed font-light mb-8 break-words"></p>
+                        <div class="flex flex-wrap gap-3 mb-6">
+                            <a id="modal-trailer-btn" href="#" target="_blank" class="hidden items-center gap-2 bg-white text-surface-900 px-5 md:px-6 py-2.5 rounded-full font-bold hover:bg-cyan-400 hover:text-white transition-colors shadow-glow-cyan text-sm md:text-base">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Bande-annonce
+                            </a>
+                            <a id="modal-tmdb-btn" href="#" target="_blank" class="hidden items-center gap-2 bg-surface-800 text-white border border-white/10 px-5 md:px-6 py-2.5 rounded-full font-bold hover:bg-white/10 transition-colors text-sm md:text-base">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg> Voir sur TMDB
+                            </a>
+                        </div>
 
-                        <h3 class="text-lg font-bold text-white mb-3">Tête d'affiche</h3>
-                        <div id="modal-cast-loading" class="flex gap-2 items-center text-gray-500 text-sm">
+                        <!-- Movie Stats -->
+                        <div id="modal-stats" class="hidden grid-cols-2 md:grid-cols-4 gap-3 mb-6 p-4 rounded-2xl bg-surface-800/30 border border-white/5">
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Budget</p>
+                                <p id="modal-budget" class="text-sm font-bold text-white"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Recettes</p>
+                                <p id="modal-revenue" class="text-sm font-bold text-white"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Langue</p>
+                                <p id="modal-language" class="text-sm font-bold text-white uppercase"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Votes</p>
+                                <p id="modal-votes" class="text-sm font-bold text-white"></p>
+                            </div>
+                        </div>
+
+                        <h3 class="text-base md:text-lg font-bold text-white mb-2">Synopsis</h3>
+                        <p id="modal-overview" class="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-6 md:mb-8 break-words"></p>
+
+                        <h3 class="text-base md:text-lg font-bold text-white mb-3">Tête d'affiche</h3>
+                        <div id="modal-cast-loading" class="flex gap-2 items-center text-gray-500 text-sm mb-4">
                             <div class="spinner"></div> Chargement du casting...
                         </div>
-                        <div id="modal-cast" class="flex gap-4 overflow-x-auto custom-scroll pb-4 scroll-mask">
-                            </div>
+                        <div id="modal-cast" class="flex gap-3 md:gap-4 overflow-x-auto custom-scroll pb-4 scroll-mask">
+                        </div>
+
+                        <!-- Production Companies -->
+                        <div id="modal-production" class="hidden mt-6 pt-6 border-t border-white/5">
+                            <h3 class="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wider">Production</h3>
+                            <div id="modal-companies" class="flex flex-wrap gap-3"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Favorites Modal -->
+    <div id="favorites-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-surface-950/80 backdrop-blur-sm" onclick="closeFavorites()"></div>
+        <div class="relative bg-surface-900 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] border border-violet-500/30 shadow-glow-violet flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    Mes favoris
+                </h3>
+                <button onclick="closeFavorites()" class="p-2 rounded-xl hover:bg-white/10 transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="favorites-list" class="overflow-y-auto custom-scroll flex-1 -mx-2 px-2">
+                <p class="text-gray-500 text-center py-10">Aucun film en favoris pour le moment.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
     <div id="settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
         <div class="absolute inset-0 bg-surface-950/80 backdrop-blur-sm" onclick="closeSettings()"></div>
-        <div class="relative bg-surface-900 rounded-3xl p-8 max-w-md w-full border border-violet-500/30 shadow-glow-violet">
-            <h3 class="text-2xl font-bold mb-6 text-white">Paramètres</h3>
-            <label class="block text-sm text-gray-400 mb-2 font-medium">Clé API TMDB</label>
-            <input type="text" id="api-key-input" class="w-full bg-surface-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition-colors mb-2">
-            <div class="flex justify-end gap-3 mt-6">
-                <button onclick="closeSettings()" class="px-5 py-2.5 rounded-xl text-gray-400 hover:text-white transition-colors font-medium">Annuler</button>
-                <button id="save-api-key" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold transition-all">Sauvegarder</button>
+        <div class="relative bg-surface-900 rounded-3xl p-6 md:p-8 max-w-md w-full border border-violet-500/30 shadow-glow-violet">
+            <h3 class="text-xl md:text-2xl font-bold mb-6 text-white">Paramètres</h3>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2 font-medium">Clé API TMDB</label>
+                    <input type="text" id="api-key-input" class="w-full bg-surface-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 transition-colors text-sm" placeholder="Entrez votre clé API...">
+                    <p class="text-xs text-gray-600 mt-2">Laissez vide pour utiliser la clé par défaut.</p>
+                </div>
+
+                <div class="flex items-center justify-between py-3 border-t border-white/5">
+                    <div>
+                        <p class="text-sm font-medium text-white">Mode clair</p>
+                        <p class="text-xs text-gray-500">Basculer entre le mode sombre et clair</p>
+                    </div>
+                    <button id="theme-toggle-settings" class="w-12 h-6 rounded-full bg-surface-800 border border-white/10 relative transition-colors">
+                        <div class="w-4 h-4 rounded-full bg-violet-500 absolute top-1 left-1 transition-transform" id="theme-toggle-dot"></div>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between py-3 border-t border-white/5">
+                    <div>
+                        <p class="text-sm font-medium text-white">Effacer le cache</p>
+                        <p class="text-xs text-gray-500">Supprimer les données locales</p>
+                    </div>
+                    <button id="clear-cache-btn" class="px-4 py-2 rounded-xl bg-red-500/20 text-red-400 text-sm font-bold hover:bg-red-500/30 transition-colors">
+                        Effacer
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-white/5">
+                <button onclick="closeSettings()" class="px-5 py-2.5 rounded-xl text-gray-400 hover:text-white transition-colors font-medium text-sm">Annuler</button>
+                <button id="save-api-key" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold transition-all text-sm hover:shadow-glow-violet">Sauvegarder</button>
             </div>
         </div>
     </div>
 
     <script>
         (function() {
+            // ==================== CONFIGURATION ====================
             const DEFAULT_API_KEY = '81f09aab8379105c078d67759877bc0b';
             const BASE_URL = 'https://api.themoviedb.org/3';
             const IMG_URL = 'https://image.tmdb.org/t/p/w500';
             const PROFILE_URL = 'https://image.tmdb.org/t/p/w185';
             const BACKDROP_URL = 'https://image.tmdb.org/t/p/w1280';
+            const TMDB_URL = 'https://www.themoviedb.org/movie';
             const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-            
+
+            // ==================== STATE ====================
             let apiKey = localStorage.getItem('tmdb_api_key') || DEFAULT_API_KEY;
+            let favorites = JSON.parse(localStorage.getItem('cinelume_favorites') || '[]');
+            let cache = JSON.parse(localStorage.getItem('cinelume_cache') || '{}');
+            let isDarkMode = localStorage.getItem('cinelume_theme') !== 'light';
+            let currentView = 'grid';
+            let currentPage = 1;
+            let totalPages = 1;
+            let currentMovies = [];
+            let selectedGenre = null;
+            let searchQuery = '';
+
             const today = new Date();
             let selectedMonth = today.getMonth();
-            let selectedWeek = Math.min(4, Math.ceil(today.getDate() / 7));
+            let selectedWeek = getWeekNumber(today);
             let selectedYear = today.getFullYear();
-            let selectedRegion = 'FR'; // Par défaut : France
+            let selectedRegion = localStorage.getItem('cinelume_region') || 'FR';
 
             const minYear = today.getFullYear() - 1;
             const maxYear = today.getFullYear() + 2;
@@ -296,188 +628,645 @@
             const loadingEl = document.getElementById('loading');
             const dynamicBg = document.getElementById('dynamic-bg');
             const modal = document.getElementById('movie-modal');
+            const emptyState = document.getElementById('empty-state');
+            const loadMoreContainer = document.getElementById('load-more-container');
 
-            // SVG Image de remplacement si pas de photo d'acteur
-            const fallbackAvatar = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%2318181b' width='100' height='100'/><path fill='%23ffffff30' d='M50 25c-11 0-20 9-20 20s9 20 20 20 20-9 20-20-9-20-20-20zm0 45c-15.5 0-40 7.8-40 23.3v11.7h80v-11.7c0-15.5-24.5-23.3-40-23.3z'/></svg>`;
+            // ==================== UTILITIES ====================
+            function getWeekNumber(date) {
+                const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+                const dayNum = d.getUTCDay() || 7;
+                d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+                const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+                return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            }
+
+            function getWeeksInMonth(year, month) {
+                const lastDay = new Date(year, month + 1, 0).getDate();
+                return Math.ceil(lastDay / 7);
+            }
 
             function getDatesForWeek(year, monthIndex, weekNumber) {
+                const weeksCount = getWeeksInMonth(year, monthIndex);
                 const startDay = (weekNumber - 1) * 7 + 1;
                 let endDay = weekNumber * 7;
                 const lastDayOfMonth = new Date(year, monthIndex + 1, 0).getDate();
-                if (weekNumber === 4) endDay = lastDayOfMonth;
+                if (weekNumber === weeksCount) endDay = lastDayOfMonth;
                 return { 
                     start: `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`,
                     end: `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`
                 };
             }
+
             function formatDateFR(dateString) {
+                if (!dateString) return 'Date inconnue';
                 return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
             }
 
+            function formatCurrency(amount) {
+                if (!amount || amount === 0) return 'Non disponible';
+                return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+            }
+
+            function showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const colors = {
+                    info: 'bg-violet-600',
+                    success: 'bg-green-600',
+                    error: 'bg-red-600',
+                    warning: 'bg-amber-600'
+                };
+                toast.className = `toast pointer-events-auto px-4 py-3 rounded-xl ${colors[type] || colors.info} text-white text-sm font-medium shadow-lg flex items-center gap-2`;
+                toast.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.style.animation = 'toast-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) reverse forwards';
+                        setTimeout(() => toast.remove(), 400);
+                    }
+                }, 4000);
+            }
+
+            function cacheSet(key, data, ttl = 3600000) { // 1 hour default
+                cache[key] = { data, expiry: Date.now() + ttl };
+                localStorage.setItem('cinelume_cache', JSON.stringify(cache));
+            }
+
+            function cacheGet(key) {
+                const item = cache[key];
+                if (!item) return null;
+                if (Date.now() > item.expiry) {
+                    delete cache[key];
+                    localStorage.setItem('cinelume_cache', JSON.stringify(cache));
+                    return null;
+                }
+                return item.data;
+            }
+
+            function updateFavoritesCount() {
+                const count = favorites.length;
+                const badge = document.getElementById('fav-count');
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            function isFavorite(movieId) {
+                return favorites.some(f => f.id === movieId);
+            }
+
+            function toggleFavorite(movie) {
+                const index = favorites.findIndex(f => f.id === movie.id);
+                if (index > -1) {
+                    favorites.splice(index, 1);
+                    showToast(`${movie.title} retiré des favoris`, 'info');
+                } else {
+                    favorites.push({
+                        id: movie.id,
+                        title: movie.title,
+                        poster_path: movie.poster_path,
+                        release_date: movie.release_date,
+                        vote_average: movie.vote_average
+                    });
+                    showToast(`${movie.title} ajouté aux favoris ❤️`, 'success');
+                }
+                localStorage.setItem('cinelume_favorites', JSON.stringify(favorites));
+                updateFavoritesCount();
+                updateFavoriteButtons(movie.id);
+            }
+
+            function updateFavoriteButtons(movieId) {
+                const btn = document.getElementById('modal-favorite-btn');
+                if (btn && btn.dataset.movieId == movieId) {
+                    if (isFavorite(movieId)) {
+                        btn.classList.add('active');
+                        btn.querySelector('svg').setAttribute('fill', 'currentColor');
+                    } else {
+                        btn.classList.remove('active');
+                        btn.querySelector('svg').setAttribute('fill', 'none');
+                    }
+                }
+            }
+
+            function applyTheme() {
+                const html = document.documentElement;
+                const sunIcon = document.getElementById('sun-icon');
+                const moonIcon = document.getElementById('moon-icon');
+                const toggleDot = document.getElementById('theme-toggle-dot');
+
+                if (isDarkMode) {
+                    html.classList.add('dark');
+                    html.classList.remove('light');
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                    if (toggleDot) toggleDot.style.transform = 'translateX(0)';
+                    document.getElementById('bg-overlay').classList.remove('opacity-0');
+                } else {
+                    html.classList.remove('dark');
+                    html.classList.add('light');
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                    if (toggleDot) toggleDot.style.transform = 'translateX(24px)';
+                    document.getElementById('bg-overlay').classList.add('opacity-0');
+                }
+            }
+
+            // ==================== UI BUILDERS ====================
             function buildUI() {
                 const mContainer = document.getElementById('months-container');
                 mContainer.innerHTML = '';
                 months.forEach((month, i) => {
                     const btn = document.createElement('button');
-                    btn.textContent = month;
-                    btn.onclick = () => { selectedMonth = i; selectedWeek = 1; updateUI(); };
+                    btn.textContent = month.substring(0, 3);
+                    btn.title = month;
+                    btn.setAttribute('aria-label', month);
+                    btn.onclick = () => { selectedMonth = i; selectedWeek = 1; currentPage = 1; updateUI(); };
                     mContainer.appendChild(btn);
                 });
 
-                const wContainer = document.getElementById('weeks-container');
-                wContainer.innerHTML = '';
-                for (let i = 1; i <= 4; i++) {
-                    const btn = document.createElement('button');
-                    btn.textContent = `Semaine ${i}`;
-                    btn.onclick = () => { selectedWeek = i; updateUI(); };
-                    wContainer.appendChild(btn);
-                }
+                updateWeeksUI();
 
-                // Event listener pour le filtre pays
+                document.getElementById('region-filter').value = selectedRegion;
                 document.getElementById('region-filter').addEventListener('change', (e) => {
                     selectedRegion = e.target.value;
+                    localStorage.setItem('cinelume_region', selectedRegion);
+                    currentPage = 1;
                     updateUI();
+                });
+
+                // Search inputs
+                ['search-input', 'search-input-mobile'].forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        let debounceTimer;
+                        input.addEventListener('input', (e) => {
+                            clearTimeout(debounceTimer);
+                            debounceTimer = setTimeout(() => {
+                                searchQuery = e.target.value.trim();
+                                currentPage = 1;
+                                if (searchQuery) {
+                                    searchMovies(searchQuery);
+                                } else {
+                                    updateUI();
+                                }
+                            }, 500);
+                        });
+                    }
+                });
+
+                // View toggles
+                document.getElementById('view-grid').onclick = () => setView('grid');
+                document.getElementById('view-list').onclick = () => setView('list');
+
+                // Load more
+                document.getElementById('load-more-btn').onclick = () => {
+                    currentPage++;
+                    loadMoreMovies();
+                };
+
+                // Today button
+                document.getElementById('today-btn').onclick = () => {
+                    const now = new Date();
+                    selectedYear = now.getFullYear();
+                    selectedMonth = now.getMonth();
+                    selectedWeek = getWeekNumber(now);
+                    currentPage = 1;
+                    searchQuery = '';
+                    document.getElementById('search-input').value = '';
+                    document.getElementById('search-input-mobile').value = '';
+                    updateUI();
+                    showToast('Retour à la date actuelle', 'info');
+                };
+
+                // Favorites
+                document.getElementById('favorites-btn').onclick = openFavorites;
+                document.getElementById('modal-favorite-btn').onclick = function() {
+                    const movieId = parseInt(this.dataset.movieId);
+                    const movie = currentMovies.find(m => m.id === movieId);
+                    if (movie) toggleFavorite(movie);
+                };
+
+                // Theme
+                document.getElementById('theme-toggle').onclick = toggleTheme;
+                document.getElementById('theme-toggle-settings').onclick = toggleTheme;
+
+                // Share
+                document.getElementById('modal-share-btn').onclick = shareMovie;
+
+                // Clear cache
+                document.getElementById('clear-cache-btn').onclick = () => {
+                    cache = {};
+                    localStorage.removeItem('cinelume_cache');
+                    showToast('Cache effacé', 'success');
+                };
+
+                applyTheme();
+                updateFavoritesCount();
+                loadGenres();
+            }
+
+            function updateWeeksUI() {
+                const wContainer = document.getElementById('weeks-container');
+                wContainer.innerHTML = '';
+                const weeksCount = getWeeksInMonth(selectedYear, selectedMonth);
+                for (let i = 1; i <= weeksCount; i++) {
+                    const btn = document.createElement('button');
+                    btn.textContent = `S${i}`;
+                    btn.title = `Semaine ${i}`;
+                    btn.setAttribute('aria-label', `Semaine ${i}`);
+                    btn.onclick = () => { selectedWeek = i; currentPage = 1; updateUI(); };
+                    wContainer.appendChild(btn);
+                }
+            }
+
+            function setView(view) {
+                currentView = view;
+                document.getElementById('view-grid').className = view === 'grid' ? 'p-2 rounded-lg bg-white/10 text-white' : 'p-2 rounded-lg hover:bg-white/10 text-gray-500 hover:text-white transition-colors';
+                document.getElementById('view-list').className = view === 'list' ? 'p-2 rounded-lg bg-white/10 text-white' : 'p-2 rounded-lg hover:bg-white/10 text-gray-500 hover:text-white transition-colors';
+                displayMovies(currentMovies);
+            }
+
+            async function loadGenres() {
+                const cached = cacheGet('genres');
+                if (cached) {
+                    renderGenres(cached);
+                    return;
+                }
+                try {
+                    const res = await fetch(`${BASE_URL}/genre/movie/list?api_key=${apiKey}&language=fr-FR`);
+                    const data = await res.json();
+                    if (data.genres) {
+                        cacheSet('genres', data.genres, 86400000); // 24h
+                        renderGenres(data.genres);
+                    }
+                } catch (e) {
+                    console.error('Erreur chargement genres:', e);
+                }
+            }
+
+            function renderGenres(genres) {
+                const container = document.getElementById('genre-filters');
+                container.innerHTML = '';
+
+                const allBtn = document.createElement('button');
+                allBtn.textContent = 'Tous';
+                allBtn.className = `genre-pill px-3 py-1 rounded-full text-xs font-medium transition-all ${!selectedGenre ? 'bg-violet-600 text-white' : 'bg-surface-800 text-gray-400 hover:text-white border border-white/5'}`;
+                allBtn.onclick = () => { selectedGenre = null; currentPage = 1; updateUI(); };
+                container.appendChild(allBtn);
+
+                genres.slice(0, 8).forEach(genre => {
+                    const btn = document.createElement('button');
+                    btn.textContent = genre.name;
+                    btn.className = `genre-pill px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap ${selectedGenre === genre.id ? 'bg-violet-600 text-white' : 'bg-surface-800 text-gray-400 hover:text-white border border-white/5'}`;
+                    btn.onclick = () => { selectedGenre = genre.id; currentPage = 1; updateUI(); };
+                    container.appendChild(btn);
                 });
             }
 
             function updateUI() {
                 document.getElementById('current-year-display').textContent = selectedYear;
+                updateWeeksUI();
+
                 Array.from(document.getElementById('months-container').children).forEach((btn, i) => {
-                    btn.className = `px-5 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm whitespace-nowrap ${i === selectedMonth ? 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-glow-violet' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
+                    btn.className = `px-3 md:px-5 py-2 rounded-xl font-bold transition-all duration-300 text-xs md:text-sm whitespace-nowrap ${i === selectedMonth ? 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-glow-violet' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
                 });
-                Array.from(document.getElementById('weeks-container').children).forEach((btn, i) => {
-                    btn.className = `px-5 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm whitespace-nowrap ${i + 1 === selectedWeek ? 'bg-white text-surface-900 shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
+
+                const weeksContainer = document.getElementById('weeks-container');
+                Array.from(weeksContainer.children).forEach((btn, i) => {
+                    btn.className = `px-3 md:px-5 py-2 rounded-xl font-bold transition-all duration-300 text-xs md:text-sm whitespace-nowrap ${i + 1 === selectedWeek ? 'bg-white text-surface-900 shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
                 });
 
                 const dates = getDatesForWeek(selectedYear, selectedMonth, selectedWeek);
                 document.getElementById('date-subtitle').textContent = `Du ${formatDateFR(dates.start)} au ${formatDateFR(dates.end)}`;
+
+                // Update genre buttons
+                loadGenres();
+
                 fetchMovies(dates.start, dates.end);
+            }
+
+            async function searchMovies(query) {
+                gridEl.classList.add('hidden');
+                loadingEl.classList.remove('hidden');
+                loadMoreContainer.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                buildSkeletons();
+
+                document.getElementById('date-subtitle').textContent = `Résultats pour "${query}"`;
+
+                try {
+                    const url = `${BASE_URL}/search/movie?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}&page=${currentPage}&include_adult=false`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    loadingEl.classList.add('hidden');
+
+                    if (data.results && data.results.length > 0) {
+                        currentMovies = data.results.filter(m => m.poster_path);
+                        totalPages = data.total_pages;
+                        displayMovies(currentMovies);
+                        gridEl.classList.remove('hidden');
+                        emptyState.classList.add('hidden');
+                        loadMoreContainer.classList.toggle('hidden', currentPage >= totalPages);
+
+                        if (data.results[0].backdrop_path) {
+                            dynamicBg.style.backgroundImage = `url('${BACKDROP_URL}${data.results[0].backdrop_path}')`;
+                        }
+
+                        document.getElementById('results-count').textContent = `${data.total_results} résultat${data.total_results > 1 ? 's' : ''}`;
+                    } else {
+                        gridEl.classList.add('hidden');
+                        emptyState.classList.remove('hidden');
+                        document.getElementById('results-count').textContent = '0 résultat';
+                    }
+                } catch (e) {
+                    loadingEl.classList.add('hidden');
+                    showToast('Erreur lors de la recherche', 'error');
+                }
             }
 
             async function fetchMovies(startDate, endDate) {
                 gridEl.classList.add('hidden');
-                loadingEl.innerHTML = Array(10).fill(`<div class="rounded-2xl bg-surface-800 border border-white/5 aspect-[2/3] animate-shimmer"></div>`).join('');
                 loadingEl.classList.remove('hidden');
+                loadMoreContainer.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                buildSkeletons();
 
                 try {
-                    // Application dynamique du filtre Région
                     const regionParam = selectedRegion ? `&region=${selectedRegion}` : '';
-                    const url = `${BASE_URL}/discover/movie?api_key=${apiKey}&language=fr-FR${regionParam}&primary_release_date.gte=${startDate}&primary_release_date.lte=${endDate}&with_release_type=2|3&sort_by=popularity.desc`;
-                    
+                    const genreParam = selectedGenre ? `&with_genres=${selectedGenre}` : '';
+                    const url = `${BASE_URL}/discover/movie?api_key=${apiKey}&language=fr-FR${regionParam}${genreParam}&primary_release_date.gte=${startDate}&primary_release_date.lte=${endDate}&with_release_type=2|3&sort_by=popularity.desc&page=${currentPage}`;
+
                     const response = await fetch(url);
                     const data = await response.json();
-                    
+
                     loadingEl.classList.add('hidden');
-                    gridEl.classList.remove('hidden');
-                    
+
                     if (data.results && data.results.length > 0) {
-                        displayMovies(data.results);
-                        if (data.results[0].backdrop_path) dynamicBg.style.backgroundImage = `url('${BACKDROP_URL}${data.results[0].backdrop_path}')`;
+                        currentMovies = data.results.filter(m => m.poster_path);
+                        totalPages = data.total_pages;
+                        displayMovies(currentMovies);
+                        gridEl.classList.remove('hidden');
+                        emptyState.classList.add('hidden');
+                        loadMoreContainer.classList.toggle('hidden', currentPage >= totalPages);
+
+                        if (data.results[0].backdrop_path) {
+                            dynamicBg.style.backgroundImage = `url('${BACKDROP_URL}${data.results[0].backdrop_path}')`;
+                        }
+
+                        document.getElementById('results-count').textContent = `${data.total_results} film${data.total_results > 1 ? 's' : ''}`;
                     } else {
-                        gridEl.innerHTML = `<div class="col-span-full py-16 text-center text-gray-500 text-lg">Aucune sortie pour cette période et ce pays.</div>`;
+                        gridEl.classList.add('hidden');
+                        emptyState.classList.remove('hidden');
+                        dynamicBg.style.backgroundImage = '';
+                        document.getElementById('results-count').textContent = '0 film';
                     }
                 } catch (e) {
                     loadingEl.classList.add('hidden');
                     gridEl.classList.remove('hidden');
-                    gridEl.innerHTML = `<div class="col-span-full py-16 text-center text-red-400">Erreur réseau.</div>`;
+                    showToast('Erreur de connexion. Vérifiez votre clé API.', 'error');
                 }
             }
 
+            async function loadMoreMovies() {
+                const dates = getDatesForWeek(selectedYear, selectedMonth, selectedWeek);
+                const regionParam = selectedRegion ? `&region=${selectedRegion}` : '';
+                const genreParam = selectedGenre ? `&with_genres=${selectedGenre}` : '';
+                const url = `${BASE_URL}/discover/movie?api_key=${apiKey}&language=fr-FR${regionParam}${genreParam}&primary_release_date.gte=${dates.start}&primary_release_date.lte=${dates.end}&with_release_type=2|3&sort_by=popularity.desc&page=${currentPage}`;
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (data.results) {
+                        const newMovies = data.results.filter(m => m.poster_path);
+                        currentMovies = [...currentMovies, ...newMovies];
+                        appendMovies(newMovies);
+                        loadMoreContainer.classList.toggle('hidden', currentPage >= totalPages);
+                    }
+                } catch (e) {
+                    showToast('Erreur lors du chargement', 'error');
+                }
+            }
+
+            function buildSkeletons() {
+                loadingEl.innerHTML = Array(10).fill(0).map((_, i) => `
+                    <div class="rounded-2xl bg-surface-800 border border-white/5 overflow-hidden aspect-[2/3] skeleton">
+                        <div class="w-full h-full"></div>
+                    </div>
+                `).join('');
+            }
+
             function handleTilt(e, card) {
+                if (window.matchMedia('(pointer: coarse)').matches) return;
                 const rect = card.getBoundingClientRect();
-                const rotateX = (((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2)) * -12; 
-                const rotateY = (((e.clientX - rect.left) - rect.width / 2) / (rect.width / 2)) * 12;
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+                const rotateX = (((e.clientY - rect.top) - rect.height / 2) / (rect.height / 2)) * -8; 
+                const rotateY = (((e.clientX - rect.left) - rect.width / 2) / (rect.width / 2)) * 8;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            }
+
+            function createMovieCard(movie, index, isAppend = false) {
+                const card = document.createElement('div');
+                const isFav = isFavorite(movie.id);
+
+                if (currentView === 'grid') {
+                    card.className = "movie-card group relative rounded-2xl overflow-hidden cursor-pointer bg-surface-800 border border-white/10 aspect-[2/3] shadow-lg";
+                    if (!isAppend) card.style.animationDelay = `${index * 0.05}s`;
+
+                    if (!window.matchMedia('(pointer: coarse)').matches) {
+                        card.addEventListener('mousemove', (e) => handleTilt(e, card));
+                        card.addEventListener('mouseleave', () => card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`);
+                    }
+
+                    card.onclick = (e) => {
+                        if (e.target.closest('.fav-btn')) return;
+                        openModal(movie);
+                    };
+
+                    const rating = movie.vote_average > 0 ? `<div class="absolute top-2 right-2 md:top-3 md:right-3 bg-surface-900/80 backdrop-blur-md border border-white/10 text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 z-10"><span class="text-cyan-400">★</span>${movie.vote_average.toFixed(1)}</div>` : '';
+
+                    card.innerHTML = `
+                        ${rating}
+                        <button class="fav-btn absolute top-2 left-2 md:top-3 md:left-3 z-20 p-1.5 rounded-full bg-black/40 backdrop-blur-md hover:bg-red-500/80 transition-all ${isFav ? 'text-red-500' : 'text-white/70'}" onclick="event.stopPropagation(); window.toggleMovieFavorite(${movie.id})">
+                            <svg class="w-4 h-4" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        </button>
+                        <img src="${IMG_URL}${movie.poster_path}" alt="${movie.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" onload="this.classList.add('loaded')">
+                        <div class="absolute inset-0 bg-gradient-to-t from-surface-950 via-surface-900/50 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="absolute inset-0 flex flex-col justify-end p-3 md:p-5">
+                            <h3 class="text-white font-extrabold text-sm md:text-lg leading-tight mb-1 group-hover:text-cyan-400 transition-colors">${movie.title}</h3>
+                            <p class="text-violet-300 text-[10px] md:text-xs font-bold uppercase tracking-wider">${formatDateFR(movie.release_date)}</p>
+                        </div>
+                    `;
+                } else {
+                    // List view
+                    card.className = "movie-card flex gap-4 p-3 rounded-2xl bg-surface-800 border border-white/10 cursor-pointer hover:bg-surface-800/80 transition-colors";
+                    if (!isAppend) card.style.animationDelay = `${index * 0.05}s`;
+                    card.onclick = () => openModal(movie);
+
+                    card.innerHTML = `
+                        <div class="w-20 md:w-24 shrink-0 rounded-xl overflow-hidden aspect-[2/3] bg-surface-900">
+                            <img src="${IMG_URL}${movie.poster_path}" alt="${movie.title}" class="w-full h-full object-cover" loading="lazy" onload="this.classList.add('loaded')">
+                        </div>
+                        <div class="flex-1 min-w-0 py-1">
+                            <div class="flex items-start justify-between gap-2">
+                                <h3 class="text-white font-bold text-base md:text-lg leading-tight mb-1">${movie.title}</h3>
+                                ${movie.vote_average > 0 ? `<span class="text-cyan-400 font-bold text-sm shrink-0">★ ${movie.vote_average.toFixed(1)}</span>` : ''}
+                            </div>
+                            <p class="text-violet-300 text-xs font-medium mb-2">${formatDateFR(movie.release_date)}</p>
+                            <p class="text-gray-500 text-xs line-clamp-2">${movie.overview || 'Aucun synopsis disponible.'}</p>
+                        </div>
+                    `;
+                }
+
+                return card;
             }
 
             function displayMovies(movies) {
                 gridEl.innerHTML = '';
+                gridEl.className = currentView === 'grid' 
+                    ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 gap-y-8 md:gap-y-10 perspective-1000"
+                    : "flex flex-col gap-3";
+
                 movies.forEach((movie, index) => {
                     if (!movie.poster_path) return;
-                    const card = document.createElement('div');
-                    card.className = "movie-card group relative rounded-2xl overflow-hidden cursor-pointer bg-surface-800 border border-white/10 aspect-[2/3] shadow-lg";
-                    card.style.animationDelay = `${index * 0.05}s`;
-                    
-                    if(window.matchMedia("(min-width: 768px)").matches) {
-                        card.addEventListener('mousemove', (e) => handleTilt(e, card));
-                        card.addEventListener('mouseleave', () => card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`);
-                    }
-                    
-                    card.onclick = () => openModal(movie);
-                    const rating = movie.vote_average > 0 ? `<div class="absolute top-3 right-3 bg-surface-900/80 backdrop-blur-md border border-white/10 text-white text-xs font-bold px-2 py-1 rounded-lg flex items-center gap-1 z-10"><span class="text-cyan-400">★</span>${movie.vote_average.toFixed(1)}</div>` : '';
+                    gridEl.appendChild(createMovieCard(movie, index));
+                });
+            }
 
-                    card.innerHTML = `
-                        ${rating}
-                        <img src="${IMG_URL}${movie.poster_path}" alt="${movie.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-surface-950 via-surface-900/50 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="absolute inset-0 flex flex-col justify-end p-4 md:p-5">
-                            <h3 class="text-white font-extrabold text-lg leading-tight mb-1 group-hover:text-cyan-400">${movie.title}</h3>
-                            <p class="text-violet-300 text-xs font-bold uppercase tracking-wider">${formatDateFR(movie.release_date)}</p>
-                        </div>
-                    `;
+            function appendMovies(movies) {
+                const startIndex = gridEl.children.length;
+                movies.forEach((movie, index) => {
+                    if (!movie.poster_path) return;
+                    const card = createMovieCard(movie, startIndex + index, true);
+                    card.style.animation = 'none';
+                    card.style.opacity = '1';
                     gridEl.appendChild(card);
                 });
             }
 
+            window.toggleMovieFavorite = function(movieId) {
+                const movie = currentMovies.find(m => m.id === movieId);
+                if (movie) toggleFavorite(movie);
+                // Update UI
+                displayMovies(currentMovies);
+            };
+
             async function fetchMovieDetails(movieId) {
+                const cacheKey = `movie_${movieId}`;
+                const cached = cacheGet(cacheKey);
+
+                if (cached) {
+                    renderMovieDetails(cached);
+                    return;
+                }
+
                 document.getElementById('modal-cast-loading').style.display = 'flex';
                 document.getElementById('modal-cast').innerHTML = '';
                 document.getElementById('modal-runtime').classList.add('hidden');
+                document.getElementById('modal-status').classList.add('hidden');
                 document.getElementById('modal-genres').innerHTML = '';
                 document.getElementById('modal-director').textContent = '';
                 document.getElementById('modal-trailer-btn').classList.add('hidden');
+                document.getElementById('modal-tmdb-btn').classList.add('hidden');
+                document.getElementById('modal-stats').classList.add('hidden');
+                document.getElementById('modal-production').classList.add('hidden');
 
                 try {
                     const res = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${apiKey}&language=fr-FR&append_to_response=credits,videos`);
                     const data = await res.json();
 
-                    if (data.runtime) {
-                        const h = Math.floor(data.runtime / 60);
-                        const m = data.runtime % 60;
-                        const runtimeEl = document.getElementById('modal-runtime');
-                        runtimeEl.textContent = `${h}h ${m < 10 ? '0'+m : m}m`;
-                        runtimeEl.classList.remove('hidden');
-                    }
-
-                    if (data.genres) {
-                        document.getElementById('modal-genres').innerHTML = data.genres.slice(0,3).map(g => `<span>${g.name}</span>`).join('<span class="text-white/20">•</span>');
-                    }
-
-                    if (data.credits && data.credits.crew) {
-                        const director = data.credits.crew.find(c => c.job === 'Director');
-                        if (director) document.getElementById('modal-director').innerHTML = `Un film de <span class="text-white">${director.name}</span>`;
-                    }
-
-                    if (data.videos && data.videos.results) {
-                        const trailer = data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results.find(v => v.site === 'YouTube');
-                        if (trailer) {
-                            const btn = document.getElementById('modal-trailer-btn');
-                            btn.href = `https://www.youtube.com/watch?v=${trailer.key}`;
-                            btn.classList.remove('hidden');
-                        }
-                    }
-
-                    document.getElementById('modal-cast-loading').style.display = 'none';
-                    if (data.credits && data.credits.cast && data.credits.cast.length > 0) {
-                        const castHtml = data.credits.cast.slice(0, 8).map(actor => {
-                            // Gestion de l'image ou de l'icône SVG par défaut
-                            const imgPath = actor.profile_path ? `${PROFILE_URL}${actor.profile_path}` : fallbackAvatar;
-                            return `
-                                <div class="flex flex-col items-center min-w-[80px] w-20 shrink-0">
-                                    <div class="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-white/10 bg-surface-800 shrink-0">
-                                        <img src="${imgPath}" alt="${actor.name}" class="w-full h-full object-cover" onerror="this.src='${fallbackAvatar}'">
-                                    </div>
-                                    <span class="text-xs text-white font-bold text-center leading-tight w-full truncate">${actor.name}</span>
-                                    <span class="text-[10px] text-gray-500 text-center leading-tight mt-1 w-full truncate">${actor.character}</span>
-                                </div>
-                            `;
-                        }).join('');
-                        document.getElementById('modal-cast').innerHTML = castHtml;
-                    } else {
-                        document.getElementById('modal-cast').innerHTML = `<p class="text-sm text-gray-500">Casting non renseigné.</p>`;
-                    }
+                    cacheSet(cacheKey, data, 1800000); // 30 min cache
+                    renderMovieDetails(data);
                 } catch (e) {
-                    document.getElementById('modal-cast-loading').innerHTML = "Erreur de chargement.";
+                    document.getElementById('modal-cast-loading').innerHTML = "<span class='text-red-400'>Erreur de chargement.</span>";
+                }
+            }
+
+            function renderMovieDetails(data) {
+                if (data.runtime) {
+                    const h = Math.floor(data.runtime / 60);
+                    const m = data.runtime % 60;
+                    const runtimeEl = document.getElementById('modal-runtime');
+                    runtimeEl.textContent = `${h}h ${m < 10 ? '0'+m : m}`;
+                    runtimeEl.classList.remove('hidden');
+                }
+
+                if (data.status) {
+                    const statusMap = {
+                        'Released': 'Sorti',
+                        'Post Production': 'Post-production',
+                        'In Production': 'En production',
+                        'Planned': 'Planifié'
+                    };
+                    const statusEl = document.getElementById('modal-status');
+                    statusEl.textContent = statusMap[data.status] || data.status;
+                    statusEl.classList.remove('hidden');
+                }
+
+                if (data.genres) {
+                    document.getElementById('modal-genres').innerHTML = data.genres.slice(0, 4).map(g => `<span class="bg-white/5 px-2 py-1 rounded-lg">${g.name}</span>`).join('<span class="text-white/20 mx-1">•</span>');
+                }
+
+                if (data.credits && data.credits.crew) {
+                    const director = data.credits.crew.find(c => c.job === 'Director');
+                    if (director) document.getElementById('modal-director').innerHTML = `Un film de <span class="text-white">${director.name}</span>`;
+                }
+
+                if (data.videos && data.videos.results) {
+                    const trailer = data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results.find(v => v.site === 'YouTube');
+                    if (trailer) {
+                        const btn = document.getElementById('modal-trailer-btn');
+                        btn.href = `https://www.youtube.com/watch?v=${trailer.key}`;
+                        btn.classList.remove('hidden');
+                        btn.classList.add('inline-flex');
+                    }
+                }
+
+                // TMDB Link
+                const tmdbBtn = document.getElementById('modal-tmdb-btn');
+                tmdbBtn.href = `${TMDB_URL}/${data.id}`;
+                tmdbBtn.classList.remove('hidden');
+                tmdbBtn.classList.add('inline-flex');
+
+                // Stats
+                document.getElementById('modal-budget').textContent = formatCurrency(data.budget);
+                document.getElementById('modal-revenue').textContent = formatCurrency(data.revenue);
+                document.getElementById('modal-language').textContent = data.original_language || 'N/A';
+                document.getElementById('modal-votes').textContent = data.vote_count ? data.vote_count.toLocaleString('fr-FR') : '0';
+                document.getElementById('modal-stats').classList.remove('hidden');
+                document.getElementById('modal-stats').classList.add('grid');
+
+                // Production companies
+                if (data.production_companies && data.production_companies.length > 0) {
+                    const companiesEl = document.getElementById('modal-companies');
+                    companiesEl.innerHTML = data.production_companies.slice(0, 4).map(c => 
+                        `<span class="text-xs text-gray-400 bg-white/5 px-3 py-1.5 rounded-lg">${c.name}</span>`
+                    ).join('');
+                    document.getElementById('modal-production').classList.remove('hidden');
+                }
+
+                document.getElementById('modal-cast-loading').style.display = 'none';
+                if (data.credits && data.credits.cast && data.credits.cast.length > 0) {
+                    const castHtml = data.credits.cast.slice(0, 10).map(actor => {
+                        const imgPath = actor.profile_path ? `${PROFILE_URL}${actor.profile_path}` : '';
+                        return `
+                            <div class="flex flex-col items-center min-w-[70px] md:min-w-[80px] w-16 md:w-20 shrink-0">
+                                <div class="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden mb-2 border-2 border-white/10 bg-surface-800 shrink-0 flex items-center justify-center">
+                                    ${imgPath ? `<img src="${imgPath}" alt="${actor.name}" class="w-full h-full object-cover" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'text-gray-600 text-xs font-bold\'>${actor.name.charAt(0)}</span>'">` : `<span class="text-gray-600 text-xs font-bold">${actor.name.charAt(0)}</span>`}
+                                </div>
+                                <span class="text-[11px] md:text-xs text-white font-bold text-center leading-tight w-full truncate">${actor.name}</span>
+                                <span class="text-[9px] md:text-[10px] text-gray-500 text-center leading-tight mt-0.5 w-full truncate">${actor.character}</span>
+                            </div>
+                        `;
+                    }).join('');
+                    document.getElementById('modal-cast').innerHTML = castHtml;
+                } else {
+                    document.getElementById('modal-cast').innerHTML = `<p class="text-sm text-gray-500">Casting non renseigné.</p>`;
                 }
             }
 
@@ -487,7 +1276,9 @@
                 document.getElementById('modal-rating').textContent = movie.vote_average > 0 ? movie.vote_average.toFixed(1) : 'N/A';
                 document.getElementById('modal-overview').textContent = movie.overview || "Synopsis indisponible pour le moment.";
                 document.getElementById('modal-poster').src = `${IMG_URL}${movie.poster_path}`;
-                
+                document.getElementById('modal-favorite-btn').dataset.movieId = movie.id;
+                updateFavoriteButtons(movie.id);
+
                 const backdrop = document.getElementById('modal-backdrop');
                 if (movie.backdrop_path) {
                     backdrop.src = `${BACKDROP_URL}${movie.backdrop_path}`;
@@ -520,9 +1311,93 @@
                 }, 400);
             };
 
+            // Favorites Modal
+            function openFavorites() {
+                const modal = document.getElementById('favorites-modal');
+                const list = document.getElementById('favorites-list');
+
+                if (favorites.length === 0) {
+                    list.innerHTML = `<div class="text-center py-10"><div class="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-800 flex items-center justify-center"><svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg></div><p class="text-gray-500">Aucun film en favoris</p></div>`;
+                } else {
+                    list.innerHTML = favorites.map(movie => `
+                        <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group" onclick="window.openMovieFromFav(${movie.id})">
+                            <div class="w-12 h-16 rounded-lg overflow-hidden bg-surface-800 shrink-0">
+                                <img src="${IMG_URL}${movie.poster_path}" alt="${movie.title}" class="w-full h-full object-cover" loading="lazy">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-white font-bold text-sm truncate">${movie.title}</h4>
+                                <p class="text-gray-500 text-xs">${formatDateFR(movie.release_date)}</p>
+                            </div>
+                            <button class="p-2 rounded-lg hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100" onclick="event.stopPropagation(); window.removeFavorite(${movie.id})">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            window.closeFavorites = function() {
+                document.getElementById('favorites-modal').classList.add('hidden');
+                document.getElementById('favorites-modal').classList.remove('flex');
+            };
+
+            window.openMovieFromFav = async function(movieId) {
+                closeFavorites();
+                try {
+                    const res = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${apiKey}&language=fr-FR`);
+                    const movie = await res.json();
+                    if (movie.id) openModal(movie);
+                } catch (e) {
+                    showToast('Erreur lors du chargement du film', 'error');
+                }
+            };
+
+            window.removeFavorite = function(movieId) {
+                const movie = favorites.find(f => f.id === movieId);
+                favorites = favorites.filter(f => f.id !== movieId);
+                localStorage.setItem('cinelume_favorites', JSON.stringify(favorites));
+                updateFavoritesCount();
+                openFavorites(); // Refresh list
+                if (movie) showToast(`${movie.title} retiré des favoris`, 'info');
+                displayMovies(currentMovies);
+            };
+
+            // Share
+            async function shareMovie() {
+                const title = document.getElementById('modal-title').textContent;
+                const movieId = document.getElementById('modal-favorite-btn').dataset.movieId;
+                const url = `${TMDB_URL}/${movieId}`;
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: `CineLume - ${title}`,
+                            text: `Découvrez ${title} sur CineLume`,
+                            url: url
+                        });
+                    } catch (e) {
+                        // User cancelled
+                    }
+                } else {
+                    await navigator.clipboard.writeText(url);
+                    showToast('Lien copié dans le presse-papiers', 'success');
+                }
+            }
+
+            // Theme
+            function toggleTheme() {
+                isDarkMode = !isDarkMode;
+                localStorage.setItem('cinelume_theme', isDarkMode ? 'dark' : 'light');
+                applyTheme();
+            }
+
+            // Settings
             const settingsModal = document.getElementById('settings-modal');
             document.getElementById('settings-btn').onclick = () => {
-                document.getElementById('api-key-input').value = apiKey;
+                document.getElementById('api-key-input').value = apiKey === DEFAULT_API_KEY ? '' : apiKey;
                 settingsModal.classList.remove('hidden');
                 settingsModal.classList.add('flex');
             };
@@ -532,23 +1407,75 @@
             };
             document.getElementById('save-api-key').onclick = () => {
                 const newKey = document.getElementById('api-key-input').value.trim();
-                if (newKey) {
-                    apiKey = newKey;
-                    localStorage.setItem('tmdb_api_key', apiKey);
-                    closeSettings();
-                    updateUI();
-                }
+                apiKey = newKey || DEFAULT_API_KEY;
+                localStorage.setItem('tmdb_api_key', apiKey);
+                closeSettings();
+                showToast('Paramètres sauvegardés', 'success');
+                updateUI();
             };
 
-            document.getElementById('prev-year').onclick = () => { if (selectedYear > minYear) { selectedYear--; updateUI(); }};
-            document.getElementById('next-year').onclick = () => { if (selectedYear < maxYear) { selectedYear++; updateUI(); }};
+            // Navigation
+            document.getElementById('prev-year').onclick = () => { 
+                if (selectedYear > minYear) { selectedYear--; selectedWeek = 1; currentPage = 1; updateUI(); }
+            };
+            document.getElementById('next-year').onclick = () => { 
+                if (selectedYear < maxYear) { selectedYear++; selectedWeek = 1; currentPage = 1; updateUI(); }
+            };
 
+            // Keyboard
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     if (!modal.classList.contains('hidden')) closeModal();
                     if (!settingsModal.classList.contains('hidden')) closeSettings();
+                    if (!document.getElementById('favorites-modal').classList.contains('hidden')) closeFavorites();
                 }
             });
+
+            // Swipe to close modal on mobile
+            let touchStartY = 0;
+            const modalContent = document.getElementById('modal-content');
+            const modalScroll = document.getElementById('modal-scroll');
+
+            modalContent.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            modalContent.addEventListener('touchmove', (e) => {
+                if (window.innerWidth >= 768) return;
+                const touchY = e.touches[0].clientY;
+                const diff = touchY - touchStartY;
+
+                if (modalScroll.scrollTop === 0 && diff > 0) {
+                    modalContent.style.transform = `translateY(${diff * 0.5}px)`;
+                }
+            }, { passive: true });
+
+            modalContent.addEventListener('touchend', (e) => {
+                if (window.innerWidth >= 768) return;
+                const touchY = e.changedTouches[0].clientY;
+                const diff = touchY - touchStartY;
+
+                if (diff > 100 && modalScroll.scrollTop === 0) {
+                    closeModal();
+                } else {
+                    modalContent.style.transform = '';
+                }
+            }, { passive: true });
+
+            // Navbar scroll effect
+            let lastScroll = 0;
+            window.addEventListener('scroll', () => {
+                const nav = document.getElementById('navbar');
+                const currentScroll = window.pageYOffset;
+
+                if (currentScroll > 50) {
+                    nav.classList.add('shadow-lg');
+                } else {
+                    nav.classList.remove('shadow-lg');
+                }
+
+                lastScroll = currentScroll;
+            }, { passive: true });
 
             buildUI();
             updateUI();
@@ -556,4 +1483,3 @@
     </script>
 </body>
 </html>
- 
