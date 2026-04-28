@@ -1,2 +1,2 @@
 # CineLume
-site internet derneires sortie cine
+site internet dernieres sortie cine
