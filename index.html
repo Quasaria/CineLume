@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineLume - L'Éclairage sur le Cinéma</title>
+    <meta name="description" content="CineLume – Découvrez les sorties cinéma de la semaine avec une interface élégante et réactive.">
+    <title>CineLume – L'Éclairage sur le Cinéma</title>
+    
+    <!-- Tailwind & Font -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     
@@ -13,7 +16,7 @@
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: {
-                        accent: { 300: '#67e8f9', 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' }, // Cyan Néon
+                        accent: { 300: '#67e8f9', 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
                         surface: { 800: '#18181b', 900: '#09090b', 950: '#050505' }
                     },
                     boxShadow: {
@@ -30,15 +33,32 @@
             }
         }
     </script>
+    
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #ffffff; overflow-x: hidden; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
         
         #dynamic-bg {
-            position: fixed; inset: 0; z-index: -1;
-            background-size: cover; background-position: center;
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
             filter: blur(50px) brightness(0.15) saturate(1.2);
             transition: background-image 1.5s ease-in-out;
             transform: scale(1.2);
+        }
+        /* Fallback when no backdrop */
+        #dynamic-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #0891b220 0%, transparent 70%);
+            z-index: -1;
         }
 
         .glass-nav {
@@ -73,247 +93,393 @@
     <div id="dynamic-bg"></div>
     <div class="fixed inset-0 bg-gradient-to-b from-transparent via-surface-950/90 to-surface-950 z-[-1]"></div>
 
+    <!-- Navigation -->
     <nav class="fixed top-0 w-full glass-nav z-40 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer group">
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="location.reload()">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-400 to-blue-600 shadow-glow flex items-center justify-center transform group-hover:scale-105 transition-all">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
+                    </svg>
                 </div>
                 <h1 class="text-2xl font-extrabold tracking-tight">Cine<span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-blue-500">Lume</span></h1>
             </div>
+            <!-- Settings button -->
+            <button id="settings-btn" class="p-2 rounded-xl hover:bg-white/10 transition-colors" aria-label="Paramètres">
+                <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+            </button>
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto pt-32 px-6 pb-20">
-        
         <div class="mb-12 text-center md:text-left flex flex-col items-center md:items-start">
             <h2 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">Sorties en <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-400 to-blue-500">salles.</span></h2>
             <p class="text-gray-400 text-lg md:text-xl max-w-2xl font-light" id="date-subtitle">Découvrez les pépites cinématographiques de la semaine.</p>
         </div>
 
-        <div class="glass-panel p-2 rounded-2xl inline-flex flex-col md:flex-row gap-2 mb-12 w-full md:w-auto">
-            <div class="flex overflow-x-auto no-scrollbar gap-1 p-1 md:max-w-md lg:max-w-2xl" id="months-container">
-                </div>
-            
-            <div class="hidden md:block w-px bg-white/10 my-2 mx-2"></div>
-            
-            <div class="flex overflow-x-auto no-scrollbar gap-2 p-1" id="weeks-container">
-                </div>
+        <!-- Sélecteurs : Année, Mois, Semaine -->
+        <div class="glass-panel p-2 rounded-2xl inline-flex flex-col md:flex-row gap-2 mb-12 w-full md:w-auto items-center">
+            <div class="flex items-center gap-1">
+                <button id="prev-year" class="p-2 rounded-lg hover:bg-white/5 text-gray-400 transition-colors" aria-label="Année précédente">←</button>
+                <span id="current-year-display" class="text-white font-bold text-sm w-12 text-center">2026</span>
+                <button id="next-year" class="p-2 rounded-lg hover:bg-white/5 text-gray-400 transition-colors" aria-label="Année suivante">→</button>
+            </div>
+            <div class="hidden md:block w-px bg-white/10 my-2 mx-2 h-8"></div>
+            <div class="flex overflow-x-auto no-scrollbar gap-1 p-1" id="months-container"></div>
+            <div class="hidden md:block w-px bg-white/10 my-2 mx-2 h-8"></div>
+            <div class="flex overflow-x-auto no-scrollbar gap-2 p-1" id="weeks-container"></div>
         </div>
 
-        <div id="loading" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-10">
-            </div>
-
-        <div id="movie-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-10">
-            </div>
+        <!-- Chargement & Grille -->
+        <div id="loading" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-10"></div>
+        <div id="movie-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 gap-y-10"></div>
     </main>
 
-    <div id="movie-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 md:p-0">
+    <!-- Modal Détails Film -->
+    <div id="movie-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 md:p-0" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div id="modal-overlay" class="absolute inset-0 bg-surface-950/90 backdrop-blur-md opacity-0" onclick="closeModal()"></div>
-        
         <div id="modal-content" class="relative w-full max-w-4xl bg-surface-900 rounded-3xl overflow-hidden shadow-2xl scale-95 opacity-0 flex flex-col max-h-[90vh] md:max-h-[85vh] border border-white/10">
-            
-            <div class="relative h-48 md:h-72 w-full shrink-0">
-                <img id="modal-backdrop" src="" alt="Fond" class="w-full h-full object-cover">
+            <div class="relative h-48 md:h-72 w-full shrink-0 bg-gradient-to-br from-accent-600/30 to-surface-800">
+                <img id="modal-backdrop" src="" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'">
                 <div class="absolute inset-0 bg-gradient-to-t from-surface-900 via-surface-900/60 to-transparent"></div>
-                <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/50 hover:bg-white/20 text-white backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center transition-all z-10">✕</button>
+                <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/50 hover:bg-white/20 text-white backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center transition-all z-10" aria-label="Fermer">✕</button>
             </div>
-            
             <div class="px-6 md:px-10 pb-10 pt-0 flex flex-col md:flex-row gap-8 relative -mt-16 md:-mt-24 overflow-y-auto no-scrollbar">
-                <div class="hidden md:block w-48 shrink-0 rounded-xl overflow-hidden shadow-2xl border border-white/10">
-                    <img id="modal-poster" src="" alt="Affiche" class="w-full h-full object-cover">
+                <div class="hidden md:block w-48 shrink-0 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-surface-800">
+                    <img id="modal-poster" src="" alt="Affiche du film" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22300%22%3E%3Crect fill=%22%2318181b%22 width=%22200%22 height=%22300%22/%3E%3Ctext fill=%22%23ffffff50%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2214%22%3EPoster indisponible%3C/text%3E%3C/svg%3E'">
                 </div>
-                
-                <div class="flex flex-col justify-end pt-4">
-                    <div class="flex flex-wrap gap-2 mb-3 items-center" id="modal-genres">
-                        <span class="bg-accent-500/20 text-accent-400 border border-accent-500/30 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase" id="modal-date">Date</span>
+                <div class="flex flex-col justify-end pt-4 w-full">
+                    <div class="flex flex-wrap gap-2 mb-3 items-center">
+                        <span id="modal-date" class="bg-accent-500/20 text-accent-400 border border-accent-500/30 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase"></span>
                     </div>
-                    
-                    <h2 id="modal-title" class="text-3xl md:text-5xl font-extrabold mb-4 leading-tight tracking-tight">Titre</h2>
-                    
+                    <h2 id="modal-title" class="text-3xl md:text-5xl font-extrabold mb-4 leading-tight tracking-tight"></h2>
                     <div class="flex items-center gap-4 mb-6">
                         <div class="flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
                             <svg class="w-5 h-5 text-accent-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            <span id="modal-rating" class="font-bold text-white">0.0</span>
+                            <span id="modal-rating" class="font-bold text-white"></span>
                         </div>
                     </div>
-                    
-                    <p id="modal-overview" class="text-gray-300 text-base md:text-lg leading-relaxed font-light">Résumé...</p>
+                    <p id="modal-overview" class="text-gray-300 text-base md:text-lg leading-relaxed font-light"></p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal Paramètres (API Key) -->
+    <div id="settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeSettings()"></div>
+        <div class="relative bg-surface-900 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
+            <h3 id="settings-title" class="text-xl font-bold mb-4">Paramètres</h3>
+            <label class="block text-sm text-gray-400 mb-2">Clé API TMDB</label>
+            <input type="text" id="api-key-input" class="w-full bg-surface-800 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-accent-500 transition-colors" placeholder="Entrez votre clé API">
+            <p class="text-xs text-gray-500 mt-2">Nécessite une clé <a href="https://www.themoviedb.org/settings/api" target="_blank" class="underline hover:text-accent-400">TMDB</a>. Sauvegardée localement.</p>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeSettings()" class="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-colors">Annuler</button>
+                <button id="save-api-key" class="px-4 py-2 rounded-xl bg-accent-500 text-white font-semibold hover:bg-accent-600 transition-colors">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer discret -->
+    <footer class="text-center pb-6 text-gray-600 text-xs">
+        Données fournies par <a href="https://www.themoviedb.org/" target="_blank" class="underline hover:text-gray-400">TMDb</a>.
+    </footer>
+
     <script>
-        const API_KEY = '81f09aab8379105c078d67759877bc0b';
-        const BASE_URL = 'https://api.themoviedb.org/3';
-        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
-        const BACKDROP_URL = 'https://image.tmdb.org/t/p/w1280';
+        (function() {
+            // ==================== CONFIGURATION ====================
+            const DEFAULT_API_KEY = '81f09aab8379105c078d67759877bc0b'; // Remplacez par votre propre clé TMDB si nécessaire
+            const BASE_URL = 'https://api.themoviedb.org/3';
+            const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+            const BACKDROP_URL = 'https://image.tmdb.org/t/p/w1280'; // Correction : suppression de l'espace
 
-        const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear(); 
-        let selectedMonth = currentDate.getMonth();
-        let selectedWeek = Math.ceil(currentDate.getDate() / 7);
-        if(selectedWeek > 4) selectedWeek = 4;
+            const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            
+            // État
+            let apiKey = localStorage.getItem('tmdb_api_key') || DEFAULT_API_KEY;
+            const today = new Date();
+            let selectedMonth = today.getMonth();
+            let selectedWeek = Math.min(4, Math.ceil(today.getDate() / 7));
+            let selectedYear = today.getFullYear();
+            const minYear = today.getFullYear() - 1;
+            const maxYear = today.getFullYear() + 1;
 
-        function getDatesForWeek(year, monthIndex, weekNumber) {
-            let startDay = (weekNumber - 1) * 7 + 1;
-            let endDay = weekNumber * 7;
-            let lastDayOfMonth = new Date(year, monthIndex + 1, 0).getDate();
-            if (weekNumber === 4) endDay = lastDayOfMonth; 
-            let start = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`;
-            let end = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`;
-            return { start, end };
-        }
-
-        function formatDateFR(dateString) {
-            return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-        }
-
-        function generateSkeletons() {
-            const loadingContainer = document.getElementById('loading');
-            loadingContainer.innerHTML = '';
-            for(let i=0; i<10; i++) {
-                loadingContainer.innerHTML += `
-                    <div class="rounded-2xl bg-surface-800 border border-white/5 aspect-[2/3] animate-shimmer overflow-hidden relative">
-                        <div class="absolute bottom-4 left-4 right-4 space-y-3">
-                            <div class="h-4 bg-white/10 rounded w-3/4"></div>
-                            <div class="h-3 bg-white/10 rounded w-1/2"></div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        function initUI() {
+            // ==================== ÉLÉMENTS DOM ====================
             const monthsContainer = document.getElementById('months-container');
             const weeksContainer = document.getElementById('weeks-container');
-            generateSkeletons();
+            const loadingEl = document.getElementById('loading');
+            const gridEl = document.getElementById('movie-grid');
+            const dateSubtitle = document.getElementById('date-subtitle');
+            const dynamicBg = document.getElementById('dynamic-bg');
+            const yearDisplay = document.getElementById('current-year-display');
+            const prevYearBtn = document.getElementById('prev-year');
+            const nextYearBtn = document.getElementById('next-year');
 
-            months.forEach((month, index) => {
-                const btn = document.createElement('button');
-                btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${index === selectedMonth ? 'bg-accent-500 text-white shadow-glow' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
-                btn.innerText = month;
-                btn.onclick = () => { selectedMonth = index; selectedWeek = 1; updateUI(); };
-                monthsContainer.appendChild(btn);
-            });
+            const modal = document.getElementById('movie-modal');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalContent = document.getElementById('modal-content');
 
-            for(let i = 1; i <= 4; i++) {
-                const btn = document.createElement('button');
-                btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${i === selectedWeek ? 'bg-white text-surface-900 shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
-                btn.innerText = `Semaine ${i}`;
-                btn.onclick = () => { selectedWeek = i; updateUI(); };
-                weeksContainer.appendChild(btn);
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsModal = document.getElementById('settings-modal');
+            const apiKeyInput = document.getElementById('api-key-input');
+            const saveApiKeyBtn = document.getElementById('save-api-key');
+
+            // ==================== UTILITAIRES ====================
+            function getDatesForWeek(year, monthIndex, weekNumber) {
+                const startDay = (weekNumber - 1) * 7 + 1;
+                let endDay = weekNumber * 7;
+                const lastDayOfMonth = new Date(year, monthIndex + 1, 0).getDate();
+                if (weekNumber === 4) endDay = lastDayOfMonth;
+                const start = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`;
+                const end = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`;
+                return { start, end };
             }
-            updateUI();
-        }
 
-        function updateUI() {
-            const monthBtns = document.getElementById('months-container').children;
-            Array.from(monthBtns).forEach((btn, index) => {
-                btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${index === selectedMonth ? 'bg-accent-500 text-white shadow-glow' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
-            });
+            function formatDateFR(dateString) {
+                return new Date(dateString).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+            }
 
-            const weekBtns = document.getElementById('weeks-container').children;
-            Array.from(weekBtns).forEach((btn, index) => {
-                btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${index + 1 === selectedWeek ? 'bg-white text-surface-900 shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
-            });
+            // ==================== UI ====================
+            function buildMonthButtons() {
+                monthsContainer.innerHTML = '';
+                months.forEach((month, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${index === selectedMonth ? 'bg-accent-500 text-white shadow-glow' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
+                    btn.textContent = month;
+                    btn.setAttribute('aria-pressed', index === selectedMonth);
+                    btn.addEventListener('click', () => {
+                        selectedMonth = index;
+                        selectedWeek = 1;
+                        updateUI();
+                    });
+                    monthsContainer.appendChild(btn);
+                });
+            }
 
-            const dates = getDatesForWeek(currentYear, selectedMonth, selectedWeek);
-            document.getElementById('date-subtitle').innerText = `Sorties prévues du ${formatDateFR(dates.start)} au ${formatDateFR(dates.end)}`;
-            fetchMovies(dates.start, dates.end);
-        }
-
-        async function fetchMovies(startDate, endDate) {
-            const grid = document.getElementById('movie-grid');
-            const loading = document.getElementById('loading');
-            
-            grid.classList.add('hidden');
-            loading.classList.remove('hidden');
-
-            try {
-                const url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=fr-FR&region=FR&primary_release_date.gte=${startDate}&primary_release_date.lte=${endDate}&with_release_type=2|3&sort_by=popularity.desc`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                loading.classList.add('hidden');
-                grid.classList.remove('hidden');
-                
-                displayMovies(data.results);
-                
-                if(data.results && data.results.length > 0 && data.results[0].backdrop_path) {
-                    document.getElementById('dynamic-bg').style.backgroundImage = `url('${BACKDROP_URL + data.results[0].backdrop_path}')`;
+            function buildWeekButtons() {
+                weeksContainer.innerHTML = '';
+                for (let i = 1; i <= 4; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${i === selectedWeek ? 'bg-white text-surface-900 shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
+                    btn.textContent = `Semaine ${i}`;
+                    btn.setAttribute('aria-pressed', i === selectedWeek);
+                    btn.addEventListener('click', () => {
+                        selectedWeek = i;
+                        updateUI();
+                    });
+                    weeksContainer.appendChild(btn);
                 }
-            } catch (error) {
-                loading.innerHTML = '<p class="text-red-500 col-span-full">Erreur de connexion.</p>';
-            }
-        }
-
-        function displayMovies(movies) {
-            const grid = document.getElementById('movie-grid');
-            grid.innerHTML = '';
-            
-            if(!movies || movies.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-10 text-center text-gray-500">Aucun film trouvé pour cette semaine.</div>`;
-                return;
             }
 
-            movies.forEach((movie, index) => {
-                if (!movie.poster_path) return;
-                const card = document.createElement('div');
-                card.className = "movie-card group relative rounded-2xl overflow-hidden cursor-pointer bg-surface-800 border border-white/5 aspect-[2/3] shadow-lg hover:shadow-2xl hover:shadow-accent-500/20 transition-all duration-500";
-                card.style.animationDelay = `${index * 0.05}s`;
-                card.onclick = () => openModal(movie);
+            function updateYearDisplay() {
+                yearDisplay.textContent = selectedYear;
+                prevYearBtn.style.visibility = selectedYear > minYear ? 'visible' : 'hidden';
+                nextYearBtn.style.visibility = selectedYear < maxYear ? 'visible' : 'hidden';
+            }
 
-                card.innerHTML = `
-                    <img src="${IMG_URL + movie.poster_path}" alt="${movie.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-gradient-to-t from-surface-950 via-surface-900/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="absolute inset-0 flex flex-col justify-end p-5">
-                        <h3 class="text-white font-bold text-lg leading-tight mb-1 group-hover:text-accent-400 transition-colors">${movie.title}</h3>
-                        <p class="text-gray-400 text-sm font-medium">${formatDateFR(movie.release_date)}</p>
-                    </div>
-                `;
-                grid.appendChild(card);
+            function generateSkeletons() {
+                loadingEl.innerHTML = '';
+                for (let i = 0; i < 10; i++) {
+                    loadingEl.innerHTML += `
+                        <div class="rounded-2xl bg-surface-800 border border-white/5 aspect-[2/3] animate-shimmer overflow-hidden relative">
+                            <div class="absolute bottom-4 left-4 right-4 space-y-3">
+                                <div class="h-4 bg-white/10 rounded w-3/4"></div>
+                                <div class="h-3 bg-white/10 rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            function updateUI() {
+                // Met à jour les boutons actifs
+                Array.from(monthsContainer.children).forEach((btn, idx) => {
+                    btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${idx === selectedMonth ? 'bg-accent-500 text-white shadow-glow' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
+                    btn.setAttribute('aria-pressed', idx === selectedMonth);
+                });
+                Array.from(weeksContainer.children).forEach((btn, idx) => {
+                    const weekNum = idx + 1;
+                    btn.className = `px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm whitespace-nowrap ${weekNum === selectedWeek ? 'bg-white text-surface-900 shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5'}`;
+                    btn.setAttribute('aria-pressed', weekNum === selectedWeek);
+                });
+
+                const dates = getDatesForWeek(selectedYear, selectedMonth, selectedWeek);
+                dateSubtitle.textContent = `Sorties prévues du ${formatDateFR(dates.start)} au ${formatDateFR(dates.end)}`;
+                fetchMovies(dates.start, dates.end);
+            }
+
+            // ==================== API ====================
+            async function fetchMovies(startDate, endDate) {
+                gridEl.classList.add('hidden');
+                loadingEl.classList.remove('hidden');
+                generateSkeletons();
+
+                try {
+                    const url = `${BASE_URL}/discover/movie?api_key=${apiKey}&language=fr-FR&region=FR&primary_release_date.gte=${startDate}&primary_release_date.lte=${endDate}&with_release_type=2|3&sort_by=popularity.desc`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+                    const data = await response.json();
+                    
+                    loadingEl.classList.add('hidden');
+                    gridEl.classList.remove('hidden');
+                    
+                    if (data.results && data.results.length > 0) {
+                        displayMovies(data.results);
+                        // Fond dynamique avec le premier film
+                        const first = data.results[0];
+                        if (first.backdrop_path) {
+                            dynamicBg.style.backgroundImage = `url('${BACKDROP_URL}${first.backdrop_path}')`;
+                        } else {
+                            dynamicBg.style.backgroundImage = ''; // reprend le dégradé par défaut
+                        }
+                    } else {
+                        gridEl.innerHTML = `<div class="col-span-full py-10 text-center text-gray-500">Aucun film trouvé pour cette période.</div>`;
+                        dynamicBg.style.backgroundImage = '';
+                    }
+                } catch (error) {
+                    loadingEl.classList.add('hidden');
+                    gridEl.classList.remove('hidden');
+                    gridEl.innerHTML = `<div class="col-span-full py-10 text-center text-red-400">Erreur : ${error.message}. Vérifiez votre clé API.</div>`;
+                    dynamicBg.style.backgroundImage = '';
+                }
+            }
+
+            function displayMovies(movies) {
+                gridEl.innerHTML = '';
+                const fragment = document.createDocumentFragment();
+                movies.forEach((movie, index) => {
+                    if (!movie.poster_path) return; // on ignore les films sans affiche
+                    const card = document.createElement('div');
+                    card.className = "movie-card group relative rounded-2xl overflow-hidden cursor-pointer bg-surface-800 border border-white/5 aspect-[2/3] shadow-lg hover:shadow-2xl hover:shadow-accent-500/20 transition-all duration-500";
+                    card.style.animationDelay = `${index * 0.05}s`;
+                    card.setAttribute('tabindex', '0');
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('aria-label', `Voir les détails de ${movie.title}`);
+                    
+                    card.addEventListener('click', () => openModal(movie));
+                    card.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openModal(movie);
+                        }
+                    });
+
+                    card.innerHTML = `
+                        <img src="${IMG_URL}${movie.poster_path}" alt="Affiche de ${movie.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22450%22%3E%3Crect fill=%22%2318181b%22 width=%22300%22 height=%22450%22/%3E%3Ctext fill=%22%23ffffff50%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2216%22%3EPoster indisponible%3C/text%3E%3C/svg%3E'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-surface-950 via-surface-900/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div class="absolute inset-0 flex flex-col justify-end p-5">
+                            <h3 class="text-white font-bold text-lg leading-tight mb-1 group-hover:text-accent-400 transition-colors">${movie.title}</h3>
+                            <p class="text-gray-400 text-sm font-medium">${formatDateFR(movie.release_date)}</p>
+                        </div>
+                    `;
+                    fragment.appendChild(card);
+                });
+                gridEl.appendChild(fragment);
+            }
+
+            // ==================== MODALE FILM ====================
+            function openModal(movie) {
+                document.getElementById('modal-title').textContent = movie.title;
+                document.getElementById('modal-date').textContent = formatDateFR(movie.release_date);
+                document.getElementById('modal-rating').textContent = movie.vote_average.toFixed(1);
+                document.getElementById('modal-overview').textContent = movie.overview || "Le synopsis n'est pas disponible.";
+                
+                const posterImg = document.getElementById('modal-poster');
+                posterImg.src = `${IMG_URL}${movie.poster_path}`;
+                posterImg.alt = `Affiche de ${movie.title}`;
+                
+                const backdropImg = document.getElementById('modal-backdrop');
+                if (movie.backdrop_path) {
+                    backdropImg.src = `${BACKDROP_URL}${movie.backdrop_path}`;
+                    backdropImg.style.display = '';
+                } else {
+                    backdropImg.style.display = 'none'; // le conteneur gardera son dégradé
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+
+                // Double requestAnimationFrame pour garantir le déclenchement des transitions
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        modalOverlay.classList.remove('opacity-0');
+                        modalContent.classList.remove('opacity-0', 'scale-95');
+                    });
+                });
+            }
+
+            function closeModal() {
+                modalOverlay.classList.add('opacity-0');
+                modalContent.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            }
+
+            // ==================== PARAMÈTRES API ====================
+            function openSettings() {
+                apiKeyInput.value = apiKey;
+                settingsModal.classList.remove('hidden');
+                settingsModal.classList.add('flex');
+            }
+
+            function closeSettings() {
+                settingsModal.classList.add('hidden');
+                settingsModal.classList.remove('flex');
+            }
+
+            function saveApiKey() {
+                const newKey = apiKeyInput.value.trim();
+                if (newKey) {
+                    apiKey = newKey;
+                    localStorage.setItem('tmdb_api_key', apiKey);
+                    closeSettings();
+                    updateUI(); // recharge les films avec la nouvelle clé
+                }
+            }
+
+            // ==================== ÉVÉNEMENTS GLOBAUX ====================
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!modal.classList.contains('hidden')) closeModal();
+                    if (!settingsModal.classList.contains('hidden')) closeSettings();
+                }
             });
-        }
 
-        const modal = document.getElementById('movie-modal');
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalContent = document.getElementById('modal-content');
+            prevYearBtn.addEventListener('click', () => {
+                if (selectedYear > minYear) {
+                    selectedYear--;
+                    updateYearDisplay();
+                    updateUI();
+                }
+            });
 
-        function openModal(movie) {
-            document.getElementById('modal-title').innerText = movie.title;
-            document.getElementById('modal-date').innerText = formatDateFR(movie.release_date);
-            document.getElementById('modal-rating').innerText = movie.vote_average.toFixed(1);
-            document.getElementById('modal-overview').innerText = movie.overview || "Le synopsis n'est pas disponible.";
-            document.getElementById('modal-poster').src = IMG_URL + movie.poster_path;
-            
-            // Gestion du backdrop : s'il n'y en a pas, on met le poster flouté
-            const backdropImg = movie.backdrop_path ? BACKDROP_URL + movie.backdrop_path : IMG_URL + movie.poster_path;
-            document.getElementById('modal-backdrop').src = backdropImg;
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            setTimeout(() => {
-                modalOverlay.classList.remove('opacity-0');
-                modalContent.classList.remove('opacity-0', 'scale-95');
-            }, 10);
-            document.body.style.overflow = 'hidden'; 
-        }
+            nextYearBtn.addEventListener('click', () => {
+                if (selectedYear < maxYear) {
+                    selectedYear++;
+                    updateYearDisplay();
+                    updateUI();
+                }
+            });
 
-        function closeModal() {
-            modalOverlay.classList.add('opacity-0');
-            modalContent.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                document.body.style.overflow = 'auto';
-            }, 300);
-        }
+            settingsBtn.addEventListener('click', openSettings);
+            saveApiKeyBtn.addEventListener('click', saveApiKey);
+            // Fermer les paramètres en cliquant en dehors (overlay déjà géré par onclick sur le fond)
 
-        initUI();
+            // ==================== INITIALISATION ====================
+            buildMonthButtons();
+            buildWeekButtons();
+            updateYearDisplay();
+            generateSkeletons();
+            updateUI(); // premier chargement
+        })();
     </script>
 </body>
 </html>
