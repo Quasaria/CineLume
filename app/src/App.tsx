@@ -1,14 +1,16 @@
 import { useEffect, useCallback } from 'react';
 import { MotionConfig } from 'framer-motion';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/appStore';
-import { discoverMovies, searchMovies, BACK } from '@/lib/tmdb';
+import { discoverMovies, searchMovies, searchPersons, BACK } from '@/lib/tmdb';
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { DateNavigator } from '@/components/DateNavigator';
 import { MovieGrid } from '@/components/MovieGrid';
+import { PersonStrip } from '@/components/PersonStrip';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { MovieModal } from '@/components/MovieModal';
 import { FavoritesModal } from '@/components/FavoritesModal';
@@ -24,11 +26,16 @@ interface DiscoverResponse {
 }
 
 export default function App() {
-  const { selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, searchQuery } = useAppStore();
+  const {
+    selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
+    selectedPerson, searchQuery,
+  } = useAppStore();
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
 
+  useModalUrlSync();
+
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
-    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider],
+    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null],
     queryFn: async ({ pageParam = 1 }) => {
       const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
@@ -41,6 +48,7 @@ export default function App() {
         page: pageParam as number,
         releaseMode: selReleaseMode,
         provider: selProvider,
+        personId: selectedPerson?.id ?? null,
       });
       return res;
     },
@@ -49,7 +57,7 @@ export default function App() {
       if (pages.length >= Math.min(lastPage.total_pages, 500)) return undefined;
       return pages.length + 1;
     },
-    enabled: !debouncedSearch,
+    enabled: !debouncedSearch || !!selectedPerson,
   });
 
   const searchQueryHook = useInfiniteQuery<DiscoverResponse, Error>({
@@ -63,12 +71,20 @@ export default function App() {
       if (pages.length >= Math.min(lastPage.total_pages, 500)) return undefined;
       return pages.length + 1;
     },
-    enabled: !!debouncedSearch,
+    enabled: !!debouncedSearch && !selectedPerson,
   });
 
-  const activeQuery = debouncedSearch ? searchQueryHook : discoverQuery;
+  const personsQuery = useQuery({
+    queryKey: ['searchPersons', debouncedSearch],
+    queryFn: () => searchPersons(debouncedSearch),
+    enabled: !!debouncedSearch && !selectedPerson && debouncedSearch.length >= 2,
+  });
+
+  const isSearchMode = !!debouncedSearch && !selectedPerson;
+  const activeQuery = isSearchMode ? searchQueryHook : discoverQuery;
   const movies: Movie[] = activeQuery.data?.pages.flatMap((p) => p.results).filter((m) => m.poster_path) || [];
   const totalResults = activeQuery.data?.pages[0]?.total_results || 0;
+  const persons = (personsQuery.data?.results || []).filter((p) => p.profile_path).slice(0, 12);
 
   const loadMore = useCallback(() => {
     if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
@@ -106,7 +122,11 @@ export default function App() {
         <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-20">
           <Hero backdrops={heroBackdrops} />
 
-          <DateNavigator />
+          {!selectedPerson && !isSearchMode && <DateNavigator />}
+
+          {persons.length > 0 && isSearchMode && (
+            <PersonStrip persons={persons} />
+          )}
 
           <MovieGrid
             movies={movies}

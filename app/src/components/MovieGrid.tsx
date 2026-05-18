@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { LayoutGrid, List, Filter, SlidersHorizontal, AlertCircle, RefreshCw } from 'lucide-react';
+import { LayoutGrid, List, Filter, SlidersHorizontal, AlertCircle, RefreshCw, X, User } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { PROVIDERS } from '@/lib/tmdb';
 import { MovieCard } from './MovieCard';
@@ -26,9 +26,9 @@ interface MovieGridProps {
 }
 
 export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults, isError, errorMessage, onRetry }: MovieGridProps) {
-  const { viewMode, setViewMode, openFilters, selRegion, selGenre, selReleaseMode, selProvider } = useAppStore();
+  const { viewMode, setViewMode, openFilters, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson, setSelectedPerson } = useAppStore();
   const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
-  const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'all' || !!selProvider;
+  const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'all' || !!selProvider || !!selectedPerson;
 
   if (isError) {
     return (
@@ -84,6 +84,23 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
 
   return (
     <div>
+      {selectedPerson && (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-violet-500/15 border border-violet-500/40 text-violet-200 text-sm font-medium">
+            <User className="w-3.5 h-3.5" aria-hidden="true" />
+            Filmographie de <span className="font-bold">{selectedPerson.name}</span>
+            <button
+              type="button"
+              onClick={() => setSelectedPerson(null)}
+              aria-label="Retirer le filtre par personne"
+              className="ml-1 p-0.5 rounded-full hover:bg-violet-500/30 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
+            </button>
+          </span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <span className="text-sm text-white/60 font-medium">

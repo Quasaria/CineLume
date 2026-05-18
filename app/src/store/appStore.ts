@@ -5,6 +5,11 @@ import { getCurrentCinemaContext, getCinemaWeeksOfMonth } from '@/lib/cinema-wee
 
 export type ReleaseMode = 'theater' | 'platform' | 'all';
 
+export interface SelectedPerson {
+  id: number;
+  name: string;
+}
+
 interface AppState {
   isDark: boolean;
   viewMode: ViewMode;
@@ -16,6 +21,7 @@ interface AppState {
   selGenre: string;
   selReleaseMode: ReleaseMode;
   selProvider: string;
+  selectedPerson: SelectedPerson | null;
   favorites: FavoriteMovie[];
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
@@ -30,6 +36,7 @@ interface AppState {
   setGenre: (genre: string) => void;
   setReleaseMode: (mode: ReleaseMode) => void;
   setProvider: (provider: string) => void;
+  setSelectedPerson: (person: SelectedPerson | null) => void;
   jumpToToday: () => void;
   toggleFav: (movie: FavoriteMovie) => void;
   removeFav: (id: number) => void;
@@ -93,6 +100,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   selGenre: localStorage.getItem('cinelume_genre') || '',
   selReleaseMode: savedReleaseMode,
   selProvider: localStorage.getItem('cinelume_provider') || '',
+  selectedPerson: null,
   favorites: safeParseFavs(),
   currentModalMovieId: null,
   isFilterOpen: false,
@@ -140,6 +148,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setProvider: (provider) => {
     localStorage.setItem('cinelume_provider', provider);
     set({ selProvider: provider });
+  },
+
+  setSelectedPerson: (person) => {
+    set({ selectedPerson: person, searchQuery: '' });
   },
 
   jumpToToday: () => {
