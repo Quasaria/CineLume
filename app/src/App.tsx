@@ -46,7 +46,7 @@ export default function App() {
       const startStr = formatDateISO(w.start);
       const endStr = formatDateISO(w.end);
 
-      const commonParams = {
+      const res = await discoverMovies({
         region: selRegion,
         genre: selGenre,
         startDate: startStr,
@@ -55,33 +55,10 @@ export default function App() {
         releaseMode: selReleaseMode,
         provider: selProvider,
         personId: selectedPerson?.id ?? null,
-      };
+      });
 
-      // Filmographie : pas de double requete, on veut toute la carriere.
-      if (selectedPerson) {
-        return discoverMovies({ ...commonParams, dateFilter: 'release_date' });
-      }
-
-      // Double requete TMDB :
-      // - Query A : release_date + region + with_release_type -> films avec sortie
-      //   FR theatrale dans la semaine (catche Cannes-puis-FR-delayed).
-      // - Query B : primary_release_date sans contrainte region/type -> films avec
-      //   primary mondiale dans la semaine (catche Hollywood type Backrooms dont
-      //   la donnee FR n'est pas encore dans TMDB).
-      const [resA, resB] = await Promise.all([
-        discoverMovies({ ...commonParams, dateFilter: 'release_date' }),
-        discoverMovies({ ...commonParams, dateFilter: 'primary_release_date' }),
-      ]);
-
-      // Merge + dedupe par id
-      const seen = new Set<number>();
-      const candidates: Movie[] = [];
-      for (const m of [...resA.results, ...resB.results]) {
-        if (!m.poster_path) continue;
-        if (seen.has(m.id)) continue;
-        seen.add(m.id);
-        candidates.push(m);
-      }
+      // Filmographie : pas de filtre date, on garde la carriere complete.
+      if (selectedPerson) return res;
 
       const acceptedTypes =
         selReleaseMode === 'theater'
@@ -90,58 +67,35 @@ export default function App() {
             ? [4, 6]
             : [1, 2, 3, 4, 6];
 
-      // Recency 12 mois : excluet les vieux films (Night Swim 2024, etc.) qui
-      // auraient une re-projection FR cette semaine. On garde une marge raisonnable
-      // pour les films type Cannes-puis-FR-1-an-plus-tard.
+      // Recency 12 mois : exclut les films dont la premiere sortie mondiale
+      // a plus d'un an. Bloque les re-projections d'anciens films (Night Swim
+      // 2024 sur une semaine 2026 par exemple).
       const recencyCutoffDate = new Date(w.start);
       recencyCutoffDate.setMonth(recencyCutoffDate.getMonth() - 12);
       const recencyCutoff = formatDateISO(recencyCutoffDate);
 
-      // Pays "proxy occidentaux" pour fallback quand TMDB n'a pas d'entree pour
-      // la region selectionnee : si le film a une sortie theatrale dans un de
-      // ces pays dans la semaine, on suppose qu'il sortira aussi en FR.
-      const PROXY_COUNTRIES = ['US', 'GB', 'DE', 'IT', 'ES', 'CA', 'AU', 'IE', 'NL', 'BE'];
-
       const enriched = await Promise.all(
-        candidates.map(async (movie) => {
+        res.results.map(async (movie) => {
+          if (!movie.poster_path) return null;
           if (movie.release_date && movie.release_date < recencyCutoff) return null;
           try {
             const rd = await getMovieReleaseDates(movie.id);
-            // 1. Strict : si TMDB a une entree pour la region selectionnee, on
-            //    prend la PLUS ANCIENNE entree matchant le type. Le film
-            //    n'apparait que dans la semaine de cette premiere entree, jamais
-            //    dans plusieurs semaines successives.
+            // Strict region-only : on prend la PLUS ANCIENNE entree de la
+            // region selectionnee qui matche le type, puis on regarde si elle
+            // tombe dans la fenetre semaine. Resultat : chaque film n'apparait
+            // que dans la semaine de sa toute premiere sortie dans le pays.
             const regionEntry = rd.results.find((r) => r.iso_3166_1 === selRegion);
-            if (regionEntry && regionEntry.release_dates.length > 0) {
-              const matching = regionEntry.release_dates
-                .filter((d) => acceptedTypes.includes(d.type))
-                .map((d) => (d.release_date || '').split('T')[0])
-                .filter((day) => !!day)
-                .sort();
-              if (matching.length === 0) return null;
-              const earliest = matching[0];
-              return earliest >= startStr && earliest <= endStr ? movie : null;
-            }
-            // 2. Fallback : pas de donnees pour la region. On regarde si le film
-            //    a une sortie theatrale dans un pays proxy dans la semaine -> on
-            //    suppose qu'il sortira aussi dans la region. Idem : on prend la
-            //    PLUS ANCIENNE entree proxy pour ne pas dupliquer.
-            const allProxyDates: string[] = [];
-            for (const code of PROXY_COUNTRIES) {
-              const entry = rd.results.find((r) => r.iso_3166_1 === code);
-              if (!entry) continue;
-              for (const d of entry.release_dates) {
-                if (!acceptedTypes.includes(d.type)) continue;
-                const day = (d.release_date || '').split('T')[0];
-                if (day) allProxyDates.push(day);
-              }
-            }
-            if (allProxyDates.length === 0) return null;
-            allProxyDates.sort();
-            const earliestProxy = allProxyDates[0];
-            return earliestProxy >= startStr && earliestProxy <= endStr ? movie : null;
+            if (!regionEntry || regionEntry.release_dates.length === 0) return null;
+            const matching = regionEntry.release_dates
+              .filter((d) => acceptedTypes.includes(d.type))
+              .map((d) => (d.release_date || '').split('T')[0])
+              .filter((day) => !!day)
+              .sort();
+            if (matching.length === 0) return null;
+            const earliest = matching[0];
+            return earliest >= startStr && earliest <= endStr ? movie : null;
           } catch {
-            // En cas d'erreur reseau sur release_dates, on garde le film (best effort)
+            // Erreur reseau sur release_dates : on garde le film en best effort
             return movie;
           }
         }),
@@ -149,8 +103,8 @@ export default function App() {
 
       const filtered = enriched.filter((m): m is Movie => m !== null);
       return {
+        ...res,
         results: filtered,
-        total_pages: Math.max(resA.total_pages, resB.total_pages),
         total_results: filtered.length,
       };
     },

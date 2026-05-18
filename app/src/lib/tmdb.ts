@@ -21,11 +21,6 @@ export interface DiscoverParams {
   releaseMode?: 'theater' | 'platform' | 'all';
   provider?: string;
   personId?: number | null;
-  // 'release_date' (default) : filtre par sortie regionale + with_release_type
-  // 'primary_release_date' : filtre par premiere sortie mondiale, pas de
-  //                          contrainte region/type (catche Hollywood sans
-  //                          donnees FR)
-  dateFilter?: 'release_date' | 'primary_release_date';
 }
 
 export interface PersonSearchResult {
@@ -56,40 +51,29 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
   const apiKey = getApiKey();
   const region = params.region || 'FR';
   const mode = params.releaseMode || 'theater';
-  const dateFilter = params.dateFilter || 'release_date';
   const genreQ = params.genre ? `&with_genres=${params.genre}` : '';
 
   let releaseTypeQ = '';
   let providerQ = '';
-  // En mode 'primary_release_date' : pas de filtre type (on veut catcher les
-  // films qui n'ont pas encore d'entree FR theatrale dans TMDB). Le filtrage
-  // par type sera fait client-side via /release_dates.
-  // En mode 'release_date' : with_release_type fait le filtrage serveur.
-  if (dateFilter === 'release_date') {
-    if (mode === 'theater') {
-      releaseTypeQ = '&with_release_type=1|2|3';
-    } else if (mode === 'platform') {
-      releaseTypeQ = '&with_release_type=4|6';
-      if (params.provider) {
-        providerQ = `&with_watch_providers=${params.provider}&watch_region=${region}`;
-      }
-    } else {
-      releaseTypeQ = '&with_release_type=1|2|3|4|6';
+  if (mode === 'theater') {
+    releaseTypeQ = '&with_release_type=1|2|3';
+  } else if (mode === 'platform') {
+    releaseTypeQ = '&with_release_type=4|6';
+    if (params.provider) {
+      providerQ = `&with_watch_providers=${params.provider}&watch_region=${region}`;
     }
-  } else if (mode === 'platform' && params.provider) {
-    providerQ = `&with_watch_providers=${params.provider}&watch_region=${region}`;
+  } else {
+    releaseTypeQ = '&with_release_type=1|2|3|4|6';
   }
 
   const personQ = params.personId ? `&with_people=${params.personId}` : '';
 
-  let dateQ = '';
-  if (!params.personId) {
-    if (dateFilter === 'release_date') {
-      dateQ = `&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}`;
-    } else {
-      dateQ = `&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}`;
-    }
-  }
+  // Filtre par release_date dans la region selectionnee. TMDB retourne les
+  // films qui ont au moins une sortie correspondante en FR (ou region) dans
+  // la fenetre semaine. En mode filmographie : pas de filtre date.
+  const dateQ = params.personId
+    ? ''
+    : `&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}`;
   const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
   const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
 
