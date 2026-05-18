@@ -8,6 +8,7 @@ import { getMovieDetails, IMG, BACK, PROF, ORIG, TMDB_SITE, posterSrcSet, backdr
 import { fmtDateLocalized } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 export function MovieModal() {
   const { t, i18n } = useTranslation();
@@ -46,15 +47,7 @@ export function MovieModal() {
   });
 
   const movie = details;
-
-  useEffect(() => {
-    if (currentModalMovieId !== null) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [currentModalMovieId]);
+  useBodyScrollLock(currentModalMovieId !== null);
 
   async function shareMovie() {
     if (!movie) return;
@@ -297,7 +290,7 @@ export function MovieModal() {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-3 mb-6">
+                      <div className="grid grid-cols-2 gap-2 mb-6 sm:flex sm:flex-wrap sm:gap-3">
                         {(() => {
                           const yt = movie.videos?.results ?? [];
                           const video =
@@ -310,7 +303,7 @@ export function MovieModal() {
                               href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.key)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white transition-colors"
+                              className="col-span-2 sm:col-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white active:bg-cyan-500 transition-colors min-h-12"
                             >
                               <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                               {video.type === 'Trailer' ? t('modal.trailer') : video.type === 'Teaser' ? t('modal.teaser') : t('modal.video')}
@@ -321,15 +314,15 @@ export function MovieModal() {
                           href={`${TMDB_SITE}/${movie.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 transition-colors border border-white/10"
+                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
                         >
-                          <ExternalLink className="w-4 h-4" />
+                          <ExternalLink className="w-4 h-4" aria-hidden="true" />
                           TMDB
                         </a>
                         <button
                           type="button"
                           onClick={shareMovie}
-                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 transition-colors border border-white/10"
+                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
                         >
                           <Share2 className="w-4 h-4" aria-hidden="true" />
                           {t('modal.share')}

@@ -69,7 +69,7 @@ export function Hero({ backdrops = [] }: HeroProps) {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="mb-8 sm:mb-10 relative"
     >
-      <div className="hero-stage absolute -top-16 -left-10 -right-10 sm:-left-12 sm:-right-12 h-[260px] sm:h-[460px] rounded-3xl overflow-hidden pointer-events-none">
+      <div className="hero-stage absolute -top-16 -left-10 -right-10 sm:-left-12 sm:-right-12 h-[210px] sm:h-[460px] rounded-3xl overflow-hidden pointer-events-none">
         <AnimatePresence mode="popLayout">
           {currentBackdrop && (
             <motion.img
@@ -102,7 +102,7 @@ export function Hero({ backdrops = [] }: HeroProps) {
         <p className="text-white/70 text-base sm:text-lg font-light drop-shadow-[0_1px_6px_rgba(0,0,0,0.3)]">{label}</p>
 
         {backdrops.length > 1 && (
-          <div className="flex gap-1.5 mt-4" aria-hidden="true">
+          <div className="hidden sm:flex gap-1.5 mt-4" aria-hidden="true">
             {backdrops.map((_, i) => (
               <span
                 key={i}

@@ -8,6 +8,7 @@ import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -21,6 +22,7 @@ export function SettingsModal() {
   const { isSettingsOpen, closeSettings, isDark, toggleTheme } = useAppStore();
   const [apiKey, setApiKey] = useState('');
   const queryClient = useQueryClient();
+  useBodyScrollLock(isSettingsOpen);
 
   const currentLang = (i18n.language || 'fr').split('-')[0] as SupportedLang;
 
