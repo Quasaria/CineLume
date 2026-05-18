@@ -68,13 +68,14 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
 
   const personQ = params.personId ? `&with_people=${params.personId}` : '';
 
-  // Filtre par primary_release_date (date de premiere sortie mondiale du film).
-  // C'est le filtre le plus fiable de TMDB. Implicitement, un film de 1985 ne peut pas
-  // matcher une fenetre de 2026, donc pas besoin de recency separee.
-  // En mode filmographie, on skip le filtre date pour voir toute la carriere.
+  // Filtre par release_date (date de sortie *dans la region selectionnee*) au lieu
+  // de primary_release_date (premiere sortie mondiale). Couple avec region + with_release_type,
+  // TMDB renvoie les films qui ont une sortie FR (du type demande) dans la fenetre.
+  // -> Backrooms avec sortie FR le 27 mai apparait meme si son primary mondiale est le 17 juin.
+  // En mode filmographie, on skip pour voir toute la carriere.
   const dateQ = params.personId
     ? ''
-    : `&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}`;
+    : `&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}`;
   const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
   const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
 
