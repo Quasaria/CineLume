@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/appStore';
 import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
@@ -6,15 +7,30 @@ const MONTHS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet',
 const MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 interface HeroProps {
-  backdropUrl?: string;
+  backdrops?: string[];
 }
 
-export function Hero({ backdropUrl }: HeroProps) {
+const CYCLE_MS = 7000;
+
+export function Hero({ backdrops = [] }: HeroProps) {
   const { selYear, selMonth, selWeek, selRegion, searchQuery } = useAppStore();
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    setIdx(0);
+  }, [backdrops.join('|')]);
+
+  useEffect(() => {
+    if (backdrops.length <= 1) return;
+    const t = setInterval(() => {
+      setIdx((i) => (i + 1) % backdrops.length);
+    }, CYCLE_MS);
+    return () => clearInterval(t);
+  }, [backdrops.length]);
 
   const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
-  const idx = Math.min(Math.max(selWeek - 1, 0), Math.max(weeks.length - 1, 0));
-  const w = weeks[idx];
+  const wIdx = Math.min(Math.max(selWeek - 1, 0), Math.max(weeks.length - 1, 0));
+  const w = weeks[wIdx];
 
   let label: string;
   if (searchQuery) {
@@ -30,6 +46,8 @@ export function Hero({ backdropUrl }: HeroProps) {
       : `${w.start.getDate()} ${MONTHS_SHORT[w.start.getMonth()]} - ${w.end.getDate()} ${MONTHS_SHORT[w.end.getMonth()]} ${w.end.getFullYear()}`;
   }
 
+  const currentBackdrop = backdrops[idx];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -37,17 +55,48 @@ export function Hero({ backdropUrl }: HeroProps) {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="mb-8 sm:mb-10 relative"
     >
-      {backdropUrl && (
-        <div className="hero-backdrop absolute -top-10 -left-10 -right-10 h-72 rounded-3xl overflow-hidden opacity-30 pointer-events-none">
-          <img src={backdropUrl} alt="" className="w-full h-full object-cover blur-sm" />
-          <div className="hero-backdrop-overlay absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/60 to-transparent" />
-        </div>
-      )}
-      <div className="relative">
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-2">
+      <div className="hero-stage absolute -top-16 -left-10 -right-10 sm:-left-12 sm:-right-12 h-[420px] sm:h-[460px] rounded-3xl overflow-hidden pointer-events-none">
+        <AnimatePresence mode="popLayout">
+          {currentBackdrop && (
+            <motion.img
+              key={currentBackdrop}
+              src={currentBackdrop}
+              alt=""
+              initial={{ opacity: 0, scale: 1.02 }}
+              animate={{ opacity: 1, scale: 1.12 }}
+              exit={{ opacity: 0, scale: 1.14 }}
+              transition={{
+                opacity: { duration: 1.6, ease: 'easeInOut' },
+                scale: { duration: CYCLE_MS / 1000 + 2, ease: 'linear' },
+              }}
+              className="hero-stage-img absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+        </AnimatePresence>
+
+        <div className="hero-stage-grain absolute inset-0 mix-blend-overlay opacity-30 pointer-events-none" />
+        <div className="hero-stage-overlay absolute inset-0" />
+        <div className="hero-stage-sides absolute inset-0" />
+      </div>
+
+      <div className="relative pt-8 sm:pt-12">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]">
           Sorties <span className="text-gradient">cinéma</span>
         </h1>
-        <p className="text-white/40 text-base sm:text-lg font-light">{label}</p>
+        <p className="text-white/70 text-base sm:text-lg font-light drop-shadow-[0_1px_6px_rgba(0,0,0,0.3)]">{label}</p>
+
+        {backdrops.length > 1 && (
+          <div className="flex gap-1.5 mt-4" aria-hidden="true">
+            {backdrops.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1 rounded-full transition-all duration-500 ${
+                  i === idx ? 'w-6 bg-white/80' : 'w-2 bg-white/30'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );
