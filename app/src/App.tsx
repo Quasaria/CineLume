@@ -62,14 +62,15 @@ export default function App() {
       // En mode filmographie, on saute cette verification.
       if (selectedPerson) return res;
 
-      // Types acceptes : on exclut type 1 (Premiere/festival) qui ne constitue pas
-      // une sortie cinema reelle, et type 5 (physique) qui n'est pas pertinent.
+      // Types acceptes : type 5 (physique) exclu car pas pertinent pour "sorties".
+      // Type 1 (Premiere) garde car TMDB l'utilise parfois pour la sortie ciné
+      // officielle (pas seulement festivals).
       const acceptedTypes =
         selReleaseMode === 'theater'
-          ? [2, 3]
+          ? [1, 2, 3]
           : selReleaseMode === 'platform'
             ? [4, 6]
-            : [2, 3, 4, 6];
+            : [1, 2, 3, 4, 6];
 
       // Recency 2 ans sur la primary worldwide date : exclut les vieux films qui
       // auraient une re-projection theatrale recente (anniversaire, restauration).
