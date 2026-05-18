@@ -4,6 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/appStore';
 import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
+const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p';
+
+function heroSrcSet(url: string): string {
+  const match = url.match(/\/t\/p\/[^/]+(\/.+)$/);
+  if (!match) return '';
+  const path = match[1];
+  // TMDB backdrops dispos : w300, w780, w1280, original
+  return [`${TMDB_IMG_BASE}/w780${path} 780w`, `${TMDB_IMG_BASE}/w1280${path} 1280w`].join(', ');
+}
+
 interface HeroProps {
   backdrops?: string[];
 }
@@ -65,6 +75,8 @@ export function Hero({ backdrops = [] }: HeroProps) {
             <motion.img
               key={currentBackdrop}
               src={currentBackdrop}
+              srcSet={heroSrcSet(currentBackdrop)}
+              sizes="(max-width: 640px) 100vw, 1200px"
               alt=""
               initial={{ opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1.12 }}

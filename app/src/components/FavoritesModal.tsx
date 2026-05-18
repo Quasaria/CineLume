@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { X, Heart, Trash2, Calendar, Sparkles, Archive } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
-import { IMG } from '@/lib/tmdb';
+import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import type { FavoriteMovie } from '@/types/movie';
 
 function parseLocalDate(s: string | null | undefined): Date | null {
@@ -66,6 +67,7 @@ function groupFavorites(favorites: FavoriteMovie[]): Group[] {
 
 export function FavoritesModal() {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const { isFavOpen, closeFavorites, favorites, removeFav, openModal } = useAppStore();
   const groups = useMemo(() => groupFavorites(favorites), [favorites]);
   const fmtDate = (d?: string) => fmtDateLocalized(d);
@@ -77,7 +79,7 @@ export function FavoritesModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -87,12 +89,13 @@ export function FavoritesModal() {
             onClick={closeFavorites}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
+            animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-[#0f0f15] rounded-3xl p-6 max-w-lg w-full max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
+            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
           >
+            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-xl flex items-center gap-2">
                 <Heart className="w-5 h-5 text-red-500 fill-red-500" aria-hidden="true" />
@@ -148,6 +151,8 @@ export function FavoritesModal() {
                               {f.poster_path && (
                                 <img
                                   src={`${IMG}${f.poster_path}`}
+                                  srcSet={posterSrcSet(f.poster_path)}
+                                  sizes="40px"
                                   alt={f.title}
                                   className="w-full h-full object-cover"
                                   loading="lazy"

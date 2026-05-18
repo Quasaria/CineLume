@@ -26,7 +26,10 @@ export function DateNavigator() {
   }, [weeks, selWeek, selYear, selMonth, setDate]);
 
   return (
-    <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 sm:py-3 mb-6 bg-[var(--bg)]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-lg shadow-black/20">
+    <div
+      className="sticky z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 sm:py-3 mb-6 bg-[var(--bg)]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-lg shadow-black/20"
+      style={{ top: 'calc(4rem + env(safe-area-inset-top))' }}
+    >
       {/* Mobile : 2 lignes (annee+actions sur ligne 1, mois+semaines sur ligne 2)
           Desktop : 1 ligne avec tout */}
       <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">

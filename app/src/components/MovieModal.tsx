@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
-import { getMovieDetails, IMG, BACK, PROF, ORIG, TMDB_SITE } from '@/lib/tmdb';
+import { getMovieDetails, IMG, BACK, PROF, ORIG, TMDB_SITE, posterSrcSet, backdropSrcSet, profileSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +22,8 @@ export function MovieModal() {
     return new Intl.NumberFormat(lang || 'fr', { style: 'currency', currency: 'USD', notation: 'compact' }).format(n);
   }
   const [touchY, setTouchY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
 
   // Si la lightbox est ouverte, Echap la ferme en priorite avant la modale.
@@ -101,23 +103,38 @@ export function MovieModal() {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full max-w-4xl max-h-[92dvh] sm:max-h-[85vh] bg-[#0f0f15] sm:rounded-3xl rounded-t-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col"
             onTouchStart={(e) => {
+              if (window.innerWidth >= 640) return;
               if (e.touches.length !== 1) return;
+              // Drag pour fermer uniquement si le contenu interne est tout en haut
+              // du scroll. Sinon l'utilisateur veut juste scroller dans la modale.
+              if (contentRef.current && contentRef.current.scrollTop > 0) {
+                setIsDragging(false);
+                return;
+              }
               setTouchY(e.touches[0].clientY);
+              setIsDragging(true);
             }}
             onTouchMove={(e) => {
-              if (window.innerWidth >= 640 || e.touches.length !== 1) return;
+              if (!isDragging || window.innerWidth >= 640 || e.touches.length !== 1) return;
               const diff = e.touches[0].clientY - touchY;
               if (diff > 0) e.currentTarget.style.transform = `translateY(${diff * 0.4}px)`;
             }}
             onTouchEnd={(e) => {
-              if (window.innerWidth >= 640) return;
+              if (!isDragging || window.innerWidth >= 640) {
+                setIsDragging(false);
+                return;
+              }
               const t = e.changedTouches[0];
-              if (!t) return;
+              if (!t) {
+                setIsDragging(false);
+                return;
+              }
               if (t.clientY - touchY > 100) {
                 closeModal();
               } else {
                 e.currentTarget.style.transform = '';
               }
+              setIsDragging(false);
             }}
           >
             <button
@@ -131,7 +148,7 @@ export function MovieModal() {
 
             <div className="w-12 h-1.5 rounded-full bg-white/40 absolute top-2.5 left-1/2 -translate-x-1/2 sm:hidden z-50" aria-hidden="true" />
 
-            <div className="overflow-y-auto flex-1 custom-scroll">
+            <div ref={contentRef} className="overflow-y-auto flex-1 custom-scroll overscroll-contain">
               {isLoading ? (
                 <div className="p-6 space-y-4">
                   <Skeleton className="h-48 sm:h-72 w-full rounded-2xl bg-white/5" />
@@ -151,6 +168,8 @@ export function MovieModal() {
                       >
                         <img
                           src={`${BACK}${movie.backdrop_path}`}
+                          srcSet={backdropSrcSet(movie.backdrop_path)}
+                          sizes="(max-width: 640px) 100vw, 80vw"
                           alt={movie.title}
                           className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity"
                           loading="lazy"
@@ -177,6 +196,8 @@ export function MovieModal() {
                       >
                         <img
                           src={`${IMG}${movie.poster_path}`}
+                          srcSet={posterSrcSet(movie.poster_path)}
+                          sizes="208px"
                           alt={movie.title}
                           className="w-full h-auto group-hover/poster:scale-[1.02] transition-transform"
                           loading="lazy"
@@ -351,12 +372,14 @@ export function MovieModal() {
                                   {actor.profile_path ? (
                                     <img
                                       src={`${PROF}${actor.profile_path}`}
+                                      srcSet={profileSrcSet(actor.profile_path)}
+                                      sizes="56px"
                                       alt={actor.name}
                                       className="w-full h-full object-cover"
                                       loading="lazy"
                                     />
                                   ) : (
-                                    <Users className="w-4 h-4 text-white/20" />
+                                    <Users className="w-4 h-4 text-white/20" aria-hidden="true" />
                                   )}
                                 </div>
                                 <span className="text-[11px] text-white font-medium text-center leading-tight w-full truncate">

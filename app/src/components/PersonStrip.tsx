@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
-import { PROF } from '@/lib/tmdb';
+import { PROF, profileSrcSet } from '@/lib/tmdb';
 import type { PersonSearchResult } from '@/lib/tmdb';
 
 interface PersonStripProps {
@@ -44,6 +44,8 @@ export function PersonStrip({ persons }: PersonStripProps) {
               {p.profile_path ? (
                 <img
                   src={`${PROF}${p.profile_path}`}
+                  srcSet={profileSrcSet(p.profile_path)}
+                  sizes="88px"
                   alt={p.name}
                   className="w-full h-full object-cover"
                   loading="lazy"

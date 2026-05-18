@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -16,6 +17,7 @@ const LANG_LABEL: Record<SupportedLang, string> = {
 
 export function SettingsModal() {
   const { t, i18n } = useTranslation();
+  const isMobile = useIsMobile();
   const { isSettingsOpen, closeSettings, isDark, toggleTheme } = useAppStore();
   const [apiKey, setApiKey] = useState('');
   const queryClient = useQueryClient();
@@ -66,7 +68,7 @@ export function SettingsModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -76,12 +78,13 @@ export function SettingsModal() {
             onClick={closeSettings}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
+            animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-[#0f0f15] rounded-3xl p-6 max-w-md w-full border border-white/10 shadow-2xl"
+            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-md w-full max-h-[90vh] sm:max-h-none overflow-y-auto border border-white/10 shadow-2xl"
           >
+            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
             <h3 className="font-bold text-xl mb-6">{t('settings.title')}</h3>
 
             <div className="space-y-5">

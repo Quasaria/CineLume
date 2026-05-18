@@ -6,6 +6,7 @@ import { useAppStore } from '@/store/appStore';
 import type { ReleaseMode } from '@/store/appStore';
 import { getGenres, PROVIDERS } from '@/lib/tmdb';
 import { useQuery } from '@tanstack/react-query';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 const REGION_CODES = ['FR', 'US', 'GB', 'JP', 'DE', 'ES', 'IT', 'KR', 'CA', 'AU', 'BR', 'MX', 'IN', 'CN', 'RU', 'SE', 'NL', 'BE', 'CH', 'AT'] as const;
 const FLAGS: Record<string, string> = {
@@ -24,6 +25,7 @@ const RELEASE_MODES: { value: ReleaseMode; icon: typeof Film }[] = [
 export function FilterDrawer() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
+  const isMobile = useIsMobile();
   const {
     isFilterOpen, closeFilters,
     selRegion, selGenre, selReleaseMode, selProvider,
@@ -81,13 +83,14 @@ export function FilterDrawer() {
             onClick={closeFilters}
           />
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 top-0 h-full w-full max-w-sm bg-[#0f0f15] border-l border-white/10 shadow-2xl flex flex-col"
+            initial={isMobile ? { y: '100%' } : { x: '100%' }}
+            animate={isMobile ? { y: 0 } : { x: 0 }}
+            exit={isMobile ? { y: '100%' } : { x: '100%' }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-0 right-0 bottom-0 sm:left-auto sm:top-0 sm:bottom-0 w-full sm:max-w-sm sm:h-full max-h-[90vh] sm:max-h-none bg-[#0f0f15] border-t sm:border-t-0 sm:border-l border-white/10 shadow-2xl flex flex-col rounded-t-3xl sm:rounded-none"
           >
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
+            <div className="w-12 h-1.5 rounded-full bg-white/30 mt-3 mx-auto sm:hidden" aria-hidden="true" />
+            <div className="flex items-center justify-between p-5 pb-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
                 <h2 className="font-bold text-xl">{t('filters.title')}</h2>
                 {activeCount > 0 && (
@@ -234,7 +237,7 @@ export function FilterDrawer() {
               </div>
             </div>
 
-            <div className="p-5 border-t border-white/10 flex gap-3">
+            <div className="p-5 border-t border-white/10 flex gap-3 safe-pb">
               <button
                 type="button"
                 onClick={reset}

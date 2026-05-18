@@ -33,13 +33,13 @@ export function Navbar() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`fixed top-0 w-full z-50 transition-all duration-300 safe-pt ${
         scrolled
           ? 'bg-[#050508]/85 backdrop-blur-xl shadow-lg shadow-black/20 border-b border-white/5'
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
         <button
           type="button"
           aria-label={t('nav.home')}
@@ -63,7 +63,7 @@ export function Navbar() {
               <LogoMark className="w-[22px] h-[22px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
             </div>
           </motion.div>
-          <span className="font-bold text-xl tracking-tight">
+          <span className="hidden min-[420px]:inline font-bold text-xl tracking-tight">
             Cine<span className="text-gradient">Lume</span>
           </span>
         </button>
@@ -88,7 +88,7 @@ export function Navbar() {
             onClick={() => setSearchVisible(!searchVisible)}
             aria-label={t('nav.openSearch')}
             aria-expanded={searchVisible}
-            className="sm:hidden p-2.5 rounded-xl hover:bg-white/5 transition-colors"
+            className="sm:hidden min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors"
           >
             <Search className="w-5 h-5 text-white/70" aria-hidden="true" />
           </motion.button>
@@ -98,11 +98,11 @@ export function Navbar() {
             whileTap={{ scale: 0.95 }}
             onClick={openFavorites}
             aria-label={favCount > 0 ? t('nav.favoritesAria', { count: favCount }) : t('nav.favorites')}
-            className="p-2.5 rounded-xl hover:bg-white/5 transition-colors relative"
+            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors relative"
           >
             <Heart className="w-5 h-5 text-white/70" aria-hidden="true" />
             {favCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-violet-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-violet-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                 {favCount}
               </span>
             )}
@@ -113,7 +113,7 @@ export function Navbar() {
             whileTap={{ scale: 0.95 }}
             onClick={toggleTheme}
             aria-label={isDark ? t('nav.themeLight') : t('nav.themeDark')}
-            className="p-2.5 rounded-xl hover:bg-white/5 transition-colors"
+            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors"
           >
             {isDark ? (
               <Sun className="w-5 h-5 text-amber-400" aria-hidden="true" />
@@ -127,7 +127,7 @@ export function Navbar() {
             whileTap={{ scale: 0.95 }}
             onClick={openSettings}
             aria-label={t('nav.settings')}
-            className="p-2.5 rounded-xl hover:bg-white/5 transition-colors"
+            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors"
           >
             <Settings className="w-5 h-5 text-white/70" aria-hidden="true" />
           </motion.button>
