@@ -6,6 +6,7 @@ const BASE = 'https://api.themoviedb.org/3';
 export const IMG = 'https://image.tmdb.org/t/p/w500';
 export const BACK = 'https://image.tmdb.org/t/p/w1280';
 export const PROF = 'https://image.tmdb.org/t/p/w185';
+export const ORIG = 'https://image.tmdb.org/t/p/original';
 export const TMDB_SITE = 'https://www.themoviedb.org/movie';
 
 function getApiKey(): string {
