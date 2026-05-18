@@ -125,7 +125,7 @@ export default function App() {
         <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-20">
           <Hero backdrops={heroBackdrops} />
 
-          {!selectedPerson && !isSearchMode && <DateNavigator />}
+          {!selectedPerson && <DateNavigator />}
 
           {persons.length > 0 && isSearchMode && (
             <PersonStrip persons={persons} />
