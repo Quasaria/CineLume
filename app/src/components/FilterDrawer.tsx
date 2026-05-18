@@ -73,7 +73,7 @@ export function FilterDrawer() {
   const activeCount =
     (tempRegion !== 'FR' ? 1 : 0) +
     (tempGenre ? 1 : 0) +
-    (tempMode !== 'all' ? 1 : 0) +
+    (tempMode !== 'theater' ? 1 : 0) +
     (tempProvider ? 1 : 0);
 
   return (
