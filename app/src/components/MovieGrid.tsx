@@ -1,10 +1,17 @@
 import { motion } from 'framer-motion';
 import { LayoutGrid, List, Filter, SlidersHorizontal } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
+import { PROVIDERS } from '@/lib/tmdb';
 import { MovieCard } from './MovieCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import type { Movie } from '@/types/movie';
+
+const MODE_LABEL: Record<string, string> = {
+  theater: 'Salle',
+  platform: 'Plateforme',
+  all: 'Tout',
+};
 
 interface MovieGridProps {
   movies: Movie[];
@@ -16,7 +23,9 @@ interface MovieGridProps {
 }
 
 export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults }: MovieGridProps) {
-  const { viewMode, setViewMode, openFilters, selRegion, selGenre } = useAppStore();
+  const { viewMode, setViewMode, openFilters, selRegion, selGenre, selReleaseMode, selProvider } = useAppStore();
+  const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
+  const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'all' || !!selProvider;
 
   if (isLoading) {
     return (
@@ -51,11 +60,21 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
           <span className="text-sm text-white/30 font-medium">
             {totalResults} film{totalResults > 1 ? 's' : ''}
           </span>
-          {(selRegion !== 'FR' || selGenre) && (
-            <div className="flex items-center gap-1.5">
-              {selRegion !== 'FR' && (
+          {hasActiveFilter && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {selRegion !== 'FR' && selRegion && (
                 <span className="px-2 py-0.5 rounded-md bg-violet-500/10 text-violet-300 text-xs border border-violet-500/20">
                   {selRegion}
+                </span>
+              )}
+              {selReleaseMode !== 'all' && (
+                <span className="px-2 py-0.5 rounded-md bg-fuchsia-500/10 text-fuchsia-300 text-xs border border-fuchsia-500/20">
+                  {MODE_LABEL[selReleaseMode]}
+                </span>
+              )}
+              {providerName && (
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 text-xs border border-emerald-500/20">
+                  {providerName}
                 </span>
               )}
               {selGenre && (
@@ -76,7 +95,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
           >
             <Filter className="w-4 h-4 text-white/60" />
             <span className="hidden sm:inline">Filtres</span>
-            {(selRegion !== 'FR' || selGenre) && (
+            {hasActiveFilter && (
               <span className="w-2 h-2 rounded-full bg-violet-500" />
             )}
           </Button>

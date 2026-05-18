@@ -7,7 +7,7 @@ import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
 export function DateNavigator() {
-  const { selYear, selMonth, selWeek, selRegion, setDate } = useAppStore();
+  const { selYear, selMonth, selWeek, selRegion, setDate, jumpToToday } = useAppStore();
   const now = new Date();
   const MIN_YEAR = now.getFullYear() - 1;
   const MAX_YEAR = now.getFullYear() + 2;
@@ -44,7 +44,7 @@ export function DateNavigator() {
         <ChevronRight className="w-4 h-4 text-white/60" />
       </motion.button>
 
-      <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+      <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent mx-2 shrink-0" />
 
       <div className="flex gap-1 overflow-x-auto no-scrollbar">
         {MONTHS.map((m, i) => (
@@ -64,7 +64,7 @@ export function DateNavigator() {
         ))}
       </div>
 
-      <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+      <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent mx-2 shrink-0" />
 
       <div className="flex gap-1">
         {Array.from({ length: weeks }, (_, i) => i + 1).map((w) => (
@@ -84,15 +84,12 @@ export function DateNavigator() {
         ))}
       </div>
 
-      <div className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+      <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent mx-2 shrink-0" />
 
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => {
-          const n = new Date();
-          setDate(n.getFullYear(), n.getMonth(), 1);
-        }}
+        onClick={jumpToToday}
         className="ml-auto shrink-0 px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-300 text-xs font-semibold hover:bg-violet-500/20 transition-colors border border-violet-500/20 flex items-center gap-1.5"
       >
         <Calendar className="w-3 h-3" />

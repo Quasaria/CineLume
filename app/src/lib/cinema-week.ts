@@ -42,3 +42,26 @@ export function formatDateISO(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+
+export function getCurrentCinemaContext(region: string): { year: number; month: number; week: number } {
+  const today = new Date();
+  const startDay = getCinemaWeekStartDay(region);
+
+  const weekStart = new Date(today);
+  weekStart.setHours(0, 0, 0, 0);
+  while (weekStart.getDay() !== startDay) {
+    weekStart.setDate(weekStart.getDate() - 1);
+  }
+
+  const year = weekStart.getFullYear();
+  const month = weekStart.getMonth();
+  const weeks = getCinemaWeeksOfMonth(year, month, region);
+  const idx = weeks.findIndex(
+    (w) =>
+      w.start.getFullYear() === weekStart.getFullYear() &&
+      w.start.getMonth() === weekStart.getMonth() &&
+      w.start.getDate() === weekStart.getDate(),
+  );
+
+  return { year, month, week: idx >= 0 ? idx + 1 : 1 };
+}

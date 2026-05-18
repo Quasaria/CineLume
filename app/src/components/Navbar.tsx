@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 function LogoMark({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3.5 1.6" strokeLinecap="round" />
-      <path d="M10 8.5 L16 12 L10 15.5 Z" fill="currentColor" />
+      <path d="M18.5 6.2a8.5 8.5 0 1 0 0 11.6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M13 10 L18.5 12 L13 14 Z" fill="currentColor" />
     </svg>
   );
 }
@@ -49,10 +49,16 @@ export function Navbar() {
           }}
         >
           <motion.div
-            whileHover={{ scale: 1.05, rotate: 3 }}
-            className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/30 ring-1 ring-white/10"
+            whileHover={{ scale: 1.07, rotate: -4 }}
+            whileTap={{ scale: 0.94 }}
+            className="relative w-10 h-10 rounded-2xl overflow-hidden ring-1 ring-white/15 shadow-lg shadow-violet-500/40"
           >
-            <LogoMark className="w-5 h-5 text-white" />
+            <div className="logo-halo" />
+            <div className="absolute inset-0 logo-shimmer" />
+            <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <LogoMark className="w-[22px] h-[22px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" />
+            </div>
           </motion.div>
           <span className="font-bold text-xl tracking-tight">
             Cine<span className="text-gradient">Lume</span>
