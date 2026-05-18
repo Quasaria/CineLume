@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { X, Heart, Trash2, Calendar, Sparkles, Archive } from 'lucide-react';
@@ -7,6 +7,7 @@ import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useDragToClose } from '@/hooks/useDragToClose';
 import type { FavoriteMovie } from '@/types/movie';
 
 function parseLocalDate(s: string | null | undefined): Date | null {
@@ -72,6 +73,8 @@ export function FavoritesModal() {
   const { isFavOpen, closeFavorites, favorites, removeFav, openModal } = useAppStore();
   const groups = useMemo(() => groupFavorites(favorites), [favorites]);
   const fmtDate = (d?: string) => fmtDateLocalized(d);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const dragHandlers = useDragToClose({ onClose: closeFavorites, contentRef });
   useBodyScrollLock(isFavOpen);
 
   return (
@@ -96,6 +99,7 @@ export function FavoritesModal() {
             exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
+            {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between mb-4">
@@ -125,7 +129,7 @@ export function FavoritesModal() {
                 <p className="text-white/40 text-xs mt-1">{t('favorites.emptyHint')}</p>
               </div>
             ) : (
-              <div className="overflow-y-auto custom-scroll flex-1 -mx-2 px-2 space-y-5">
+              <div ref={contentRef} className="overflow-y-auto custom-scroll overscroll-contain flex-1 -mx-2 px-2 space-y-5">
                 {groups.map((group) => {
                   const Icon = group.icon;
                   return (

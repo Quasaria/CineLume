@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Trash2, Globe } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useDragToClose } from '@/hooks/useDragToClose';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -22,6 +23,8 @@ export function SettingsModal() {
   const { isSettingsOpen, closeSettings, isDark, toggleTheme } = useAppStore();
   const [apiKey, setApiKey] = useState('');
   const queryClient = useQueryClient();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const dragHandlers = useDragToClose({ onClose: closeSettings, contentRef });
   useBodyScrollLock(isSettingsOpen);
 
   const currentLang = (i18n.language || 'fr').split('-')[0] as SupportedLang;
@@ -80,11 +83,13 @@ export function SettingsModal() {
             onClick={closeSettings}
           />
           <motion.div
+            ref={contentRef}
             initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
             exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-md w-full max-h-[90vh] sm:max-h-none overflow-y-auto border border-white/10 shadow-2xl"
+            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-md w-full max-h-[90vh] sm:max-h-none overflow-y-auto overscroll-contain border border-white/10 shadow-2xl"
+            {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
             <h3 className="font-bold text-xl mb-6">{t('settings.title')}</h3>

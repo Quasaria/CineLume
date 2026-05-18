@@ -56,7 +56,13 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
         {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton key={i} className="rounded-2xl aspect-[2/3] bg-white/5" />
+          <div key={i} className="relative rounded-2xl overflow-hidden aspect-[2/3] bg-white/5">
+            <Skeleton className="absolute inset-0 bg-white/[0.04]" />
+            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 space-y-2">
+              <Skeleton className="h-4 w-3/4 bg-white/10 rounded" />
+              <Skeleton className="h-3 w-1/2 bg-white/[0.08] rounded" />
+            </div>
+          </div>
         ))}
       </div>
     );

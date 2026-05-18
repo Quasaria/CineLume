@@ -96,10 +96,10 @@ export function Hero({ backdrops = [] }: HeroProps) {
       </div>
 
       <div className="relative pt-8 sm:pt-12">
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.65)]">
           {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
         </h1>
-        <p className="text-white/70 text-base sm:text-lg font-light drop-shadow-[0_1px_6px_rgba(0,0,0,0.3)]">{label}</p>
+        <p className="text-white/85 text-base sm:text-lg font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">{label}</p>
 
         {backdrops.length > 1 && (
           <div className="hidden sm:flex gap-1.5 mt-4" aria-hidden="true">
