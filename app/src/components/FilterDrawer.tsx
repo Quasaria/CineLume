@@ -7,6 +7,7 @@ import type { ReleaseMode } from '@/store/appStore';
 import { getGenres, PROVIDERS } from '@/lib/tmdb';
 import { useQuery } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 const REGION_CODES = ['FR', 'US', 'GB', 'JP', 'DE', 'ES', 'IT', 'KR', 'CA', 'AU', 'BR', 'MX', 'IN', 'CN', 'RU', 'SE', 'NL', 'BE', 'CH', 'AT'] as const;
 const FLAGS: Record<string, string> = {
@@ -35,6 +36,7 @@ export function FilterDrawer() {
   const [tempGenre, setTempGenre] = useState(selGenre);
   const [tempMode, setTempMode] = useState<ReleaseMode>(selReleaseMode);
   const [tempProvider, setTempProvider] = useState(selProvider);
+  useBodyScrollLock(isFilterOpen);
 
   const { data: genres } = useQuery({
     queryKey: ['genres', lang],

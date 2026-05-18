@@ -67,12 +67,12 @@ export function DateNavigator() {
             whileTap={{ scale: 0.95 }}
             onClick={openFilters}
             aria-label={t('grid.filters')}
-            className="relative px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs sm:text-sm font-semibold transition-colors border border-white/10 flex items-center gap-1.5 min-h-11"
+            className="relative px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs sm:text-sm font-semibold transition-colors border border-white/10 flex items-center gap-1.5 min-w-11 min-h-11"
           >
-            <Filter className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{t('grid.filters')}</span>
+            <Filter className="w-4 h-4 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">{t('grid.filters')}</span>
             {hasActiveFilter && (
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" aria-hidden="true" />
+              <span className="absolute sm:relative top-1.5 right-1.5 sm:top-auto sm:right-auto w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full bg-violet-500" aria-hidden="true" />
             )}
           </motion.button>
 

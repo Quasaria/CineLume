@@ -24,7 +24,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="flex gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer group"
+        className="flex gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer group active:scale-[0.99]"
         onClick={() => openModal(movie.id)}
       >
         <div className="w-20 h-28 rounded-xl overflow-hidden bg-white/5 shrink-0 relative">
@@ -84,7 +84,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
       className="movie-card"
     >
       <div
-        className="relative rounded-2xl overflow-hidden bg-[#13131a] border border-white/[0.06] cursor-pointer group aspect-[2/3] movie-card-inner"
+        className="relative rounded-2xl overflow-hidden bg-[#13131a] border border-white/[0.06] cursor-pointer group aspect-[2/3] movie-card-inner transition-transform duration-150 active:scale-[0.97]"
         onClick={() => openModal(movie.id)}
       >
         <motion.button

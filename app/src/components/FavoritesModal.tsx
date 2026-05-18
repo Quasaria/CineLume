@@ -6,6 +6,7 @@ import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import type { FavoriteMovie } from '@/types/movie';
 
 function parseLocalDate(s: string | null | undefined): Date | null {
@@ -71,6 +72,7 @@ export function FavoritesModal() {
   const { isFavOpen, closeFavorites, favorites, removeFav, openModal } = useAppStore();
   const groups = useMemo(() => groupFavorites(favorites), [favorites]);
   const fmtDate = (d?: string) => fmtDateLocalized(d);
+  useBodyScrollLock(isFavOpen);
 
   return (
     <AnimatePresence>
