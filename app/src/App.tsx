@@ -99,7 +99,7 @@ export default function App() {
             const matching = regionEntry.release_dates
               .filter((d) => acceptedTypes.includes(d.type))
               .map((d) => (d.release_date || '').split('T')[0])
-              .filter((day) => !!day)
+              .filter((day) => !!day && /^\d{4}-\d{2}-\d{2}$/.test(day))
               .sort();
             if (matching.length === 0) return null;
             const earliest = matching[0];
@@ -110,8 +110,10 @@ export default function App() {
             // mondiale wide 10 septembre).
             return { ...movie, release_date: earliest };
           } catch {
-            // Erreur reseau sur release_dates : on garde le film en best effort
-            return movie;
+            // Erreur reseau sur release_dates : on EXCLUT le film. Mieux d'avoir
+            // un film manquant ponctuellement que d'afficher un film a la mauvaise
+            // date faute de pouvoir verifier.
+            return null;
           }
         }),
       );

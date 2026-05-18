@@ -148,7 +148,7 @@ export interface MovieReleaseDates {
 
 export async function getMovieReleaseDates(id: number): Promise<MovieReleaseDates> {
   const apiKey = getApiKey();
-  const cacheKey = `rd_${id}`;
+  const cacheKey = `rd_v2_${id}`;
   const cached = localStorage.getItem(cacheKey);
 
   if (cached) {
