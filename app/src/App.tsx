@@ -45,11 +45,23 @@ export default function App() {
       const w = weeks[idx];
       const startStr = formatDateISO(w.start);
       const endStr = formatDateISO(w.end);
+
+      // Fenetre elargie de 3 jours de chaque cote pour la requete TMDB et la
+      // verification client. Catche les films dont la sortie FR officielle est
+      // juste avant/apres la semaine cinema demandee (ex : sortie le mardi 12
+      // alors que la semaine cinema commence mercredi 13).
+      const startBound = new Date(w.start);
+      startBound.setDate(startBound.getDate() - 3);
+      const endBound = new Date(w.end);
+      endBound.setDate(endBound.getDate() + 3);
+      const startWide = formatDateISO(startBound);
+      const endWide = formatDateISO(endBound);
+
       const res = await discoverMovies({
         region: selRegion,
         genre: selGenre,
-        startDate: startStr,
-        endDate: endStr,
+        startDate: startWide,
+        endDate: endWide,
         page: pageParam as number,
         releaseMode: selReleaseMode,
         provider: selProvider,
@@ -88,7 +100,7 @@ export default function App() {
             const hit = regionEntry.release_dates.some((d) => {
               if (!acceptedTypes.includes(d.type)) return false;
               const day = (d.release_date || '').split('T')[0];
-              return day >= startStr && day <= endStr;
+              return day >= startWide && day <= endWide;
             });
             return hit ? movie : null;
           } catch {
