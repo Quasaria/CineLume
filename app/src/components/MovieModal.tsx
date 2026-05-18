@@ -124,12 +124,12 @@ export function MovieModal() {
               type="button"
               onClick={closeModal}
               aria-label={t('modal.close')}
-              className="absolute top-4 right-4 z-50 p-2.5 rounded-full bg-black/40 hover:bg-white/20 backdrop-blur-md transition-colors"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30"
             >
               <X className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
 
-            <div className="w-10 h-1 rounded-full bg-white/20 absolute top-3 left-1/2 -translate-x-1/2 sm:hidden z-50" />
+            <div className="w-12 h-1.5 rounded-full bg-white/40 absolute top-2.5 left-1/2 -translate-x-1/2 sm:hidden z-50" aria-hidden="true" />
 
             <div className="overflow-y-auto flex-1 custom-scroll">
               {isLoading ? (
@@ -216,11 +216,13 @@ export function MovieModal() {
                               vote_average: movie.vote_average,
                             })
                           }
-                          className={`p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors shrink-0 mt-1 ${
-                            isFav(movie.id) ? 'text-red-500' : 'text-white/70'
+                          aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
+                          aria-pressed={isFav(movie.id)}
+                          className={`min-w-11 min-h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors shrink-0 mt-1 ${
+                            isFav(movie.id) ? 'text-red-500' : 'text-white/80'
                           }`}
                         >
-                          <Heart className={`w-5 h-5 ${isFav(movie.id) ? 'fill-current' : ''}`} />
+                          <Heart className={`w-5 h-5 ${isFav(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
                         </button>
                       </div>
 
