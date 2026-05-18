@@ -13,8 +13,7 @@ export function SettingsModal() {
 
   useEffect(() => {
     if (isSettingsOpen) {
-      const saved = localStorage.getItem('tmdb_key');
-      setApiKey(saved && saved !== '81f09aab8379105c078d67759877bc0b' ? saved : '');
+      setApiKey(localStorage.getItem('tmdb_key') || '');
     }
   }, [isSettingsOpen]);
 

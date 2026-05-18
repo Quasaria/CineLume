@@ -1,6 +1,6 @@
 import type { Movie, MovieDetails, Genre } from '@/types/movie';
 
-const DEFAULT_KEY = '81f09aab8379105c078d67759877bc0b';
+const ENV_KEY = import.meta.env.VITE_TMDB_KEY as string | undefined;
 const BASE = 'https://api.themoviedb.org/3';
 export const IMG = 'https://image.tmdb.org/t/p/w500';
 export const BACK = 'https://image.tmdb.org/t/p/w1280';
@@ -8,7 +8,7 @@ export const PROF = 'https://image.tmdb.org/t/p/w185';
 export const TMDB_SITE = 'https://www.themoviedb.org/movie';
 
 function getApiKey(): string {
-  return localStorage.getItem('tmdb_key') || DEFAULT_KEY;
+  return localStorage.getItem('tmdb_key') || ENV_KEY || '';
 }
 
 export interface DiscoverParams {
