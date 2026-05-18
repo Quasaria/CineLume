@@ -317,7 +317,61 @@ html.light .border-white\/10.border-t-violet-500 {
   border-top-color: #7c3aed;
 }
 
-/* Hero backdrop : carrement masque en light mode (pas de hack qui marche) */
+/* Hero stage : slideshow de backdrops, integration theme */
+.hero-stage {
+  z-index: 0;
+}
+
+.hero-stage-img {
+  filter: blur(2px) saturate(1.05);
+  transform-origin: center;
+}
+
+.hero-stage-overlay {
+  background:
+    radial-gradient(ellipse 70% 60% at 20% 30%, transparent 0%, rgba(5, 5, 8, 0.5) 100%),
+    linear-gradient(to bottom, transparent 0%, rgba(5, 5, 8, 0.55) 50%, var(--bg) 92%);
+}
+
+.hero-stage-sides {
+  background:
+    linear-gradient(to right, var(--bg) 0%, transparent 12%, transparent 88%, var(--bg) 100%);
+}
+
+.hero-stage-grain {
+  background-image:
+    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 3px);
+}
+
+html.light .hero-stage-img {
+  filter: blur(3px) saturate(0.9) brightness(1.05);
+}
+
+html.light .hero-stage-overlay {
+  background:
+    radial-gradient(ellipse 70% 60% at 20% 30%, transparent 0%, rgba(250, 250, 250, 0.45) 100%),
+    linear-gradient(to bottom, rgba(250, 250, 250, 0.1) 0%, rgba(250, 250, 250, 0.7) 65%, var(--bg) 95%);
+}
+
+html.light .hero-stage-grain {
+  background-image:
+    repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,0.025) 0, rgba(0,0,0,0.025) 1px, transparent 1px, transparent 3px);
+}
+
+html.light .hero-stage h1,
+html.light .hero-stage p {
+  /* shadows seront override via le drop-shadow Tailwind */
+}
+
+/* override Hero text shadows pour light mode */
+html.light .hero-stage + .relative h1 {
+  filter: drop-shadow(0 1px 6px rgba(255, 255, 255, 0.6));
+}
+html.light .hero-stage + .relative p {
+  color: rgba(10, 10, 15, 0.78);
+}
+
+/* Hero backdrop legacy (gardes pour compat si jamais) : carrement masque en light mode */
 html.light .hero-backdrop {
   display: none;
 }

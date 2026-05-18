@@ -90,7 +90,11 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const heroBackdrop = movies[0]?.backdrop_path ? `${BACK}${movies[0].backdrop_path}` : undefined;
+  const heroBackdrops = movies
+    .slice(0, 6)
+    .map((m) => m.backdrop_path)
+    .filter((p): p is string => !!p)
+    .map((p) => `${BACK}${p}`);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -100,7 +104,7 @@ export default function App() {
         <Navbar />
 
         <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-20">
-          <Hero backdropUrl={heroBackdrop} />
+          <Hero backdrops={heroBackdrops} />
 
           <DateNavigator />
 
