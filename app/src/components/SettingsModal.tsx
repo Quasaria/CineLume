@@ -1,16 +1,26 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Trash2 } from 'lucide-react';
+import { Save, Trash2, Globe } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import type { SupportedLang } from '@/i18n';
+
+const LANG_LABEL: Record<SupportedLang, string> = {
+  fr: 'Français',
+  en: 'English',
+};
 
 export function SettingsModal() {
+  const { t, i18n } = useTranslation();
   const { isSettingsOpen, closeSettings, isDark, toggleTheme } = useAppStore();
   const [apiKey, setApiKey] = useState('');
   const queryClient = useQueryClient();
+
+  const currentLang = (i18n.language || 'fr').split('-')[0] as SupportedLang;
 
   useEffect(() => {
     if (isSettingsOpen) {
@@ -22,10 +32,10 @@ export function SettingsModal() {
     const key = apiKey.trim();
     if (key) {
       localStorage.setItem('tmdb_key', key);
-      toast.success('Clé API enregistrée');
+      toast.success(t('settings.keySaved'));
     } else {
       localStorage.removeItem('tmdb_key');
-      toast.success('Clé API réinitialisée');
+      toast.success(t('settings.keyReset'));
     }
     queryClient.invalidateQueries();
     closeSettings();
@@ -34,14 +44,19 @@ export function SettingsModal() {
   function clearCache() {
     let removed = 0;
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('md_') || key.startsWith('rd_') || key === 'genres_cache' || key === 'cinelume_cache') {
+      if (key.startsWith('md_') || key.startsWith('rd_') || key.startsWith('genres_cache') || key === 'cinelume_cache') {
         localStorage.removeItem(key);
         removed++;
       }
     });
     queryClient.invalidateQueries();
-    toast.success(removed > 0 ? `Cache vidé (${removed} entrées)` : 'Cache déjà vide');
+    toast.success(removed > 0 ? t('settings.cacheCleared', { count: removed }) : t('settings.cacheEmpty'));
     closeSettings();
+  }
+
+  function changeLang(lng: SupportedLang) {
+    i18n.changeLanguage(lng);
+    queryClient.invalidateQueries();
   }
 
   return (
@@ -67,59 +82,88 @@ export function SettingsModal() {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="relative bg-[#0f0f15] rounded-3xl p-6 max-w-md w-full border border-white/10 shadow-2xl"
           >
-            <h3 className="font-bold text-xl mb-6">Paramètres</h3>
+            <h3 className="font-bold text-xl mb-6">{t('settings.title')}</h3>
 
             <div className="space-y-5">
               <div>
-                <label className="text-xs text-white/40 uppercase tracking-wider font-bold mb-2 block">
-                  Clé API TMDB
+                <label htmlFor="settings-apikey" className="text-xs text-white/50 uppercase tracking-wider font-bold mb-2 block">
+                  {t('settings.apiKey')}
                 </label>
                 <Input
+                  id="settings-apikey"
                   type="password"
                   autoComplete="off"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Clé personnalisée..."
+                  placeholder={t('settings.apiKeyPlaceholder')}
                   className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-sm focus:border-violet-500/50 focus:ring-0"
                 />
               </div>
 
               <div className="flex items-center justify-between py-3 border-t border-white/5">
-                <div>
-                  <p className="text-sm font-medium">{isDark ? 'Mode sombre' : 'Mode clair'}</p>
-                  <p className="text-xs text-white/30">Basculer le thème</p>
+                <div className="flex items-center gap-2.5">
+                  <Globe className="w-4 h-4 text-white/60" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm font-medium">{t('settings.language')}</p>
+                    <p className="text-xs text-white/50">{t('settings.languageDesc')}</p>
+                  </div>
                 </div>
-                <Switch checked={!isDark} onCheckedChange={toggleTheme} />
+                <div className="flex gap-1 bg-white/5 rounded-lg p-1 border border-white/10" role="group" aria-label={t('settings.language')}>
+                  {(['fr', 'en'] as const).map((lng) => (
+                    <button
+                      key={lng}
+                      type="button"
+                      onClick={() => changeLang(lng)}
+                      aria-pressed={currentLang === lng}
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                        currentLang === lng ? 'bg-white text-black' : 'text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {LANG_LABEL[lng]}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center justify-between py-3 border-t border-white/5">
                 <div>
-                  <p className="text-sm font-medium">Effacer le cache</p>
-                  <p className="text-xs text-white/30">Supprimer les données locales</p>
+                  <p className="text-sm font-medium">{isDark ? t('settings.themeDark') : t('settings.themeLight')}</p>
+                  <p className="text-xs text-white/50">{t('settings.themeToggleDesc')}</p>
+                </div>
+                <Switch checked={!isDark} onCheckedChange={toggleTheme} aria-label={t('settings.themeToggleDesc')} />
+              </div>
+
+              <div className="flex items-center justify-between py-3 border-t border-white/5">
+                <div>
+                  <p className="text-sm font-medium">{t('settings.clearCache')}</p>
+                  <p className="text-xs text-white/50">{t('settings.clearCacheDesc')}</p>
                 </div>
                 <button
+                  type="button"
                   onClick={clearCache}
                   className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors"
                 >
-                  <Trash2 className="w-3 h-3 inline mr-1" />
-                  Effacer
+                  <Trash2 className="w-3 h-3 inline mr-1" aria-hidden="true" />
+                  {t('common.clear')}
                 </button>
               </div>
             </div>
 
             <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-white/5">
               <button
+                type="button"
                 onClick={closeSettings}
-                className="px-4 py-2 rounded-xl text-white/50 hover:text-white text-sm font-medium transition-colors"
+                className="px-4 py-2 rounded-xl text-white/60 hover:text-white text-sm font-medium transition-colors"
               >
-                Annuler
+                {t('common.cancel')}
               </button>
               <button
+                type="button"
                 onClick={save}
                 className="px-4 py-2 rounded-xl btn-primary text-white text-sm font-semibold bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 flex items-center gap-2"
               >
-                <Save className="w-4 h-4" />
-                Sauvegarder
+                <Save className="w-4 h-4" aria-hidden="true" />
+                {t('common.save')}
               </button>
             </div>
           </motion.div>

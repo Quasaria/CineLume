@@ -1,12 +1,11 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { X, Heart, Trash2, Calendar, Sparkles, Archive } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG } from '@/lib/tmdb';
-import { fmtDateFR } from '@/lib/utils';
+import { fmtDateLocalized } from '@/lib/utils';
 import type { FavoriteMovie } from '@/types/movie';
-
-const fmtDate = (d?: string) => fmtDateFR(d);
 
 function parseLocalDate(s: string | null | undefined): Date | null {
   if (!s) return null;
@@ -18,7 +17,7 @@ function parseLocalDate(s: string | null | undefined): Date | null {
 
 interface Group {
   key: 'week' | 'upcoming' | 'released' | 'undated';
-  label: string;
+  labelKey: string;
   icon: typeof Calendar;
   accent: string;
   items: FavoriteMovie[];
@@ -58,16 +57,20 @@ function groupFavorites(favorites: FavoriteMovie[]): Group[] {
   released.sort(byDateDesc);
 
   return [
-    { key: 'week', label: 'Cette semaine', icon: Calendar, accent: 'text-violet-300', items: week },
-    { key: 'upcoming', label: 'À venir', icon: Sparkles, accent: 'text-cyan-300', items: upcoming },
-    { key: 'released', label: 'Sortis', icon: Archive, accent: 'text-white/60', items: released },
-    { key: 'undated', label: 'Date inconnue', icon: Archive, accent: 'text-white/50', items: undated },
+    { key: 'week' as const, labelKey: 'favorites.weekSection', icon: Calendar, accent: 'text-violet-300', items: week },
+    { key: 'upcoming' as const, labelKey: 'favorites.upcomingSection', icon: Sparkles, accent: 'text-cyan-300', items: upcoming },
+    { key: 'released' as const, labelKey: 'favorites.releasedSection', icon: Archive, accent: 'text-white/60', items: released },
+    { key: 'undated' as const, labelKey: 'favorites.undatedSection', icon: Archive, accent: 'text-white/50', items: undated },
   ].filter((g) => g.items.length > 0);
 }
 
 export function FavoritesModal() {
+  const { t, i18n } = useTranslation();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _lang = i18n.language;
   const { isFavOpen, closeFavorites, favorites, removeFav, openModal } = useAppStore();
   const groups = useMemo(() => groupFavorites(favorites), [favorites]);
+  const fmtDate = (d?: string) => fmtDateLocalized(d);
 
   return (
     <AnimatePresence>
@@ -95,7 +98,7 @@ export function FavoritesModal() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-xl flex items-center gap-2">
                 <Heart className="w-5 h-5 text-red-500 fill-red-500" aria-hidden="true" />
-                Mes favoris
+                {t('favorites.title')}
                 {favorites.length > 0 && (
                   <span className="text-white/60 text-sm font-medium">({favorites.length})</span>
                 )}
@@ -103,7 +106,7 @@ export function FavoritesModal() {
               <button
                 type="button"
                 onClick={closeFavorites}
-                aria-label="Fermer la liste des favoris"
+                aria-label={t('favorites.close')}
                 className="p-2 rounded-xl hover:bg-white/5 transition-colors"
               >
                 <X className="w-5 h-5 text-white/70" aria-hidden="true" />
@@ -115,8 +118,8 @@ export function FavoritesModal() {
                 <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/5 flex items-center justify-center">
                   <Heart className="w-7 h-7 text-white/30" aria-hidden="true" />
                 </div>
-                <p className="text-white/60 text-sm">Aucun favori pour l'instant</p>
-                <p className="text-white/40 text-xs mt-1">Clique sur le cœur d'un film pour l'ajouter</p>
+                <p className="text-white/60 text-sm">{t('favorites.empty')}</p>
+                <p className="text-white/40 text-xs mt-1">{t('favorites.emptyHint')}</p>
               </div>
             ) : (
               <div className="overflow-y-auto custom-scroll flex-1 -mx-2 px-2 space-y-5">
@@ -126,7 +129,7 @@ export function FavoritesModal() {
                     <section key={group.key}>
                       <h4 className={`flex items-center gap-1.5 text-xs uppercase tracking-wider font-bold mb-2 ${group.accent}`}>
                         <Icon className="w-3.5 h-3.5" aria-hidden="true" />
-                        {group.label}
+                        {t(group.labelKey)}
                         <span className="text-white/40 normal-case tracking-normal font-medium">({group.items.length})</span>
                       </h4>
                       <div className="space-y-1">
@@ -159,7 +162,7 @@ export function FavoritesModal() {
                             </div>
                             <button
                               type="button"
-                              aria-label={`Retirer ${f.title} des favoris`}
+                              aria-label={t('favorites.remove', { title: f.title })}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 removeFav(f.id);

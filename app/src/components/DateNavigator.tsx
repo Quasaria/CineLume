@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
-const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-
 export function DateNavigator() {
+  const { t } = useTranslation();
+  const MONTHS = t('dateNav.months', { returnObjects: true }) as string[];
   const { selYear, selMonth, selWeek, selRegion, setDate, jumpToToday } = useAppStore();
   const now = new Date();
   const MIN_YEAR = now.getFullYear() - 1;
@@ -24,7 +25,7 @@ export function DateNavigator() {
     <div className="flex items-center gap-3 mb-6 overflow-x-auto no-scrollbar pb-1">
       <motion.button
         type="button"
-        aria-label="Année précédente"
+        aria-label={t('dateNav.prevYear')}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => selYear > MIN_YEAR && setDate(selYear - 1, selMonth, 1)}
@@ -39,7 +40,7 @@ export function DateNavigator() {
 
       <motion.button
         type="button"
-        aria-label="Année suivante"
+        aria-label={t('dateNav.nextYear')}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => selYear < MAX_YEAR && setDate(selYear + 1, selMonth, 1)}
@@ -96,8 +97,8 @@ export function DateNavigator() {
         onClick={jumpToToday}
         className="ml-auto shrink-0 px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-300 text-xs font-semibold hover:bg-violet-500/20 transition-colors border border-violet-500/20 flex items-center gap-1.5"
       >
-        <Calendar className="w-3 h-3" />
-        Aujourd'hui
+        <Calendar className="w-3 h-3" aria-hidden="true" />
+        {t('common.today')}
       </motion.button>
     </div>
   );

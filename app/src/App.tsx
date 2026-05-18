@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/appStore';
 import { discoverMovies, searchMovies, searchPersons, BACK } from '@/lib/tmdb';
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
@@ -26,6 +27,8 @@ interface DiscoverResponse {
 }
 
 export default function App() {
+  const { i18n } = useTranslation();
+  const lang = i18n.language;
   const {
     selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
     selectedPerson, searchQuery,
@@ -35,7 +38,7 @@ export default function App() {
   useModalUrlSync();
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
-    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null],
+    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, lang],
     queryFn: async ({ pageParam = 1 }) => {
       const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
@@ -61,7 +64,7 @@ export default function App() {
   });
 
   const searchQueryHook = useInfiniteQuery<DiscoverResponse, Error>({
-    queryKey: ['search', debouncedSearch],
+    queryKey: ['search', debouncedSearch, lang],
     queryFn: async ({ pageParam = 1 }) => {
       const res = await searchMovies(debouncedSearch, pageParam as number);
       return res;
@@ -75,7 +78,7 @@ export default function App() {
   });
 
   const personsQuery = useQuery({
-    queryKey: ['searchPersons', debouncedSearch],
+    queryKey: ['searchPersons', debouncedSearch, lang],
     queryFn: () => searchPersons(debouncedSearch),
     enabled: !!debouncedSearch && !selectedPerson && debouncedSearch.length >= 2,
   });

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { toast } from 'sonner';
 import type { FavoriteMovie, ViewMode } from '@/types/movie';
 import { getCurrentCinemaContext, getCinemaWeeksOfMonth } from '@/lib/cinema-week';
+import i18n from '@/i18n';
 
 export type ReleaseMode = 'theater' | 'platform' | 'all';
 
@@ -174,7 +175,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       // ignore
     }
     set({ favorites: favs });
-    toast.success(wasFav ? `${movie.title} retiré des favoris` : `${movie.title} ajouté aux favoris`);
+    toast.success(i18n.t(wasFav ? 'favorites.removed' : 'favorites.added', { title: movie.title }));
   },
 
   removeFav: (id) => {

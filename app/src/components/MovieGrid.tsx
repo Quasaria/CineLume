@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { LayoutGrid, List, Filter, SlidersHorizontal, AlertCircle, RefreshCw, X, User } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { PROVIDERS } from '@/lib/tmdb';
@@ -6,12 +7,6 @@ import { MovieCard } from './MovieCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import type { Movie } from '@/types/movie';
-
-const MODE_LABEL: Record<string, string> = {
-  theater: 'Salle',
-  platform: 'Plateforme',
-  all: 'Tout',
-};
 
 interface MovieGridProps {
   movies: Movie[];
@@ -26,6 +21,7 @@ interface MovieGridProps {
 }
 
 export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults, isError, errorMessage, onRetry }: MovieGridProps) {
+  const { t } = useTranslation();
   const { viewMode, setViewMode, openFilters, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson, setSelectedPerson } = useAppStore();
   const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'all' || !!selProvider || !!selectedPerson;
@@ -41,15 +37,15 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
           <AlertCircle className="w-10 h-10 text-red-400" />
         </div>
-        <p className="text-white/80 text-lg font-medium mb-1">Erreur de chargement</p>
-        <p className="text-white/40 text-sm mb-5">{errorMessage || 'Impossible de joindre TMDB. Vérifie ta connexion ou ta clé API.'}</p>
+        <p className="text-white/80 text-lg font-medium mb-1">{t('grid.errorTitle')}</p>
+        <p className="text-white/60 text-sm mb-5">{errorMessage || t('grid.errorDesc')}</p>
         {onRetry && (
           <Button
             onClick={onRetry}
             className="btn-primary px-6 py-2.5 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 inline-flex items-center gap-2"
           >
-            <RefreshCw className="w-4 h-4" />
-            Réessayer
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
+            {t('common.retry')}
           </Button>
         )}
       </motion.div>
@@ -76,8 +72,8 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center">
           <SlidersHorizontal className="w-10 h-10 text-white/40" />
         </div>
-        <p className="text-white/70 text-lg font-medium mb-1">Aucun film trouvé</p>
-        <p className="text-white/50 text-sm">Essayez d'autres dates ou filtres</p>
+        <p className="text-white/70 text-lg font-medium mb-1">{t('grid.empty')}</p>
+        <p className="text-white/50 text-sm">{t('grid.emptyHint')}</p>
       </motion.div>
     );
   }
@@ -88,11 +84,11 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
         <div className="flex items-center gap-2 mb-4">
           <span className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-violet-500/15 border border-violet-500/40 text-violet-200 text-sm font-medium">
             <User className="w-3.5 h-3.5" aria-hidden="true" />
-            Filmographie de <span className="font-bold">{selectedPerson.name}</span>
+            {t('grid.filmographyOf')} <span className="font-bold">{selectedPerson.name}</span>
             <button
               type="button"
               onClick={() => setSelectedPerson(null)}
-              aria-label="Retirer le filtre par personne"
+              aria-label={t('grid.removePersonFilter')}
               className="ml-1 p-0.5 rounded-full hover:bg-violet-500/30 transition-colors"
             >
               <X className="w-3.5 h-3.5" aria-hidden="true" />
@@ -104,7 +100,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <span className="text-sm text-white/60 font-medium">
-            {totalResults} film{totalResults > 1 ? 's' : ''}
+            {t('grid.movies', { count: totalResults })}
           </span>
           {hasActiveFilter && (
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -115,7 +111,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
               )}
               {selReleaseMode !== 'all' && (
                 <span className="px-2 py-0.5 rounded-md bg-fuchsia-500/10 text-fuchsia-300 text-xs border border-fuchsia-500/20">
-                  {MODE_LABEL[selReleaseMode]}
+                  {t(`modes.${selReleaseMode}`)}
                 </span>
               )}
               {providerName && (
@@ -139,18 +135,18 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
             onClick={openFilters}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium"
           >
-            <Filter className="w-4 h-4 text-white/60" />
-            <span className="hidden sm:inline">Filtres</span>
+            <Filter className="w-4 h-4 text-white/60" aria-hidden="true" />
+            <span className="hidden sm:inline">{t('grid.filters')}</span>
             {hasActiveFilter && (
               <span className="w-2 h-2 rounded-full bg-violet-500" />
             )}
           </Button>
 
-          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10" role="group" aria-label="Mode d'affichage">
+          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10" role="group" aria-label={t('grid.viewModeGroup')}>
             <button
               type="button"
               onClick={() => setViewMode('grid')}
-              aria-label="Affichage en grille"
+              aria-label={t('grid.viewGrid')}
               aria-pressed={viewMode === 'grid'}
               className={`p-1.5 rounded-lg transition-all ${
                 viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'
@@ -161,7 +157,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              aria-label="Affichage en liste"
+              aria-label={t('grid.viewList')}
               aria-pressed={viewMode === 'list'}
               className={`p-1.5 rounded-lg transition-all ${
                 viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'
@@ -201,7 +197,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
             onClick={onLoadMore}
             className="btn-primary px-8 py-3 rounded-2xl text-white font-semibold text-sm shadow-lg shadow-violet-500/25 bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500"
           >
-            Charger plus
+            {t('grid.loadMore')}
           </Button>
         </motion.div>
       )}

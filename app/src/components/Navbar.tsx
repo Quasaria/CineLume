@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Search, Heart, Sun, Moon, Settings } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ function LogoMark({ className = '' }: { className?: string }) {
 }
 
 export function Navbar() {
+  const { t } = useTranslation();
   const { isDark, toggleTheme, openFavorites, openSettings, favorites, searchQuery, setSearchQuery } = useAppStore();
   const [scrolled, setScrolled] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
@@ -40,7 +42,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <button
           type="button"
-          aria-label="Retour à l'accueil — CineLume"
+          aria-label={t('nav.home')}
           className="flex items-center gap-3 cursor-pointer group bg-transparent border-0 p-0"
           onClick={() => {
             const store = useAppStore.getState();
@@ -69,11 +71,11 @@ export function Navbar() {
         <div className="flex items-center gap-1 sm:gap-2">
           <div className="relative hidden sm:block">
             <Search className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
-            <label className="sr-only" htmlFor="navbar-search">Rechercher un film</label>
+            <label className="sr-only" htmlFor="navbar-search">{t('nav.search')}</label>
             <Input
               id="navbar-search"
               type="search"
-              placeholder="Rechercher..."
+              placeholder={t('nav.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-48 lg:w-64 bg-white/5 border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0 focus:w-56 lg:focus:w-72 transition-all duration-300"
@@ -84,7 +86,7 @@ export function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setSearchVisible(!searchVisible)}
-            aria-label="Ouvrir la recherche"
+            aria-label={t('nav.openSearch')}
             aria-expanded={searchVisible}
             className="sm:hidden p-2.5 rounded-xl hover:bg-white/5 transition-colors"
           >
@@ -95,7 +97,7 @@ export function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={openFavorites}
-            aria-label={`Mes favoris${favCount > 0 ? ` (${favCount})` : ''}`}
+            aria-label={favCount > 0 ? t('nav.favoritesAria', { count: favCount }) : t('nav.favorites')}
             className="p-2.5 rounded-xl hover:bg-white/5 transition-colors relative"
           >
             <Heart className="w-5 h-5 text-white/70" aria-hidden="true" />
@@ -110,7 +112,7 @@ export function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleTheme}
-            aria-label={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
+            aria-label={isDark ? t('nav.themeLight') : t('nav.themeDark')}
             className="p-2.5 rounded-xl hover:bg-white/5 transition-colors"
           >
             {isDark ? (
@@ -124,7 +126,7 @@ export function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={openSettings}
-            aria-label="Paramètres"
+            aria-label={t('nav.settings')}
             className="p-2.5 rounded-xl hover:bg-white/5 transition-colors"
           >
             <Settings className="w-5 h-5 text-white/70" aria-hidden="true" />
@@ -141,11 +143,11 @@ export function Navbar() {
         >
           <div className="relative">
             <Search className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
-            <label className="sr-only" htmlFor="navbar-search-mobile">Rechercher un film</label>
+            <label className="sr-only" htmlFor="navbar-search-mobile">{t('nav.search')}</label>
             <Input
               id="navbar-search-mobile"
               type="search"
-              placeholder="Rechercher un film..."
+              placeholder={t('nav.searchMoviePlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white/5 border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0"
