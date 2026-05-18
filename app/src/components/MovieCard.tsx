@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Heart, Star } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG } from '@/lib/tmdb';
+import { fmtDateFR } from '@/lib/utils';
 import type { Movie } from '@/types/movie';
 
 interface MovieCardProps {
@@ -10,10 +11,7 @@ interface MovieCardProps {
   viewMode: 'grid' | 'list';
 }
 
-function fmtDate(d?: string) {
-  if (!d) return 'Date inconnue';
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-}
+const fmtDate = (d?: string) => fmtDateFR(d);
 
 export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
   const { isFav, toggleFav, openModal } = useAppStore();
@@ -51,6 +49,9 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
           </div>
         </div>
         <button
+          type="button"
+          aria-label={fav ? `Retirer ${movie.title} des favoris` : `Ajouter ${movie.title} aux favoris`}
+          aria-pressed={fav}
           onClick={(e) => {
             e.stopPropagation();
             toggleFav({
@@ -62,10 +63,10 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
             });
           }}
           className={`p-2 rounded-full hover:bg-white/10 transition-all self-center shrink-0 ${
-            fav ? 'text-red-500' : 'text-white/30'
+            fav ? 'text-red-500' : 'text-white/50'
           }`}
         >
-          <Heart className={`w-4 h-4 ${fav ? 'fill-current' : ''}`} />
+          <Heart className={`w-4 h-4 ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
       </motion.div>
     );
@@ -84,6 +85,9 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
         onClick={() => openModal(movie.id)}
       >
         <motion.button
+          type="button"
+          aria-label={fav ? `Retirer ${movie.title} des favoris` : `Ajouter ${movie.title} aux favoris`}
+          aria-pressed={fav}
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.85 }}
           onClick={(e) => {
@@ -96,11 +100,11 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
               vote_average: movie.vote_average,
             });
           }}
-          className={`absolute top-2.5 left-2.5 z-20 p-1.5 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-all ${
-            fav ? 'text-red-500' : 'text-white/70'
+          className={`absolute top-2.5 left-2.5 z-20 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-all ${
+            fav ? 'text-red-500' : 'text-white/80'
           }`}
         >
-          <Heart className={`w-3.5 h-3.5 ${fav ? 'fill-current' : ''}`} />
+          <Heart className={`w-3.5 h-3.5 ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
         </motion.button>
 
         {movie.vote_average > 0 && (

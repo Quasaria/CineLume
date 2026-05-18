@@ -26,8 +26,12 @@ export function SettingsModal() {
   }
 
   function clearCache() {
-    localStorage.removeItem('cinelume_cache');
-    localStorage.removeItem('genres_cache');
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('md_') || key.startsWith('rd_') || key === 'genres_cache' || key === 'cinelume_cache') {
+        localStorage.removeItem(key);
+      }
+    });
+    queryClient.invalidateQueries();
     closeSettings();
   }
 
@@ -62,7 +66,8 @@ export function SettingsModal() {
                   Clé API TMDB
                 </label>
                 <Input
-                  type="text"
+                  type="password"
+                  autoComplete="off"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="Clé personnalisée..."

@@ -88,8 +88,12 @@ export async function getMovieDetails(id: number): Promise<MovieDetails> {
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de chargement des détails');
   const data = await res.json();
-  
-  localStorage.setItem(cacheKey, JSON.stringify({ data, exp: Date.now() + 1800000 }));
+
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ data, exp: Date.now() + 1800000 }));
+  } catch {
+    // localStorage full ou indisponible : on ignore, ce n'est qu'un cache
+  }
   return data;
 }
 
@@ -109,7 +113,11 @@ export async function getGenres(): Promise<Genre[]> {
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de chargement des genres');
   const data = await res.json();
-  
-  localStorage.setItem(cacheKey, JSON.stringify({ data: data.genres, exp: Date.now() + 86400000 }));
+
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ data: data.genres, exp: Date.now() + 86400000 }));
+  } catch {
+    // ignore
+  }
   return data.genres;
 }

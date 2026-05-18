@@ -64,7 +64,22 @@ if (!localStorage.getItem('cinelume_migration_v3')) {
   localStorage.setItem('cinelume_migration_v3', '1');
 }
 
-const savedReleaseMode = (localStorage.getItem('cinelume_releasemode') as ReleaseMode) || 'theater';
+const RELEASE_MODES_VALID: readonly ReleaseMode[] = ['theater', 'platform', 'all'] as const;
+const rawMode = localStorage.getItem('cinelume_releasemode');
+const savedReleaseMode: ReleaseMode = RELEASE_MODES_VALID.includes(rawMode as ReleaseMode)
+  ? (rawMode as ReleaseMode)
+  : 'theater';
+
+function safeParseFavs(): FavoriteMovie[] {
+  try {
+    const raw = localStorage.getItem('cinelume_favs');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export const useAppStore = create<AppState>((set, get) => ({
   isDark,
@@ -77,7 +92,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   selGenre: localStorage.getItem('cinelume_genre') || '',
   selReleaseMode: savedReleaseMode,
   selProvider: localStorage.getItem('cinelume_provider') || '',
-  favorites: JSON.parse(localStorage.getItem('cinelume_favs') || '[]'),
+  favorites: safeParseFavs(),
   currentModalMovieId: null,
   isFilterOpen: false,
   isFavOpen: false,
@@ -97,10 +112,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setViewMode: (mode) => set({ viewMode: mode }),
-  setSearchQuery: (q) => {
-    const ctx = getCurrentCinemaContext(get().selRegion);
-    set({ searchQuery: q, selYear: ctx.year, selMonth: ctx.month, selWeek: ctx.week });
-  },
+  setSearchQuery: (q) => set({ searchQuery: q }),
 
   setDate: (year, month, week) => {
     set({ selYear: year, selMonth: month, selWeek: week });

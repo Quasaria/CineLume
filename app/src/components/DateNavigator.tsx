@@ -23,25 +23,29 @@ export function DateNavigator() {
   return (
     <div className="flex items-center gap-3 mb-6 overflow-x-auto no-scrollbar pb-1">
       <motion.button
+        type="button"
+        aria-label="Année précédente"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => selYear > MIN_YEAR && setDate(selYear - 1, selMonth, 1)}
         className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors shrink-0"
       >
-        <ChevronLeft className="w-4 h-4 text-white/60" />
+        <ChevronLeft className="w-4 h-4 text-white/70" aria-hidden="true" />
       </motion.button>
 
-      <span className="font-bold text-lg tabular-nums w-12 text-center shrink-0">
+      <span className="font-bold text-lg tabular-nums w-12 text-center shrink-0" aria-live="polite">
         {selYear}
       </span>
 
       <motion.button
+        type="button"
+        aria-label="Année suivante"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => selYear < MAX_YEAR && setDate(selYear + 1, selMonth, 1)}
         className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors shrink-0"
       >
-        <ChevronRight className="w-4 h-4 text-white/60" />
+        <ChevronRight className="w-4 h-4 text-white/70" aria-hidden="true" />
       </motion.button>
 
       <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent mx-2 shrink-0" />

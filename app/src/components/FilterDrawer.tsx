@@ -72,7 +72,7 @@ export function FilterDrawer() {
   function reset() {
     setTempRegion('FR');
     setTempGenre('');
-    setTempMode('all');
+    setTempMode('theater');
     setTempProvider('');
   }
 
@@ -110,10 +110,12 @@ export function FilterDrawer() {
                 )}
               </div>
               <button
+                type="button"
                 onClick={closeFilters}
+                aria-label="Fermer les filtres"
                 className="p-2 rounded-xl hover:bg-white/5 transition-colors"
               >
-                <X className="w-5 h-5 text-white/60" />
+                <X className="w-5 h-5 text-white/70" aria-hidden="true" />
               </button>
             </div>
 

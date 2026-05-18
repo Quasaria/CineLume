@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { LayoutGrid, List, Filter, SlidersHorizontal } from 'lucide-react';
+import { LayoutGrid, List, Filter, SlidersHorizontal, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { PROVIDERS } from '@/lib/tmdb';
 import { MovieCard } from './MovieCard';
@@ -20,12 +20,41 @@ interface MovieGridProps {
   hasNextPage: boolean;
   onLoadMore: () => void;
   totalResults: number;
+  isError?: boolean;
+  errorMessage?: string;
+  onRetry?: () => void;
 }
 
-export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults }: MovieGridProps) {
+export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults, isError, errorMessage, onRetry }: MovieGridProps) {
   const { viewMode, setViewMode, openFilters, selRegion, selGenre, selReleaseMode, selProvider } = useAppStore();
   const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'all' || !!selProvider;
+
+  if (isError) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="py-20 text-center"
+        role="alert"
+      >
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+          <AlertCircle className="w-10 h-10 text-red-400" />
+        </div>
+        <p className="text-white/80 text-lg font-medium mb-1">Erreur de chargement</p>
+        <p className="text-white/40 text-sm mb-5">{errorMessage || 'Impossible de joindre TMDB. Vérifie ta connexion ou ta clé API.'}</p>
+        {onRetry && (
+          <Button
+            onClick={onRetry}
+            className="btn-primary px-6 py-2.5 rounded-xl text-white font-semibold text-sm bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 inline-flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Réessayer
+          </Button>
+        )}
+      </motion.div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -45,10 +74,10 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
         className="py-20 text-center"
       >
         <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center">
-          <SlidersHorizontal className="w-10 h-10 text-white/20" />
+          <SlidersHorizontal className="w-10 h-10 text-white/40" />
         </div>
-        <p className="text-white/40 text-lg font-medium mb-1">Aucun film trouvé</p>
-        <p className="text-white/20 text-sm">Essayez d'autres dates ou filtres</p>
+        <p className="text-white/70 text-lg font-medium mb-1">Aucun film trouvé</p>
+        <p className="text-white/50 text-sm">Essayez d'autres dates ou filtres</p>
       </motion.div>
     );
   }
@@ -57,7 +86,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
     <div>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-white/30 font-medium">
+          <span className="text-sm text-white/60 font-medium">
             {totalResults} film{totalResults > 1 ? 's' : ''}
           </span>
           {hasActiveFilter && (
@@ -100,22 +129,28 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
             )}
           </Button>
 
-          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
+          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10" role="group" aria-label="Mode d'affichage">
             <button
+              type="button"
               onClick={() => setViewMode('grid')}
+              aria-label="Affichage en grille"
+              aria-pressed={viewMode === 'grid'}
               className={`p-1.5 rounded-lg transition-all ${
-                viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'
+                viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'
               }`}
             >
-              <LayoutGrid className="w-4 h-4" />
+              <LayoutGrid className="w-4 h-4" aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={() => setViewMode('list')}
+              aria-label="Affichage en liste"
+              aria-pressed={viewMode === 'list'}
               className={`p-1.5 rounded-lg transition-all ${
-                viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white'
+                viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'
               }`}
             >
-              <List className="w-4 h-4" />
+              <List className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
