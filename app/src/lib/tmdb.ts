@@ -67,10 +67,21 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
   }
 
   const personQ = params.personId ? `&with_people=${params.personId}` : '';
-  // Quand on filtre par personne, on montre toute leur filmographie (pas de borne semaine)
-  const dateQ = params.personId
-    ? ''
-    : `&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}`;
+
+  // Strategie de filtrage :
+  // - release_date.gte/lte + region : la sortie dans LA region (FR) doit etre dans la semaine
+  // - primary_release_date.gte = date - 2 ans : exclut les re-sorties / anniversaires d'anciens films
+  // (skippe les deux quand on filtre par personne pour voir toute la filmographie)
+  let dateQ = '';
+  if (!params.personId) {
+    const start = new Date(params.startDate);
+    const cutoff = new Date(start);
+    cutoff.setFullYear(cutoff.getFullYear() - 2);
+    const cy = cutoff.getFullYear();
+    const cm = String(cutoff.getMonth() + 1).padStart(2, '0');
+    const cd = String(cutoff.getDate()).padStart(2, '0');
+    dateQ = `&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}&primary_release_date.gte=${cy}-${cm}-${cd}`;
+  }
   const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
   const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
 
