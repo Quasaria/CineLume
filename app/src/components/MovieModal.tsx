@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users } from 'lucide-react';
+import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
-import { getMovieDetails, IMG, BACK, PROF, TMDB_SITE } from '@/lib/tmdb';
+import { getMovieDetails, IMG, BACK, PROF, ORIG, TMDB_SITE } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,6 +22,20 @@ export function MovieModal() {
     return new Intl.NumberFormat(lang || 'fr', { style: 'currency', currency: 'USD', notation: 'compact' }).format(n);
   }
   const [touchY, setTouchY] = useState(0);
+  const [lightbox, setLightbox] = useState<string | null>(null);
+
+  // Si la lightbox est ouverte, Echap la ferme en priorite avant la modale.
+  useEffect(() => {
+    if (!lightbox) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setLightbox(null);
+      }
+    };
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
+  }, [lightbox]);
 
   const { data: details, isLoading } = useQuery({
     queryKey: ['movieDetails', currentModalMovieId, lang],
@@ -127,30 +141,48 @@ export function MovieModal() {
                 </div>
               ) : movie ? (
                 <>
-                  <div className="relative h-48 sm:h-72 w-full overflow-hidden">
+                  <div className="relative h-72 sm:h-[28rem] w-full overflow-hidden group">
                     {movie.backdrop_path ? (
-                      <img
-                        src={`${BACK}${movie.backdrop_path}`}
-                        alt={movie.title}
-                        className="w-full h-full object-cover opacity-50"
-                        loading="lazy"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setLightbox(`${ORIG}${movie.backdrop_path}`)}
+                        aria-label="Voir l'image en grand"
+                        className="block w-full h-full cursor-zoom-in"
+                      >
+                        <img
+                          src={`${BACK}${movie.backdrop_path}`}
+                          alt={movie.title}
+                          className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity"
+                          loading="lazy"
+                        />
+                        <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/50 backdrop-blur-md text-white text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />
+                          Agrandir
+                        </span>
+                      </button>
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-violet-900/20 to-cyan-900/20" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f15] via-[#0f0f15]/60 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#0f0f15]/80 to-transparent hidden sm:block" />
+                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0f0f15] via-[#0f0f15]/70 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#0f0f15]/40 to-transparent hidden sm:block pointer-events-none" />
                   </div>
 
-                  <div className="px-5 sm:px-10 pb-10 -mt-16 sm:-mt-24 flex flex-col sm:flex-row gap-6 sm:gap-8 relative">
-                    <div className="hidden sm:block w-44 lg:w-52 shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#18181f] self-start sticky top-6">
-                      <img
-                        src={`${IMG}${movie.poster_path}`}
-                        alt={movie.title}
-                        className="w-full h-auto"
-                        loading="lazy"
-                      />
-                    </div>
+                  <div className="px-5 sm:px-10 pb-10 -mt-24 sm:-mt-32 flex flex-col sm:flex-row gap-6 sm:gap-8 relative">
+                    {movie.poster_path && (
+                      <button
+                        type="button"
+                        onClick={() => setLightbox(`${ORIG}${movie.poster_path}`)}
+                        aria-label="Voir l'affiche en grand"
+                        className="hidden sm:block w-44 lg:w-52 shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#18181f] self-start sticky top-6 cursor-zoom-in group/poster"
+                      >
+                        <img
+                          src={`${IMG}${movie.poster_path}`}
+                          alt={movie.title}
+                          className="w-full h-auto group-hover/poster:scale-[1.02] transition-transform"
+                          loading="lazy"
+                        />
+                      </button>
+                    )}
 
                     <div className="flex-1 min-w-0 pt-2">
                       <div className="flex flex-wrap gap-2 mb-3 items-center">
@@ -342,6 +374,36 @@ export function MovieModal() {
               ) : null}
             </div>
           </motion.div>
+        </motion.div>
+      )}
+
+      {lightbox && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[90] bg-black/95 flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setLightbox(null)}
+        >
+          <motion.img
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.92, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            src={lightbox}
+            alt=""
+            className="max-w-[95vw] max-h-[95vh] object-contain rounded-xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            aria-label={t('common.close')}
+            className="absolute top-4 right-4 p-2.5 rounded-full bg-black/60 hover:bg-white/20 backdrop-blur-md transition-colors"
+          >
+            <X className="w-5 h-5 text-white" aria-hidden="true" />
+          </button>
         </motion.div>
       )}
     </AnimatePresence>
