@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, List, Filter, SlidersHorizontal, AlertCircle, RefreshCw, X, User } from 'lucide-react';
+import { LayoutGrid, List, SlidersHorizontal, AlertCircle, RefreshCw, X, User } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { PROVIDERS } from '@/lib/tmdb';
 import { MovieCard } from './MovieCard';
@@ -22,7 +22,7 @@ interface MovieGridProps {
 
 export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults, isError, errorMessage, onRetry }: MovieGridProps) {
   const { t } = useTranslation();
-  const { viewMode, setViewMode, openFilters, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson, setSelectedPerson } = useAppStore();
+  const { viewMode, setViewMode, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson, setSelectedPerson } = useAppStore();
   const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'all' || !!selProvider || !!selectedPerson;
 
@@ -129,19 +129,6 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={openFilters}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium"
-          >
-            <Filter className="w-4 h-4 text-white/60" aria-hidden="true" />
-            <span className="hidden sm:inline">{t('grid.filters')}</span>
-            {hasActiveFilter && (
-              <span className="w-2 h-2 rounded-full bg-violet-500" />
-            )}
-          </Button>
-
           <div className="flex bg-white/5 rounded-xl p-1 border border-white/10" role="group" aria-label={t('grid.viewModeGroup')}>
             <button
               type="button"

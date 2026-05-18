@@ -1,19 +1,23 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Filter } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
 export function DateNavigator() {
   const { t } = useTranslation();
   const MONTHS = t('dateNav.months', { returnObjects: true }) as string[];
-  const { selYear, selMonth, selWeek, selRegion, setDate, jumpToToday } = useAppStore();
+  const {
+    selYear, selMonth, selWeek, selRegion, setDate, jumpToToday,
+    openFilters, selGenre, selReleaseMode, selProvider, selectedPerson,
+  } = useAppStore();
   const now = new Date();
   const MIN_YEAR = now.getFullYear() - 1;
   const MAX_YEAR = now.getFullYear() + 2;
 
   const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion).length;
+  const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
 
   useEffect(() => {
     if (weeks > 0 && selWeek > weeks) {
@@ -92,15 +96,33 @@ export function DateNavigator() {
 
       <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent mx-2 shrink-0" />
 
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={jumpToToday}
-        className="ml-auto shrink-0 px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-300 text-xs font-semibold hover:bg-violet-500/20 transition-colors border border-violet-500/20 flex items-center gap-1.5"
-      >
-        <Calendar className="w-3 h-3" aria-hidden="true" />
-        {t('common.today')}
-      </motion.button>
+      <div className="ml-auto flex items-center gap-2 shrink-0">
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={openFilters}
+          aria-label={t('grid.filters')}
+          className="relative px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-colors border border-white/10 flex items-center gap-1.5"
+        >
+          <Filter className="w-3 h-3" aria-hidden="true" />
+          {t('grid.filters')}
+          {hasActiveFilter && (
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-500" aria-hidden="true" />
+          )}
+        </motion.button>
+
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={jumpToToday}
+          className="px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-300 text-xs font-semibold hover:bg-violet-500/20 transition-colors border border-violet-500/20 flex items-center gap-1.5"
+        >
+          <Calendar className="w-3 h-3" aria-hidden="true" />
+          {t('common.today')}
+        </motion.button>
+      </div>
       </div>
     </div>
   );
