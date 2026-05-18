@@ -21,9 +21,9 @@ export interface DiscoverParams {
 
 export async function discoverMovies(params: DiscoverParams): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
   const apiKey = getApiKey();
-  const regionQ = params.region ? `&region=${params.region}` : '';
+  const region = params.region || 'FR';
   const genreQ = params.genre ? `&with_genres=${params.genre}` : '';
-  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR${regionQ}${genreQ}&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}&with_release_type=2|3&sort_by=popularity.desc&page=${params.page}`;
+  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}&with_release_type=2|3&sort_by=popularity.desc&page=${params.page}`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de connexion TMDB');
