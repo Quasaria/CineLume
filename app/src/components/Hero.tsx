@@ -1,44 +1,14 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/appStore';
 import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
-const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p';
-
-function heroSrcSet(url: string): string {
-  const match = url.match(/\/t\/p\/[^/]+(\/.+)$/);
-  if (!match) return '';
-  const path = match[1];
-  // TMDB backdrops dispos : w300, w780, w1280, original
-  return [`${TMDB_IMG_BASE}/w780${path} 780w`, `${TMDB_IMG_BASE}/w1280${path} 1280w`].join(', ');
-}
-
-interface HeroProps {
-  backdrops?: string[];
-}
-
-const CYCLE_MS = 7000;
-
-export function Hero({ backdrops = [] }: HeroProps) {
+export function Hero() {
   const { t } = useTranslation();
   const { selYear, selMonth, selWeek, selRegion, searchQuery, selectedPerson } = useAppStore();
-  const [idx, setIdx] = useState(0);
 
   const MONTHS_FULL = t('dateNav.monthsFull', { returnObjects: true }) as string[];
   const MONTHS_SHORT = t('dateNav.monthsShort', { returnObjects: true }) as string[];
-
-  useEffect(() => {
-    setIdx(0);
-  }, [backdrops.join('|')]);
-
-  useEffect(() => {
-    if (backdrops.length <= 1) return;
-    const t = setInterval(() => {
-      setIdx((i) => (i + 1) % backdrops.length);
-    }, CYCLE_MS);
-    return () => clearInterval(t);
-  }, [backdrops.length]);
 
   const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
   const wIdx = Math.min(Math.max(selWeek - 1, 0), Math.max(weeks.length - 1, 0));
@@ -60,64 +30,17 @@ export function Hero({ backdrops = [] }: HeroProps) {
       : `${w.start.getDate()} ${MONTHS_SHORT[w.start.getMonth()]} - ${w.end.getDate()} ${MONTHS_SHORT[w.end.getMonth()]} ${w.end.getFullYear()}`;
   }
 
-  const currentBackdrop = backdrops[idx];
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="mb-4 sm:mb-10 relative"
+      className="hero-title relative mb-4 sm:mb-10 pt-40 sm:pt-72 z-10"
     >
-      {/* Hero stage : sur mobile en flow normal (donne sa hauteur au wrapper),
-          sur desktop en absolute pour le grand effet billboard derriere le titre. */}
-      <div className="hero-stage relative h-[160px] -mx-4 rounded-2xl overflow-hidden sm:absolute sm:-top-16 sm:-left-12 sm:-right-12 sm:h-[460px] sm:rounded-3xl sm:mx-0 pointer-events-none">
-        <AnimatePresence mode="popLayout">
-          {currentBackdrop && (
-            <motion.img
-              key={currentBackdrop}
-              src={currentBackdrop}
-              srcSet={heroSrcSet(currentBackdrop)}
-              sizes="(max-width: 640px) 100vw, 1200px"
-              alt=""
-              initial={{ opacity: 0, scale: 1.02 }}
-              animate={{ opacity: 1, scale: 1.12 }}
-              exit={{ opacity: 0, scale: 1.14 }}
-              transition={{
-                opacity: { duration: 1.6, ease: 'easeInOut' },
-                scale: { duration: CYCLE_MS / 1000 + 2, ease: 'linear' },
-              }}
-              className="hero-stage-img absolute inset-0 w-full h-full object-cover"
-            />
-          )}
-        </AnimatePresence>
-
-        <div className="hero-stage-grain absolute inset-0 mix-blend-overlay opacity-30 pointer-events-none" />
-        <div className="hero-stage-overlay absolute inset-0" />
-        <div className="hero-stage-sides absolute inset-0 hidden sm:block" />
-      </div>
-
-      {/* Titre : sur mobile pose en absolute en bas de l'image (overlay sur le
-          degrade dark), sur desktop en flow normal sous le hero absolute. */}
-      <div className="hero-title absolute left-0 right-0 bottom-3 px-4 z-10 sm:static sm:px-0 sm:pt-12">
-        <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-0.5 sm:mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.85)]">
-          {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
-        </h1>
-        <p className="text-white/90 text-sm sm:text-lg font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{label}</p>
-
-        {backdrops.length > 1 && (
-          <div className="hidden sm:flex gap-1.5 mt-4" aria-hidden="true">
-            {backdrops.map((_, i) => (
-              <span
-                key={i}
-                className={`h-1 rounded-full transition-all duration-500 ${
-                  i === idx ? 'w-6 bg-white/80' : 'w-2 bg-white/30'
-                }`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-1 sm:mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.85)]">
+        {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
+      </h1>
+      <p className="text-white/90 text-sm sm:text-lg font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{label}</p>
     </motion.div>
   );
 }

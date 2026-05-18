@@ -10,6 +10,7 @@ import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
+import { HeroBackdrop } from '@/components/HeroBackdrop';
 import { DateNavigator } from '@/components/DateNavigator';
 import { MovieGrid } from '@/components/MovieGrid';
 import { PersonStrip } from '@/components/PersonStrip';
@@ -197,13 +198,17 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] selection:bg-violet-500/30">
+      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] selection:bg-violet-500/30 relative">
         <div className="ambient-bg" />
+
+        {/* Image backdrop pleine largeur en haut de la page, sans cadre,
+            avec degrade sur tous les contours pour se fondre dans le bg. */}
+        <HeroBackdrop backdrops={heroBackdrops} />
 
         <Navbar />
 
-        <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-32 pb-20">
-          <Hero backdrops={heroBackdrops} />
+        <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+          <Hero />
 
           <DateNavigator />
 
