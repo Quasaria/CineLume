@@ -74,10 +74,20 @@ export default function App() {
       recencyCutoffDate.setMonth(recencyCutoffDate.getMonth() - 12);
       const recencyCutoff = formatDateISO(recencyCutoffDate);
 
+      // Exclusion par langue : TMDB a parfois des entrees FR pour des films
+      // Bollywood / Tollywood / autre sous-continent indien (projections
+      // diaspora) que l'utilisateur ne considere pas comme de vraies sorties.
+      // Quand l'utilisateur est dans un pays occidental, on filtre les films
+      // dont la langue originale est une langue du sous-continent indien.
+      const WESTERN_REGIONS = ['FR', 'US', 'GB', 'DE', 'IT', 'ES', 'BE', 'CH', 'NL', 'AT', 'CA', 'AU', 'IE', 'SE', 'PT'];
+      const NICHE_LANGS = ['hi', 'ta', 'ml', 'te', 'kn', 'bn', 'pa', 'mr', 'gu', 'ur', 'or', 'as'];
+      const shouldFilterByLang = WESTERN_REGIONS.includes(selRegion);
+
       const enriched = await Promise.all(
         res.results.map(async (movie) => {
           if (!movie.poster_path) return null;
           if (movie.release_date && movie.release_date < recencyCutoff) return null;
+          if (shouldFilterByLang && movie.original_language && NICHE_LANGS.includes(movie.original_language)) return null;
           try {
             const rd = await getMovieReleaseDates(movie.id);
             // Strict region-only : on prend la PLUS ANCIENNE entree de la
