@@ -85,8 +85,29 @@ export default function App() {
 
   const isSearchMode = !!debouncedSearch && !selectedPerson;
   const activeQuery = isSearchMode ? searchQueryHook : discoverQuery;
-  const movies: Movie[] = activeQuery.data?.pages.flatMap((p) => p.results).filter((m) => m.poster_path) || [];
-  const totalResults = activeQuery.data?.pages[0]?.total_results || 0;
+
+  // Bornes de la semaine en cours pour le filtre client-side
+  const weekBounds = (() => {
+    const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
+    const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
+    const w = weeks[idx];
+    if (!w) return null;
+    return { start: formatDateISO(w.start), end: formatDateISO(w.end) };
+  })();
+
+  // Filtre côté client : on ne fait confiance qu'à movie.release_date (primary mondiale)
+  // pour le mode discover. TMDB lâche parfois des films hors fenêtre.
+  // En mode recherche ou filmographie : on ne filtre pas par date.
+  const rawMovies: Movie[] = activeQuery.data?.pages.flatMap((p) => p.results) || [];
+  const movies: Movie[] = rawMovies.filter((m) => {
+    if (!m.poster_path) return false;
+    if (isSearchMode || selectedPerson) return true;
+    if (!weekBounds || !m.release_date) return false;
+    return m.release_date >= weekBounds.start && m.release_date <= weekBounds.end;
+  });
+  const totalResults = isSearchMode || selectedPerson
+    ? (activeQuery.data?.pages[0]?.total_results || 0)
+    : movies.length;
   const persons = (personsQuery.data?.results || []).filter((p) => p.profile_path).slice(0, 12);
 
   const loadMore = useCallback(() => {
@@ -125,7 +146,7 @@ export default function App() {
         <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-20">
           <Hero backdrops={heroBackdrops} />
 
-          {!selectedPerson && <DateNavigator />}
+          <DateNavigator />
 
           {persons.length > 0 && isSearchMode && (
             <PersonStrip persons={persons} />
