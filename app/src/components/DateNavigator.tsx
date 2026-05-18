@@ -22,7 +22,8 @@ export function DateNavigator() {
   }, [weeks, selWeek, selYear, selMonth, setDate]);
 
   return (
-    <div className="flex items-center gap-3 mb-6 overflow-x-auto no-scrollbar pb-1">
+    <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 mb-6 bg-[var(--bg)]/85 backdrop-blur-lg border-b border-white/[0.06]">
+      <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1">
       <motion.button
         type="button"
         aria-label={t('dateNav.prevYear')}
@@ -100,6 +101,7 @@ export function DateNavigator() {
         <Calendar className="w-3 h-3" aria-hidden="true" />
         {t('common.today')}
       </motion.button>
+      </div>
     </div>
   );
 }
