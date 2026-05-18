@@ -73,6 +73,7 @@
     "close": "Fermer la fiche film",
     "status": {
       "Released": "Sorti",
+      "Upcoming": "À venir",
       "Post Production": "Post-prod",
       "In Production": "Production",
       "Planned": "Planifié"

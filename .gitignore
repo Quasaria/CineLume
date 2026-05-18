@@ -3,6 +3,13 @@ node_modules/
 .pnp
 .pnp.js
 
+# Lockfile : le workflow deploy utilise `npm install --legacy-peer-deps`
+# (pas `npm ci`), donc on ne commit pas le lockfile pour eviter les conflits
+# de peer deps. cf .github/workflows/deploy.yml
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
 # Build output
 dist/
 dist-ssr/
