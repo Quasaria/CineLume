@@ -19,6 +19,15 @@ export interface DiscoverParams {
   page: number;
   releaseMode?: 'theater' | 'platform' | 'all';
   provider?: string;
+  personId?: number | null;
+}
+
+export interface PersonSearchResult {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department: string;
+  known_for?: { id: number; title?: string; name?: string; media_type: string }[];
 }
 
 export interface Provider {
@@ -56,7 +65,13 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
     releaseTypeQ = '&with_release_type=2|3|4|6';
   }
 
-  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}${releaseTypeQ}${providerQ}&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}&sort_by=popularity.desc&page=${params.page}`;
+  const personQ = params.personId ? `&with_people=${params.personId}` : '';
+  // Quand on filtre par personne, on montre toute leur filmographie (pas de borne semaine)
+  const dateQ = params.personId
+    ? ''
+    : `&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}`;
+  const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
+  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de connexion TMDB');
@@ -69,6 +84,22 @@ export async function searchMovies(query: string, page: number): Promise<{ resul
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de recherche TMDB');
+  return res.json();
+}
+
+export async function searchPersons(query: string): Promise<{ results: PersonSearchResult[]; total_results: number }> {
+  const apiKey = getApiKey();
+  const url = `${BASE}/search/person?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}&page=1&include_adult=false`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Erreur de recherche personne');
+  return res.json();
+}
+
+export async function getPersonDetails(id: number): Promise<{ id: number; name: string; profile_path: string | null; known_for_department: string; biography?: string }> {
+  const apiKey = getApiKey();
+  const url = `${BASE}/person/${id}?api_key=${apiKey}&language=fr-FR`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Erreur de chargement de la personne');
   return res.json();
 }
 

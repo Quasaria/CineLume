@@ -13,7 +13,7 @@ interface HeroProps {
 const CYCLE_MS = 7000;
 
 export function Hero({ backdrops = [] }: HeroProps) {
-  const { selYear, selMonth, selWeek, selRegion, searchQuery } = useAppStore();
+  const { selYear, selMonth, selWeek, selRegion, searchQuery, selectedPerson } = useAppStore();
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
@@ -33,7 +33,9 @@ export function Hero({ backdrops = [] }: HeroProps) {
   const w = weeks[wIdx];
 
   let label: string;
-  if (searchQuery) {
+  if (selectedPerson) {
+    label = `Filmographie de ${selectedPerson.name}`;
+  } else if (searchQuery) {
     label = `Résultats pour "${searchQuery}"`;
   } else if (!w) {
     label = `${MONTHS_FULL[selMonth]} ${selYear}`;
