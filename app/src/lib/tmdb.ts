@@ -1,4 +1,5 @@
 import type { Movie, MovieDetails, Genre } from '@/types/movie';
+import { tmdbLang } from '@/i18n';
 
 const ENV_KEY = import.meta.env.VITE_TMDB_KEY as string | undefined;
 const BASE = 'https://api.themoviedb.org/3';
@@ -71,7 +72,7 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
     ? ''
     : `&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}`;
   const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
-  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
+  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de connexion TMDB');
@@ -80,7 +81,7 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
 
 export async function searchMovies(query: string, page: number): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
   const apiKey = getApiKey();
-  const url = `${BASE}/search/movie?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
+  const url = `${BASE}/search/movie?api_key=${apiKey}&language=${tmdbLang()}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de recherche TMDB');
@@ -89,7 +90,7 @@ export async function searchMovies(query: string, page: number): Promise<{ resul
 
 export async function searchPersons(query: string): Promise<{ results: PersonSearchResult[]; total_results: number }> {
   const apiKey = getApiKey();
-  const url = `${BASE}/search/person?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}&page=1&include_adult=false`;
+  const url = `${BASE}/search/person?api_key=${apiKey}&language=${tmdbLang()}&query=${encodeURIComponent(query)}&page=1&include_adult=false`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de recherche personne');
   return res.json();
@@ -97,7 +98,7 @@ export async function searchPersons(query: string): Promise<{ results: PersonSea
 
 export async function getPersonDetails(id: number): Promise<{ id: number; name: string; profile_path: string | null; known_for_department: string; biography?: string }> {
   const apiKey = getApiKey();
-  const url = `${BASE}/person/${id}?api_key=${apiKey}&language=fr-FR`;
+  const url = `${BASE}/person/${id}?api_key=${apiKey}&language=${tmdbLang()}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de chargement de la personne');
   return res.json();
@@ -105,7 +106,7 @@ export async function getPersonDetails(id: number): Promise<{ id: number; name: 
 
 export async function getMovieDetails(id: number): Promise<MovieDetails> {
   const apiKey = getApiKey();
-  const cacheKey = `md_${id}`;
+  const cacheKey = `md_${id}_${tmdbLang()}`;
   const cached = localStorage.getItem(cacheKey);
   
   if (cached) {
@@ -115,7 +116,7 @@ export async function getMovieDetails(id: number): Promise<MovieDetails> {
     } catch {}
   }
 
-  const url = `${BASE}/movie/${id}?api_key=${apiKey}&language=fr-FR&append_to_response=credits,videos,release_dates`;
+  const url = `${BASE}/movie/${id}?api_key=${apiKey}&language=${tmdbLang()}&append_to_response=credits,videos,release_dates`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de chargement des détails');
   const data = await res.json();
@@ -130,7 +131,7 @@ export async function getMovieDetails(id: number): Promise<MovieDetails> {
 
 export async function getGenres(): Promise<Genre[]> {
   const apiKey = getApiKey();
-  const cacheKey = 'genres_cache';
+  const cacheKey = `genres_cache_${tmdbLang()}`;
   const cached = localStorage.getItem(cacheKey);
   
   if (cached) {
@@ -140,7 +141,7 @@ export async function getGenres(): Promise<Genre[]> {
     } catch {}
   }
 
-  const url = `${BASE}/genre/movie/list?api_key=${apiKey}&language=fr-FR`;
+  const url = `${BASE}/genre/movie/list?api_key=${apiKey}&language=${tmdbLang()}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de chargement des genres');
   const data = await res.json();

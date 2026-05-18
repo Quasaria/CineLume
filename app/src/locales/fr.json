@@ -1,0 +1,174 @@
+{
+  "common": {
+    "today": "Aujourd'hui",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "save": "Sauvegarder",
+    "reset": "Réinitialiser",
+    "apply": "Appliquer",
+    "clear": "Effacer",
+    "na": "N/A",
+    "unknownDate": "Date inconnue"
+  },
+  "nav": {
+    "search": "Rechercher",
+    "searchPlaceholder": "Rechercher...",
+    "searchMoviePlaceholder": "Rechercher un film...",
+    "favorites": "Mes favoris",
+    "favoritesAria": "Mes favoris ({{count}})",
+    "settings": "Paramètres",
+    "themeDark": "Passer en mode sombre",
+    "themeLight": "Passer en mode clair",
+    "home": "Retour à l'accueil — CineLume",
+    "openSearch": "Ouvrir la recherche"
+  },
+  "hero": {
+    "title": "Sorties",
+    "titleAccent": "cinéma",
+    "filmography": "Filmographie de {{name}}",
+    "searchResults": "Résultats pour \"{{query}}\""
+  },
+  "dateNav": {
+    "prevYear": "Année précédente",
+    "nextYear": "Année suivante",
+    "months": ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"],
+    "monthsFull": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+    "monthsShort": ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
+  },
+  "grid": {
+    "movies_one": "{{count}} film",
+    "movies_other": "{{count}} films",
+    "empty": "Aucun film trouvé",
+    "emptyHint": "Essayez d'autres dates ou filtres",
+    "errorTitle": "Erreur de chargement",
+    "errorDesc": "Impossible de joindre TMDB. Vérifie ta connexion ou ta clé API.",
+    "filters": "Filtres",
+    "loadMore": "Charger plus",
+    "viewGrid": "Affichage en grille",
+    "viewList": "Affichage en liste",
+    "viewModeGroup": "Mode d'affichage",
+    "filmographyOf": "Filmographie de",
+    "removePersonFilter": "Retirer le filtre par personne"
+  },
+  "modes": {
+    "all": "Tout",
+    "theater": "Salle",
+    "platform": "Plateforme"
+  },
+  "modal": {
+    "directedBy": "Réalisé par",
+    "trailer": "Bande-annonce",
+    "teaser": "Teaser",
+    "video": "Vidéo",
+    "share": "Partager",
+    "budget": "Budget",
+    "revenue": "Recettes",
+    "language": "Langue",
+    "votes": "Votes",
+    "synopsis": "Synopsis",
+    "noSynopsis": "Synopsis indisponible.",
+    "cast": "Distribution",
+    "releaseIn": "Sortie {{region}}",
+    "close": "Fermer la fiche film",
+    "status": {
+      "Released": "Sorti",
+      "Post Production": "Post-prod",
+      "In Production": "Production",
+      "Planned": "Planifié"
+    },
+    "releaseType": {
+      "1": "Avant-première",
+      "2": "Sortie limitée",
+      "3": "Sortie en salles",
+      "4": "Sortie numérique",
+      "5": "Sortie physique",
+      "6": "Sortie TV"
+    }
+  },
+  "favorites": {
+    "title": "Mes favoris",
+    "empty": "Aucun favori pour l'instant",
+    "emptyHint": "Clique sur le cœur d'un film pour l'ajouter",
+    "weekSection": "Cette semaine",
+    "upcomingSection": "À venir",
+    "releasedSection": "Sortis",
+    "undatedSection": "Date inconnue",
+    "remove": "Retirer {{title}} des favoris",
+    "addToFav": "Ajouter {{title}} aux favoris",
+    "added": "{{title}} ajouté aux favoris",
+    "removed": "{{title}} retiré des favoris",
+    "close": "Fermer la liste des favoris"
+  },
+  "filters": {
+    "title": "Filtres",
+    "active_one": "{{count}} actif",
+    "active_other": "{{count}} actifs",
+    "releaseType": "Type de sortie",
+    "platform": "Plateforme",
+    "platformAll": "Toutes",
+    "country": "Pays de sortie",
+    "genres": "Genres",
+    "close": "Fermer les filtres"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "apiKey": "Clé API TMDB",
+    "apiKeyPlaceholder": "Clé personnalisée...",
+    "themeDark": "Mode sombre",
+    "themeLight": "Mode clair",
+    "themeToggleDesc": "Basculer le thème",
+    "language": "Langue",
+    "languageDesc": "Langue de l'interface",
+    "clearCache": "Effacer le cache",
+    "clearCacheDesc": "Supprimer les données locales",
+    "keySaved": "Clé API enregistrée",
+    "keyReset": "Clé API réinitialisée",
+    "cacheCleared_one": "Cache vidé ({{count}} entrée)",
+    "cacheCleared_other": "Cache vidé ({{count}} entrées)",
+    "cacheEmpty": "Cache déjà vide"
+  },
+  "persons": {
+    "title": "Personnes",
+    "viewFilmography": "Voir la filmographie de {{name}}",
+    "department": {
+      "Acting": "Acteur·rice",
+      "Directing": "Réalisation",
+      "Writing": "Scénario",
+      "Production": "Production",
+      "Sound": "Son",
+      "Camera": "Image",
+      "Editing": "Montage",
+      "Art": "Direction artistique",
+      "Costume & Make-Up": "Costumes",
+      "Crew": "Équipe"
+    }
+  },
+  "share": {
+    "linkCopied": "Lien copié",
+    "copyError": "Impossible de copier le lien",
+    "notSupported": "Partage non supporté"
+  },
+  "countries": {
+    "FR": "France",
+    "US": "États-Unis",
+    "GB": "Royaume-Uni",
+    "JP": "Japon",
+    "DE": "Allemagne",
+    "ES": "Espagne",
+    "IT": "Italie",
+    "KR": "Corée",
+    "CA": "Canada",
+    "AU": "Australie",
+    "BR": "Brésil",
+    "MX": "Mexique",
+    "IN": "Inde",
+    "CN": "Chine",
+    "RU": "Russie",
+    "SE": "Suède",
+    "NL": "Pays-Bas",
+    "BE": "Belgique",
+    "CH": "Suisse",
+    "AT": "Autriche"
+  }
+}

@@ -1,27 +1,16 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { PROF } from '@/lib/tmdb';
 import type { PersonSearchResult } from '@/lib/tmdb';
-
-const DEPT_LABEL: Record<string, string> = {
-  Acting: 'Acteur·rice',
-  Directing: 'Réalisation',
-  Writing: 'Scénario',
-  Production: 'Production',
-  Sound: 'Son',
-  Camera: 'Image',
-  Editing: 'Montage',
-  Art: 'Direction artistique',
-  'Costume & Make-Up': 'Costumes',
-  Crew: 'Équipe',
-};
 
 interface PersonStripProps {
   persons: PersonSearchResult[];
 }
 
 export function PersonStrip({ persons }: PersonStripProps) {
+  const { t } = useTranslation();
   const setSelectedPerson = useAppStore((s) => s.setSelectedPerson);
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
 
@@ -31,10 +20,10 @@ export function PersonStrip({ persons }: PersonStripProps) {
   }
 
   return (
-    <section className="mb-6" aria-label="Personnes correspondantes">
+    <section className="mb-6" aria-label={t('persons.title')}>
       <h2 className="flex items-center gap-2 text-xs font-bold text-white/60 uppercase tracking-wider mb-3">
         <Users className="w-3.5 h-3.5" aria-hidden="true" />
-        Personnes
+        {t('persons.title')}
         <span className="text-white/40 normal-case tracking-normal font-medium">({persons.length})</span>
       </h2>
       <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1">
@@ -48,7 +37,7 @@ export function PersonStrip({ persons }: PersonStripProps) {
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => pickPerson(p)}
-            aria-label={`Voir la filmographie de ${p.name}`}
+            aria-label={t('persons.viewFilmography', { name: p.name })}
             className="shrink-0 w-[110px] flex flex-col items-center text-center group bg-transparent border-0 p-0"
           >
             <div className="w-[88px] h-[88px] rounded-full overflow-hidden bg-white/5 border border-white/10 group-hover:border-violet-500/60 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all">
@@ -68,8 +57,8 @@ export function PersonStrip({ persons }: PersonStripProps) {
             <p className="mt-2 text-xs font-semibold text-white truncate w-full leading-tight group-hover:text-violet-300 transition-colors">
               {p.name}
             </p>
-            <p className="text-[10px] text-white/50 truncate w-full">
-              {DEPT_LABEL[p.known_for_department] ?? p.known_for_department}
+            <p className="text-[10px] text-white/60 truncate w-full">
+              {t(`persons.department.${p.known_for_department}`, { defaultValue: p.known_for_department })}
             </p>
           </motion.button>
         ))}

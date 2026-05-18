@@ -1,43 +1,30 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { getMovieDetails, IMG, BACK, PROF, TMDB_SITE } from '@/lib/tmdb';
-import { fmtDateFR } from '@/lib/utils';
+import { fmtDateLocalized } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const fmtDate = (d?: string) => fmtDateFR(d, { day: 'numeric', month: 'long', year: 'numeric' });
-const fmtDateShort = (d?: string) => fmtDateFR(d);
-
-function fmtCurrency(n?: number) {
-  if (!n) return 'N/A';
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD', notation: 'compact' }).format(n);
-}
-
-const statusMap: Record<string, string> = {
-  'Released': 'Sorti',
-  'Post Production': 'Post-prod',
-  'In Production': 'Production',
-  'Planned': 'Planifié',
-};
-
-const releaseTypeLabel: Record<number, string> = {
-  1: 'Avant-première',
-  2: 'Sortie limitée',
-  3: 'Sortie en salles',
-  4: 'Sortie numérique',
-  5: 'Sortie physique',
-  6: 'Sortie TV',
-};
-
 export function MovieModal() {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const { currentModalMovieId, closeModal, isFav, toggleFav, selRegion } = useAppStore();
+
+  const fmtDate = (d?: string) => fmtDateLocalized(d, { day: 'numeric', month: 'long', year: 'numeric' });
+  const fmtDateShort = (d?: string) => fmtDateLocalized(d);
+
+  function fmtCurrency(n?: number) {
+    if (!n) return t('common.na');
+    return new Intl.NumberFormat(lang || 'fr', { style: 'currency', currency: 'USD', notation: 'compact' }).format(n);
+  }
   const [touchY, setTouchY] = useState(0);
 
   const { data: details, isLoading } = useQuery({
-    queryKey: ['movieDetails', currentModalMovieId],
+    queryKey: ['movieDetails', currentModalMovieId, lang],
     queryFn: () => getMovieDetails(currentModalMovieId!),
     enabled: currentModalMovieId !== null,
   });
@@ -67,13 +54,13 @@ export function MovieModal() {
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(url);
-        toast.success('Lien copié');
+        toast.success(t('share.linkCopied'));
       } catch {
-        toast.error('Impossible de copier le lien');
+        toast.error(t('share.copyError'));
       }
       return;
     }
-    toast.message('Partage non supporté', { description: url });
+    toast.message(t('share.notSupported'), { description: url });
   }
 
   return (
@@ -122,7 +109,7 @@ export function MovieModal() {
             <button
               type="button"
               onClick={closeModal}
-              aria-label="Fermer la fiche film"
+              aria-label={t('modal.close')}
               className="absolute top-4 right-4 z-50 p-2.5 rounded-full bg-black/40 hover:bg-white/20 backdrop-blur-md transition-colors"
             >
               <X className="w-5 h-5 text-white" aria-hidden="true" />
@@ -176,9 +163,9 @@ export function MovieModal() {
                             {Math.floor(movie.runtime / 60)}h{String(movie.runtime % 60).padStart(2, '0')}
                           </span>
                         )}
-                        {movie.status && statusMap[movie.status] && (
-                          <span className="px-3 py-1 rounded-full bg-white/5 text-white/50 text-xs font-medium border border-white/10">
-                            {statusMap[movie.status]}
+                        {movie.status && t(`modal.status.${movie.status}`, { defaultValue: '' }) && (
+                          <span className="px-3 py-1 rounded-full bg-white/5 text-white/60 text-xs font-medium border border-white/10">
+                            {t(`modal.status.${movie.status}`)}
                           </span>
                         )}
                       </div>
@@ -207,7 +194,7 @@ export function MovieModal() {
 
                       {movie.credits?.crew?.find((c) => c.job === 'Director') && (
                         <p className="text-cyan-400/80 text-sm font-medium mb-4">
-                          Réalisé par{' '}
+                          {t('modal.directedBy')}{' '}
                           <span className="text-white">
                             {movie.credits.crew.find((c) => c.job === 'Director')?.name}
                           </span>
@@ -218,17 +205,17 @@ export function MovieModal() {
                         const regional = movie.release_dates?.results
                           .find((r) => r.iso_3166_1 === selRegion)
                           ?.release_dates
-                          .filter((d) => releaseTypeLabel[d.type])
+                          .filter((d) => [1, 2, 3, 4, 5, 6].includes(d.type))
                           .sort((a, b) => new Date(a.release_date).getTime() - new Date(b.release_date).getTime());
                         if (!regional || regional.length === 0) return null;
                         return (
                           <div className="flex flex-wrap gap-1.5 mb-5">
-                            <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold self-center mr-1">
-                              Sortie {selRegion}
+                            <span className="text-[10px] text-white/50 uppercase tracking-wider font-bold self-center mr-1">
+                              {t('modal.releaseIn', { region: selRegion })}
                             </span>
                             {regional.map((r, i) => (
-                              <span key={i} className="text-[11px] text-white/60 bg-white/[0.04] border border-white/[0.08] rounded-md px-2 py-1">
-                                {releaseTypeLabel[r.type]} <span className="text-white font-semibold ml-1">{fmtDateShort(r.release_date)}</span>
+                              <span key={i} className="text-[11px] text-white/70 bg-white/[0.04] border border-white/[0.08] rounded-md px-2 py-1">
+                                {t(`modal.releaseType.${r.type}`)} <span className="text-white font-semibold ml-1">{fmtDateShort(r.release_date)}</span>
                               </span>
                             ))}
                           </div>
@@ -239,7 +226,7 @@ export function MovieModal() {
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
                           <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                           <span className="font-bold text-sm">
-                            {movie.vote_average > 0 ? movie.vote_average.toFixed(1) : 'N/A'}
+                            {movie.vote_average > 0 ? movie.vote_average.toFixed(1) : t('common.na')}
                           </span>
                           <span className="text-white/30 text-xs">/10</span>
                         </div>
@@ -271,7 +258,7 @@ export function MovieModal() {
                               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white transition-colors"
                             >
                               <Play className="w-4 h-4 fill-current" aria-hidden="true" />
-                              {video.type === 'Trailer' ? 'Bande-annonce' : video.type === 'Teaser' ? 'Teaser' : 'Vidéo'}
+                              {video.type === 'Trailer' ? t('modal.trailer') : video.type === 'Teaser' ? t('modal.teaser') : t('modal.video')}
                             </a>
                           );
                         })()}
@@ -285,43 +272,44 @@ export function MovieModal() {
                           TMDB
                         </a>
                         <button
+                          type="button"
                           onClick={shareMovie}
                           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 transition-colors border border-white/10"
                         >
-                          <Share2 className="w-4 h-4" />
-                          Partager
+                          <Share2 className="w-4 h-4" aria-hidden="true" />
+                          {t('modal.share')}
                         </button>
                       </div>
 
                       {(movie.budget || movie.revenue || movie.vote_count) && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
                           <div>
-                            <p className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Budget</p>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.budget')}</p>
                             <p className="text-sm font-semibold">{fmtCurrency(movie.budget)}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Recettes</p>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.revenue')}</p>
                             <p className="text-sm font-semibold">{fmtCurrency(movie.revenue)}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Langue</p>
-                            <p className="text-sm font-semibold uppercase">{movie.original_language || 'N/A'}</p>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.language')}</p>
+                            <p className="text-sm font-semibold uppercase">{movie.original_language || t('common.na')}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] text-white/30 uppercase tracking-wider mb-1">Votes</p>
-                            <p className="text-sm font-semibold">{movie.vote_count?.toLocaleString('fr-FR') || '0'}</p>
+                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.votes')}</p>
+                            <p className="text-sm font-semibold">{movie.vote_count?.toLocaleString(lang || 'fr') || '0'}</p>
                           </div>
                         </div>
                       )}
 
-                      <h3 className="font-bold text-white mb-2">Synopsis</h3>
-                      <p className="text-white/60 text-sm sm:text-base leading-relaxed mb-8">
-                        {movie.overview || 'Synopsis indisponible.'}
+                      <h3 className="font-bold text-white mb-2">{t('modal.synopsis')}</h3>
+                      <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-8">
+                        {movie.overview || t('modal.noSynopsis')}
                       </p>
 
                       {movie.credits?.cast && movie.credits.cast.length > 0 && (
                         <>
-                          <h3 className="font-bold text-white mb-3">Distribution</h3>
+                          <h3 className="font-bold text-white mb-3">{t('modal.cast')}</h3>
                           <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
                             {movie.credits.cast.slice(0, 10).map((actor) => (
                               <div key={actor.id} className="flex flex-col items-center min-w-[65px]">

@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/appStore';
 import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
-
-const MONTHS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 interface HeroProps {
   backdrops?: string[];
@@ -13,8 +11,12 @@ interface HeroProps {
 const CYCLE_MS = 7000;
 
 export function Hero({ backdrops = [] }: HeroProps) {
+  const { t } = useTranslation();
   const { selYear, selMonth, selWeek, selRegion, searchQuery, selectedPerson } = useAppStore();
   const [idx, setIdx] = useState(0);
+
+  const MONTHS_FULL = t('dateNav.monthsFull', { returnObjects: true }) as string[];
+  const MONTHS_SHORT = t('dateNav.monthsShort', { returnObjects: true }) as string[];
 
   useEffect(() => {
     setIdx(0);
@@ -34,9 +36,9 @@ export function Hero({ backdrops = [] }: HeroProps) {
 
   let label: string;
   if (selectedPerson) {
-    label = `Filmographie de ${selectedPerson.name}`;
+    label = t('hero.filmography', { name: selectedPerson.name });
   } else if (searchQuery) {
-    label = `Résultats pour "${searchQuery}"`;
+    label = t('hero.searchResults', { query: searchQuery });
   } else if (!w) {
     label = `${MONTHS_FULL[selMonth]} ${selYear}`;
   } else {
@@ -83,7 +85,7 @@ export function Hero({ backdrops = [] }: HeroProps) {
 
       <div className="relative pt-8 sm:pt-12">
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)]">
-          Sorties <span className="text-gradient">cinéma</span>
+          {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
         </h1>
         <p className="text-white/70 text-base sm:text-lg font-light drop-shadow-[0_1px_6px_rgba(0,0,0,0.3)]">{label}</p>
 

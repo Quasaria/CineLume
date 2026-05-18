@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Heart, Star } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG } from '@/lib/tmdb';
-import { fmtDateFR } from '@/lib/utils';
+import { fmtDateLocalized } from '@/lib/utils';
 import type { Movie } from '@/types/movie';
 
 interface MovieCardProps {
@@ -11,11 +12,13 @@ interface MovieCardProps {
   viewMode: 'grid' | 'list';
 }
 
-const fmtDate = (d?: string) => fmtDateFR(d);
-
 export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
+  const { t, i18n } = useTranslation();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _lang = i18n.language; // re-render quand la langue change
   const { isFav, toggleFav, openModal } = useAppStore();
   const fav = isFav(movie.id);
+  const fmtDate = (d?: string) => fmtDateLocalized(d);
 
   if (viewMode === 'list') {
     return (
@@ -50,7 +53,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
         </div>
         <button
           type="button"
-          aria-label={fav ? `Retirer ${movie.title} des favoris` : `Ajouter ${movie.title} aux favoris`}
+          aria-label={fav ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
           aria-pressed={fav}
           onClick={(e) => {
             e.stopPropagation();
@@ -86,7 +89,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
       >
         <motion.button
           type="button"
-          aria-label={fav ? `Retirer ${movie.title} des favoris` : `Ajouter ${movie.title} aux favoris`}
+          aria-label={fav ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
           aria-pressed={fav}
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.85 }}
