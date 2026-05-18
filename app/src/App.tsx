@@ -44,38 +44,45 @@ export default function App() {
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
       const w = weeks[idx];
       const startStr = formatDateISO(w.start);
+      const endStr = formatDateISO(w.end);
 
-      // Fenetre elargie de 3 jours de chaque cote pour la requete TMDB et la
-      // verification client. Catche les films dont la sortie FR officielle est
-      // juste avant/apres la semaine cinema demandee (ex : sortie le mardi 12
-      // alors que la semaine cinema commence mercredi 13).
-      const startBound = new Date(w.start);
-      startBound.setDate(startBound.getDate() - 3);
-      const endBound = new Date(w.end);
-      endBound.setDate(endBound.getDate() + 3);
-      const startWide = formatDateISO(startBound);
-      const endWide = formatDateISO(endBound);
-
-      const res = await discoverMovies({
+      const commonParams = {
         region: selRegion,
         genre: selGenre,
-        startDate: startWide,
-        endDate: endWide,
+        startDate: startStr,
+        endDate: endStr,
         page: pageParam as number,
         releaseMode: selReleaseMode,
         provider: selProvider,
         personId: selectedPerson?.id ?? null,
-      });
+      };
 
-      // Pour les modes liés à une semaine de sortie (theater / platform / all), on
-      // verifie via les release_dates de chaque film qu'il sort BIEN dans le pays
-      // selectionne dans la fenetre. TMDB laisse passer des films sans entree FR.
-      // En mode filmographie, on saute cette verification.
-      if (selectedPerson) return res;
+      // Filmographie : pas de double requete, on veut toute la carriere.
+      if (selectedPerson) {
+        return discoverMovies({ ...commonParams, dateFilter: 'release_date' });
+      }
 
-      // Types acceptes : type 5 (physique) exclu car pas pertinent pour "sorties".
-      // Type 1 (Premiere) garde car TMDB l'utilise parfois pour la sortie ciné
-      // officielle (pas seulement festivals).
+      // Double requete TMDB :
+      // - Query A : release_date + region + with_release_type -> films avec sortie
+      //   FR theatrale dans la semaine (catche Cannes-puis-FR-delayed).
+      // - Query B : primary_release_date sans contrainte region/type -> films avec
+      //   primary mondiale dans la semaine (catche Hollywood type Backrooms dont
+      //   la donnee FR n'est pas encore dans TMDB).
+      const [resA, resB] = await Promise.all([
+        discoverMovies({ ...commonParams, dateFilter: 'release_date' }),
+        discoverMovies({ ...commonParams, dateFilter: 'primary_release_date' }),
+      ]);
+
+      // Merge + dedupe par id
+      const seen = new Set<number>();
+      const candidates: Movie[] = [];
+      for (const m of [...resA.results, ...resB.results]) {
+        if (!m.poster_path) continue;
+        if (seen.has(m.id)) continue;
+        seen.add(m.id);
+        candidates.push(m);
+      }
+
       const acceptedTypes =
         selReleaseMode === 'theater'
           ? [1, 2, 3]
@@ -83,27 +90,47 @@ export default function App() {
             ? [4, 6]
             : [1, 2, 3, 4, 6];
 
-      // Recency 2 ans sur la primary worldwide date : exclut les vieux films qui
-      // auraient une re-projection theatrale recente (anniversaire, restauration).
+      // Recency 2 ans sur la primary worldwide date.
       const startYear = parseInt(startStr.slice(0, 4), 10);
       const recencyCutoff = `${startYear - 2}-01-01`;
 
+      // Pays "proxy occidentaux" pour fallback quand TMDB n'a pas d'entree pour
+      // la region selectionnee : si le film a une sortie theatrale dans un de
+      // ces pays dans la semaine, on suppose qu'il sortira aussi en FR.
+      const PROXY_COUNTRIES = ['US', 'GB', 'DE', 'IT', 'ES', 'CA', 'AU', 'IE', 'NL', 'BE'];
+
       const enriched = await Promise.all(
-        res.results.map(async (movie) => {
-          if (!movie.poster_path) return null;
+        candidates.map(async (movie) => {
           if (movie.release_date && movie.release_date < recencyCutoff) return null;
           try {
             const rd = await getMovieReleaseDates(movie.id);
+            // 1. Strict : si TMDB a une entree pour la region selectionnee, on
+            //    suit cette donnee a la lettre.
             const regionEntry = rd.results.find((r) => r.iso_3166_1 === selRegion);
-            if (!regionEntry || regionEntry.release_dates.length === 0) return null;
-            const hit = regionEntry.release_dates.some((d) => {
-              if (!acceptedTypes.includes(d.type)) return false;
-              const day = (d.release_date || '').split('T')[0];
-              return day >= startWide && day <= endWide;
+            if (regionEntry && regionEntry.release_dates.length > 0) {
+              const hit = regionEntry.release_dates.some((d) => {
+                if (!acceptedTypes.includes(d.type)) return false;
+                const day = (d.release_date || '').split('T')[0];
+                return day >= startStr && day <= endStr;
+              });
+              return hit ? movie : null;
+            }
+            // 2. Fallback : pas de donnees pour la region. On regarde si le film
+            //    a une sortie theatrale dans un pays proxy dans la semaine -> on
+            //    suppose qu'il sortira aussi dans la region. Catche les sorties
+            //    Hollywood dont TMDB n'a pas encore la donnee FR.
+            const proxyHit = PROXY_COUNTRIES.some((code) => {
+              const entry = rd.results.find((r) => r.iso_3166_1 === code);
+              if (!entry) return false;
+              return entry.release_dates.some((d) => {
+                if (!acceptedTypes.includes(d.type)) return false;
+                const day = (d.release_date || '').split('T')[0];
+                return day >= startStr && day <= endStr;
+              });
             });
-            return hit ? movie : null;
+            return proxyHit ? movie : null;
           } catch {
-            // En cas d'erreur réseau sur release_dates, on garde le film (best effort)
+            // En cas d'erreur reseau sur release_dates, on garde le film (best effort)
             return movie;
           }
         }),
@@ -111,8 +138,8 @@ export default function App() {
 
       const filtered = enriched.filter((m): m is Movie => m !== null);
       return {
-        ...res,
         results: filtered,
+        total_pages: Math.max(resA.total_pages, resB.total_pages),
         total_results: filtered.length,
       };
     },
