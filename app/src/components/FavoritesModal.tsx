@@ -2,11 +2,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Trash2 } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG } from '@/lib/tmdb';
+import { fmtDateFR } from '@/lib/utils';
 
-function fmtDate(d?: string) {
-  if (!d) return 'Date inconnue';
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-}
+const fmtDate = (d?: string) => fmtDateFR(d);
 
 export function FavoritesModal() {
   const { isFavOpen, closeFavorites, favorites, removeFav, openModal } = useAppStore();
@@ -40,10 +38,12 @@ export function FavoritesModal() {
                 Mes favoris
               </h3>
               <button
+                type="button"
                 onClick={closeFavorites}
+                aria-label="Fermer la liste des favoris"
                 className="p-2 rounded-xl hover:bg-white/5 transition-colors"
               >
-                <X className="w-5 h-5 text-white/50" />
+                <X className="w-5 h-5 text-white/60" aria-hidden="true" />
               </button>
             </div>
 
@@ -77,13 +77,15 @@ export function FavoritesModal() {
                       <p className="text-xs text-white/30">{fmtDate(f.release_date)}</p>
                     </div>
                     <button
+                      type="button"
+                      aria-label={`Retirer ${f.title} des favoris`}
                       onClick={(e) => {
                         e.stopPropagation();
                         removeFav(f.id);
                       }}
-                      className="p-2 rounded-lg hover:bg-red-500/20 text-white/20 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-2 rounded-lg hover:bg-red-500/20 text-white/50 hover:text-red-400 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
                     </button>
                   </motion.div>
                 ))}

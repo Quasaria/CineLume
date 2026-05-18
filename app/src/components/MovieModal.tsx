@@ -3,18 +3,12 @@ import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users } from 'lucide
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/appStore';
 import { getMovieDetails, IMG, BACK, PROF, TMDB_SITE } from '@/lib/tmdb';
+import { fmtDateFR } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 
-function fmtDate(d?: string) {
-  if (!d) return 'Date inconnue';
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-function fmtDateShort(d?: string) {
-  if (!d) return 'Date inconnue';
-  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-}
+const fmtDate = (d?: string) => fmtDateFR(d, { day: 'numeric', month: 'long', year: 'numeric' });
+const fmtDateShort = (d?: string) => fmtDateFR(d);
 
 function fmtCurrency(n?: number) {
   if (!n) return 'N/A';
@@ -107,10 +101,12 @@ export function MovieModal() {
             }}
           >
             <button
+              type="button"
               onClick={closeModal}
-              className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/40 hover:bg-white/20 backdrop-blur-md transition-colors"
+              aria-label="Fermer la fiche film"
+              className="absolute top-4 right-4 z-50 p-2.5 rounded-full bg-black/40 hover:bg-white/20 backdrop-blur-md transition-colors"
             >
-              <X className="w-5 h-5 text-white" />
+              <X className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
 
             <div className="w-10 h-1 rounded-full bg-white/20 absolute top-3 left-1/2 -translate-x-1/2 sm:hidden z-50" />

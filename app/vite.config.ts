@@ -6,7 +6,7 @@ import { inspectAttr } from 'kimi-plugin-inspect-react'
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/CineLume/' : '/',
-  plugins: [inspectAttr(), react()],
+  plugins: command === 'serve' ? [inspectAttr(), react()] : [react()],
   server: {
     port: 3000,
   },
