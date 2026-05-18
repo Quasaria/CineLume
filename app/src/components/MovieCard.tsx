@@ -39,11 +39,11 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
           <h3 className="text-white font-bold text-base mb-1 truncate group-hover:text-violet-300 transition-colors">
             {movie.title}
           </h3>
-          <p className="text-white/40 text-xs font-medium mb-2">{fmtDate(movie.release_date)}</p>
+          <p className="text-white/70 text-xs font-medium mb-2">{fmtDate(movie.release_date)}</p>
           <div className="flex items-center gap-2">
             {movie.vote_average > 0 && (
               <span className="flex items-center gap-1 text-amber-400 text-xs font-bold">
-                <Star className="w-3 h-3 fill-amber-400" />
+                <Star className="w-3 h-3 fill-amber-400" aria-hidden="true" />
                 {movie.vote_average.toFixed(1)}
               </span>
             )}
@@ -63,11 +63,11 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
               vote_average: movie.vote_average,
             });
           }}
-          className={`p-2 rounded-full hover:bg-white/10 transition-all self-center shrink-0 ${
-            fav ? 'text-red-500' : 'text-white/50'
+          className={`min-w-11 min-h-11 flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/15 transition-all self-center shrink-0 ${
+            fav ? 'text-red-500' : 'text-white/60'
           }`}
         >
-          <Heart className={`w-4 h-4 ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
+          <Heart className={`w-5 h-5 ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
       </motion.div>
     );
@@ -101,16 +101,16 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
               vote_average: movie.vote_average,
             });
           }}
-          className={`absolute top-2 left-2 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-all ${
-            fav ? 'text-red-500' : 'text-white/80'
+          className={`absolute top-2 left-2 z-20 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/65 active:bg-black/80 transition-all ${
+            fav ? 'text-red-500' : 'text-white/90'
           }`}
         >
-          <Heart className={`w-4 h-4 ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
+          <Heart className={`w-[18px] h-[18px] ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
         </motion.button>
 
         {movie.vote_average > 0 && (
-          <div className="absolute top-2.5 right-2.5 z-20 px-2 py-1 rounded-lg bg-black/40 backdrop-blur-sm flex items-center gap-1">
-            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+          <div className="absolute top-2 right-2 z-20 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm flex items-center gap-1">
+            <Star className="w-3 h-3 text-amber-400 fill-amber-400" aria-hidden="true" />
             <span className="text-amber-400 text-xs font-bold">{movie.vote_average.toFixed(1)}</span>
           </div>
         )}
@@ -122,13 +122,13 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
           loading="lazy"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-85 group-hover:opacity-100 transition-opacity" />
 
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-          <h3 className="text-white font-bold text-sm sm:text-base leading-tight mb-0.5 line-clamp-2 group-hover:text-violet-300 transition-colors">
+          <h3 className="text-white font-bold text-base leading-tight mb-1 line-clamp-2 group-hover:text-violet-300 transition-colors">
             {movie.title}
           </h3>
-          <p className="text-white/40 text-[10px] sm:text-xs font-medium">{fmtDate(movie.release_date)}</p>
+          <p className="text-white/70 text-xs sm:text-[13px] font-medium">{fmtDate(movie.release_date)}</p>
         </div>
       </div>
     </motion.div>
