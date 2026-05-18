@@ -369,6 +369,14 @@ html.light .hero-bg-img {
   filter: blur(4px) saturate(0.85) brightness(1.05);
 }
 
+/* Mask radial commun pour tous les layers du hero backdrop : image, grain,
+   darkening. Cree un blob organique qui fond dans la page sur tous les
+   contours, aucun cadre rectangulaire visible. */
+.hero-mask {
+  -webkit-mask-image: radial-gradient(ellipse 110% 80% at 50% 35%, black 0%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.5) 70%, transparent 100%);
+  mask-image: radial-gradient(ellipse 110% 80% at 50% 35%, black 0%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.5) 70%, transparent 100%);
+}
+
 /* Hero stage (legacy) : conserve pour compat .hero-stage-grain */
 .hero-stage {
   z-index: 0;

@@ -35,7 +35,7 @@ export function HeroBackdrop({ backdrops = [] }: HeroBackdropProps) {
   return (
     <div
       aria-hidden="true"
-      className="absolute top-0 left-0 right-0 h-[300px] sm:h-[560px] overflow-hidden pointer-events-none"
+      className="absolute top-0 left-0 right-0 h-[340px] sm:h-[600px] overflow-hidden pointer-events-none"
       style={{ zIndex: 1 }}
     >
       <AnimatePresence mode="popLayout">
@@ -53,26 +53,25 @@ export function HeroBackdrop({ backdrops = [] }: HeroBackdropProps) {
               opacity: { duration: 1.8, ease: 'easeInOut' },
               scale: { duration: CYCLE_MS / 1000 + 3, ease: 'linear' },
             }}
-            className="hero-bg-img absolute inset-0 w-full h-full object-cover"
+            className="hero-bg-img hero-mask absolute inset-0 w-full h-full object-cover"
           />
         )}
       </AnimatePresence>
 
-      {/* Grain subtil pour la texture */}
-      <div className="hero-stage-grain absolute inset-0 mix-blend-overlay opacity-25" />
+      {/* Grain : meme masque pour la coherence */}
+      <div className="hero-stage-grain hero-mask absolute inset-0 mix-blend-overlay opacity-25 pointer-events-none" />
 
-      {/* Fade bas : transition douce de l'image vers le bg de la page sur 60%
-          de la hauteur. C'est ce qui evite l'effet "boite". */}
-      <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-b from-transparent via-[var(--bg)]/60 to-[var(--bg)]" />
-
-      {/* Fade lateral : les bords gauche/droit fondent dans le bg pour eviter
-          un cadre rectangulaire net. */}
-      <div className="absolute inset-y-0 left-0 w-12 sm:w-32 bg-gradient-to-r from-[var(--bg)] via-[var(--bg)]/40 to-transparent" />
-      <div className="absolute inset-y-0 right-0 w-12 sm:w-32 bg-gradient-to-l from-[var(--bg)] via-[var(--bg)]/40 to-transparent" />
-
-      {/* Fade haut : tres leger pour assombrir un poil derriere la navbar et
-          assurer la lisibilite des icones. */}
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[var(--bg)]/30 to-transparent" />
+      {/* Darkening interne au blob : sur la portion basse (40% -> 100%) on
+          ajoute un linear-gradient sombre, MASQUE par le meme mask radial.
+          Resultat : la zone darkening epouse la forme du blob, jamais de bord
+          rectangulaire visible. Sert a poser le titre sur du sombre tout en
+          gardant l'effet blob. */}
+      <div
+        className="hero-mask absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(0,0,0,0.45) 70%, rgba(0,0,0,0.7) 100%)',
+        }}
+      />
     </div>
   );
 }
