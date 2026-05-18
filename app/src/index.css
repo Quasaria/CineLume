@@ -403,12 +403,34 @@ html.light .hero-stage p {
   /* shadows seront override via le drop-shadow Tailwind */
 }
 
-/* override Hero text shadows pour light mode */
-html.light .hero-stage + .relative h1 {
-  filter: drop-shadow(0 1px 6px rgba(255, 255, 255, 0.6));
+/* override Hero text shadows pour light mode : titre par-dessus l'image
+   degrade-vers-clair, on bascule la couleur du sous-titre en sombre.
+   Sur mobile le titre est en absolute sur l'image (bottom-3) donc le degrade
+   doit rester sombre meme en light mode pour que le blanc reste lisible. */
+html.light .hero-title h1 {
+  filter: drop-shadow(0 1px 6px rgba(255, 255, 255, 0.5));
 }
-html.light .hero-stage + .relative p {
-  color: rgba(10, 10, 15, 0.78);
+html.light .hero-title p {
+  color: rgba(10, 10, 15, 0.85);
+}
+
+/* En mobile, le titre est over l'image avec degrade dark : on force le
+   degrade a finir sombre en light mode aussi pour que le titre blanc reste
+   lisible. Sur desktop l'image est en grand, le titre est en flow normal,
+   donc le degrade peut fader vers le bg light. */
+@media (max-width: 639.98px) {
+  html.light .hero-stage-overlay {
+    background:
+      radial-gradient(ellipse 70% 60% at 20% 30%, transparent 0%, rgba(10, 10, 15, 0.25) 100%),
+      linear-gradient(to bottom, transparent 0%, rgba(10, 10, 15, 0.45) 50%, rgba(10, 10, 15, 0.8) 100%);
+  }
+  html.light .hero-title h1 {
+    color: #ffffff;
+    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.6));
+  }
+  html.light .hero-title p {
+    color: rgba(255, 255, 255, 0.9);
+  }
 }
 
 /* Hero backdrop legacy (gardes pour compat si jamais) : carrement masque en light mode */
