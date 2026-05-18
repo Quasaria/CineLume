@@ -55,6 +55,15 @@ if (isDark) {
 
 const initialRegion = localStorage.getItem('cinelume_region') || 'FR';
 const initialContext = getCurrentCinemaContext(initialRegion);
+
+// Migration : l'ancien defaut etait 'all' (trop permissif), on le purge une fois
+if (!localStorage.getItem('cinelume_migration_v3')) {
+  if (localStorage.getItem('cinelume_releasemode') === 'all') {
+    localStorage.removeItem('cinelume_releasemode');
+  }
+  localStorage.setItem('cinelume_migration_v3', '1');
+}
+
 const savedReleaseMode = (localStorage.getItem('cinelume_releasemode') as ReleaseMode) || 'theater';
 
 export const useAppStore = create<AppState>((set, get) => ({

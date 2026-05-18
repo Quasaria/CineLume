@@ -317,11 +317,35 @@ html.light .border-white\/10.border-t-violet-500 {
   border-top-color: #7c3aed;
 }
 
-/* Hero backdrop : très discret en light mode */
+/* Hero backdrop : carrement masque en light mode (pas de hack qui marche) */
 html.light .hero-backdrop {
-  opacity: 0.1;
+  display: none;
 }
 
-html.light .hero-backdrop-overlay {
-  background: linear-gradient(to top, #fafafa, rgba(250, 250, 250, 0.7), transparent);
+/* Les cartes films gardent leur poster sombre + degrade noir, donc le texte
+   par-dessus doit rester blanc meme en light mode (sinon illisible). */
+html.light .movie-card .text-white,
+html.light .movie-card-inner .text-white {
+  color: #ffffff;
+}
+html.light .movie-card .text-white\/40,
+html.light .movie-card-inner .text-white\/40 {
+  color: rgba(255, 255, 255, 0.6);
+}
+html.light .movie-card .text-amber-400 {
+  color: #fbbf24;
+}
+
+/* Bouton "Aujourd'hui" : violet plus contraste en light */
+html.light .text-violet-300 {
+  color: #6d28d9;
+}
+html.light .bg-violet-500\/10 {
+  background-color: rgba(124, 58, 237, 0.08);
+}
+html.light .bg-violet-500\/20 {
+  background-color: rgba(124, 58, 237, 0.15);
+}
+html.light .border-violet-500\/20 {
+  border-color: rgba(124, 58, 237, 0.3);
 }
