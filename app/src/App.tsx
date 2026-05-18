@@ -44,7 +44,6 @@ export default function App() {
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
       const w = weeks[idx];
       const startStr = formatDateISO(w.start);
-      const endStr = formatDateISO(w.end);
 
       // Fenetre elargie de 3 jours de chaque cote pour la requete TMDB et la
       // verification client. Catche les films dont la sortie FR officielle est
