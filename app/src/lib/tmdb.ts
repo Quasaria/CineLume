@@ -133,6 +133,47 @@ export async function getMovieDetails(id: number): Promise<MovieDetails> {
   return data;
 }
 
+export interface MovieReleaseDates {
+  id?: number;
+  results: Array<{
+    iso_3166_1: string;
+    release_dates: Array<{
+      certification?: string;
+      iso_639_1?: string;
+      release_date: string;
+      type: number;
+      note?: string;
+    }>;
+  }>;
+}
+
+export async function getMovieReleaseDates(id: number): Promise<MovieReleaseDates> {
+  const apiKey = getApiKey();
+  const cacheKey = `rd_${id}`;
+  const cached = localStorage.getItem(cacheKey);
+
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed.exp > Date.now()) return parsed.data as MovieReleaseDates;
+    } catch {
+      // ignore
+    }
+  }
+
+  const url = `${BASE}/movie/${id}/release_dates?api_key=${apiKey}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Erreur de chargement des dates de sortie');
+  const data = (await res.json()) as MovieReleaseDates;
+
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ data, exp: Date.now() + 86400000 }));
+  } catch {
+    // ignore
+  }
+  return data;
+}
+
 export async function getGenres(): Promise<Genre[]> {
   const apiKey = getApiKey();
   const cacheKey = `genres_cache_${tmdbLang()}`;

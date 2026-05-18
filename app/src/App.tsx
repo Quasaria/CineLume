@@ -3,7 +3,7 @@ import { MotionConfig } from 'framer-motion';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/appStore';
-import { discoverMovies, searchMovies, searchPersons, BACK } from '@/lib/tmdb';
+import { discoverMovies, searchMovies, searchPersons, getMovieReleaseDates, BACK } from '@/lib/tmdb';
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
@@ -43,17 +43,58 @@ export default function App() {
       const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
       const w = weeks[idx];
+      const startStr = formatDateISO(w.start);
+      const endStr = formatDateISO(w.end);
       const res = await discoverMovies({
         region: selRegion,
         genre: selGenre,
-        startDate: formatDateISO(w.start),
-        endDate: formatDateISO(w.end),
+        startDate: startStr,
+        endDate: endStr,
         page: pageParam as number,
         releaseMode: selReleaseMode,
         provider: selProvider,
         personId: selectedPerson?.id ?? null,
       });
-      return res;
+
+      // Pour les modes liés à une semaine de sortie (theater / platform / all), on
+      // verifie via les release_dates de chaque film qu'il sort BIEN dans le pays
+      // selectionne dans la fenetre. TMDB laisse passer des films sans entree FR.
+      // En mode filmographie, on saute cette verification.
+      if (selectedPerson) return res;
+
+      const acceptedTypes =
+        selReleaseMode === 'theater'
+          ? [1, 2, 3]
+          : selReleaseMode === 'platform'
+            ? [4, 6]
+            : [1, 2, 3, 4, 5, 6];
+
+      const enriched = await Promise.all(
+        res.results.map(async (movie) => {
+          if (!movie.poster_path) return null;
+          try {
+            const rd = await getMovieReleaseDates(movie.id);
+            const regionEntry = rd.results.find((r) => r.iso_3166_1 === selRegion);
+            if (!regionEntry || regionEntry.release_dates.length === 0) return null;
+            const hit = regionEntry.release_dates.some((d) => {
+              if (!acceptedTypes.includes(d.type)) return false;
+              const day = (d.release_date || '').split('T')[0];
+              return day >= startStr && day <= endStr;
+            });
+            return hit ? movie : null;
+          } catch {
+            // En cas d'erreur réseau sur release_dates, on garde le film (best effort)
+            return movie;
+          }
+        }),
+      );
+
+      const filtered = enriched.filter((m): m is Movie => m !== null);
+      return {
+        ...res,
+        results: filtered,
+        total_results: filtered.length,
+      };
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage, pages) => {
@@ -86,28 +127,11 @@ export default function App() {
   const isSearchMode = !!debouncedSearch && !selectedPerson;
   const activeQuery = isSearchMode ? searchQueryHook : discoverQuery;
 
-  // Bornes de la semaine en cours pour le filtre client-side
-  const weekBounds = (() => {
-    const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
-    const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
-    const w = weeks[idx];
-    if (!w) return null;
-    return { start: formatDateISO(w.start), end: formatDateISO(w.end) };
-  })();
-
-  // Filtre côté client : on ne fait confiance qu'à movie.release_date (primary mondiale)
-  // pour le mode discover. TMDB lâche parfois des films hors fenêtre.
-  // En mode recherche ou filmographie : on ne filtre pas par date.
-  const rawMovies: Movie[] = activeQuery.data?.pages.flatMap((p) => p.results) || [];
-  const movies: Movie[] = rawMovies.filter((m) => {
-    if (!m.poster_path) return false;
-    if (isSearchMode || selectedPerson) return true;
-    if (!weekBounds || !m.release_date) return false;
-    return m.release_date >= weekBounds.start && m.release_date <= weekBounds.end;
-  });
-  const totalResults = isSearchMode || selectedPerson
-    ? (activeQuery.data?.pages[0]?.total_results || 0)
-    : movies.length;
+  // En mode discover, le queryFn fait deja le filtrage strict via /release_dates.
+  // En mode recherche/filmographie, on garde tout sauf les films sans affiche.
+  const movies: Movie[] = (activeQuery.data?.pages.flatMap((p) => p.results) || [])
+    .filter((m) => !!m.poster_path);
+  const totalResults = activeQuery.data?.pages.reduce((sum, p) => sum + p.results.length, 0) || 0;
   const persons = (personsQuery.data?.results || []).filter((p) => p.profile_path).slice(0, 12);
 
   const loadMore = useCallback(() => {
