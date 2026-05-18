@@ -1,21 +1,24 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
+import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
 const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 
 export function DateNavigator() {
-  const { selYear, selMonth, selWeek, setDate } = useAppStore();
+  const { selYear, selMonth, selWeek, selRegion, setDate } = useAppStore();
   const now = new Date();
   const MIN_YEAR = now.getFullYear() - 1;
   const MAX_YEAR = now.getFullYear() + 2;
 
-  function getWeeksInMonth(y: number, m: number) {
-    const last = new Date(y, m + 1, 0).getDate();
-    return Math.ceil(last / 7);
-  }
+  const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion).length;
 
-  const weeks = getWeeksInMonth(selYear, selMonth);
+  useEffect(() => {
+    if (weeks > 0 && selWeek > weeks) {
+      setDate(selYear, selMonth, weeks);
+    }
+  }, [weeks, selWeek, selYear, selMonth, setDate]);
 
   return (
     <div className="flex items-center gap-3 mb-6 overflow-x-auto no-scrollbar pb-1">

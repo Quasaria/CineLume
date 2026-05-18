@@ -1,27 +1,34 @@
 import { motion } from 'framer-motion';
 import { useAppStore } from '@/store/appStore';
+import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
 const MONTHS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 interface HeroProps {
   backdropUrl?: string;
 }
 
 export function Hero({ backdropUrl }: HeroProps) {
-  const { selYear, selMonth, selWeek, searchQuery } = useAppStore();
+  const { selYear, selMonth, selWeek, selRegion, searchQuery } = useAppStore();
 
-  function getWeekDates() {
-    const last = new Date(selYear, selMonth + 1, 0).getDate();
-    const weeks = Math.ceil(last / 7);
-    const start = (selWeek - 1) * 7 + 1;
-    const end = selWeek === weeks ? last : selWeek * 7;
-    return { start, end };
+  const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
+  const idx = Math.min(Math.max(selWeek - 1, 0), Math.max(weeks.length - 1, 0));
+  const w = weeks[idx];
+
+  let label: string;
+  if (searchQuery) {
+    label = `Résultats pour "${searchQuery}"`;
+  } else if (!w) {
+    label = `${MONTHS_FULL[selMonth]} ${selYear}`;
+  } else {
+    const sameMonth =
+      w.start.getMonth() === w.end.getMonth() &&
+      w.start.getFullYear() === w.end.getFullYear();
+    label = sameMonth
+      ? `${w.start.getDate()}-${w.end.getDate()} ${MONTHS_FULL[w.start.getMonth()]} ${w.start.getFullYear()}`
+      : `${w.start.getDate()} ${MONTHS_SHORT[w.start.getMonth()]} - ${w.end.getDate()} ${MONTHS_SHORT[w.end.getMonth()]} ${w.end.getFullYear()}`;
   }
-
-  const dates = getWeekDates();
-  const label = searchQuery
-    ? `Résultats pour "${searchQuery}"`
-    : `${dates.start}-${dates.end} ${MONTHS_FULL[selMonth]} ${selYear}`;
 
   return (
     <motion.div

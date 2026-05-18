@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -8,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 export function SettingsModal() {
   const { isSettingsOpen, closeSettings, isDark, toggleTheme } = useAppStore();
   const [apiKey, setApiKey] = useState('');
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (isSettingsOpen) {
@@ -20,8 +22,8 @@ export function SettingsModal() {
     const key = apiKey.trim();
     if (key) localStorage.setItem('tmdb_key', key);
     else localStorage.removeItem('tmdb_key');
+    queryClient.invalidateQueries();
     closeSettings();
-    window.location.reload();
   }
 
   function clearCache() {

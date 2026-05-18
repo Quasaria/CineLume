@@ -31,7 +31,13 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <div
           className="flex items-center gap-3 cursor-pointer group"
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            const store = useAppStore.getState();
+            const n = new Date();
+            store.setDate(n.getFullYear(), n.getMonth(), 1);
+            store.setSearchQuery('');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         >
           <motion.div
             whileHover={{ scale: 1.05, rotate: 3 }}

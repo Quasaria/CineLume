@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/appStore';
 import { discoverMovies, searchMovies, BACK } from '@/lib/tmdb';
+import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { DateNavigator } from '@/components/DateNavigator';
@@ -20,30 +21,20 @@ interface DiscoverResponse {
   total_results: number;
 }
 
-function getWeekDates(y: number, m: number, w: number) {
-  const last = new Date(y, m + 1, 0).getDate();
-  const weeks = Math.ceil(last / 7);
-  const start = (w - 1) * 7 + 1;
-  const end = w === weeks ? last : w * 7;
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return {
-    start: `${y}-${pad(m + 1)}-${pad(start)}`,
-    end: `${y}-${pad(m + 1)}-${pad(end)}`,
-  };
-}
-
 export default function App() {
   const { selYear, selMonth, selWeek, selRegion, selGenre, searchQuery } = useAppStore();
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
     queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre],
     queryFn: async ({ pageParam = 1 }) => {
-      const dates = getWeekDates(selYear, selMonth, selWeek);
+      const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
+      const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
+      const w = weeks[idx];
       const res = await discoverMovies({
         region: selRegion,
         genre: selGenre,
-        startDate: dates.start,
-        endDate: dates.end,
+        startDate: formatDateISO(w.start),
+        endDate: formatDateISO(w.end),
         page: pageParam as number,
       });
       return res;
