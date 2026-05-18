@@ -22,7 +22,7 @@ export function DateNavigator() {
   }, [weeks, selWeek, selYear, selMonth, setDate]);
 
   return (
-    <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 mb-6 bg-[var(--bg)]/85 backdrop-blur-lg border-b border-white/[0.06]">
+    <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 mb-6 bg-[var(--bg)]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-lg shadow-black/20">
       <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1">
       <motion.button
         type="button"
@@ -62,7 +62,7 @@ export function DateNavigator() {
             className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
               i === selMonth
                 ? 'bg-white text-black'
-                : 'text-white/40 hover:text-white hover:bg-white/5'
+                : 'text-white/75 hover:text-white hover:bg-white/5'
             }`}
           >
             {m}
@@ -81,8 +81,8 @@ export function DateNavigator() {
             onClick={() => setDate(selYear, selMonth, w)}
             className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               w === selWeek
-                ? 'bg-white/10 text-white border border-white/10'
-                : 'text-white/40 hover:text-white hover:bg-white/5'
+                ? 'bg-white/15 text-white border border-white/20'
+                : 'text-white/75 hover:text-white hover:bg-white/5'
             }`}
           >
             S{w}

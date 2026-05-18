@@ -62,16 +62,24 @@ export default function App() {
       // En mode filmographie, on saute cette verification.
       if (selectedPerson) return res;
 
+      // Types acceptes : on exclut type 1 (Premiere/festival) qui ne constitue pas
+      // une sortie cinema reelle, et type 5 (physique) qui n'est pas pertinent.
       const acceptedTypes =
         selReleaseMode === 'theater'
-          ? [1, 2, 3]
+          ? [2, 3]
           : selReleaseMode === 'platform'
             ? [4, 6]
-            : [1, 2, 3, 4, 5, 6];
+            : [2, 3, 4, 6];
+
+      // Recency 2 ans sur la primary worldwide date : exclut les vieux films qui
+      // auraient une re-projection theatrale recente (anniversaire, restauration).
+      const startYear = parseInt(startStr.slice(0, 4), 10);
+      const recencyCutoff = `${startYear - 2}-01-01`;
 
       const enriched = await Promise.all(
         res.results.map(async (movie) => {
           if (!movie.poster_path) return null;
+          if (movie.release_date && movie.release_date < recencyCutoff) return null;
           try {
             const rd = await getMovieReleaseDates(movie.id);
             const regionEntry = rd.results.find((r) => r.iso_3166_1 === selRegion);
