@@ -109,6 +109,11 @@ html.light {
   --accent-2: #0891b2;
 }
 
+html {
+  /* Empeche le pull-to-refresh Chrome Android et le bounce iOS sur la page */
+  overscroll-behavior-y: none;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
@@ -116,6 +121,21 @@ body {
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
   font-family: 'Inter', system-ui, sans-serif;
+  /* Pas de fond gris au tap sur iOS/Android */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Boutons : pas de tap highlight visible */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area iOS pour la navbar et le contenu bas */
+.safe-pt {
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+.safe-pb {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
 }
 
 .ambient-bg {

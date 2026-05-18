@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Heart, Star } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
-import { IMG } from '@/lib/tmdb';
+import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import type { Movie } from '@/types/movie';
 
@@ -30,6 +30,8 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
         <div className="w-20 h-28 rounded-xl overflow-hidden bg-white/5 shrink-0 relative">
           <img
             src={`${IMG}${movie.poster_path}`}
+            srcSet={posterSrcSet(movie.poster_path)}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
             alt={movie.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"

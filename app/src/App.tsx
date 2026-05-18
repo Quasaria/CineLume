@@ -7,6 +7,7 @@ import { discoverMovies, searchMovies, searchPersons, getMovieReleaseDates, BACK
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { DateNavigator } from '@/components/DateNavigator';
@@ -29,6 +30,7 @@ interface DiscoverResponse {
 export default function App() {
   const { i18n } = useTranslation();
   const lang = i18n.language;
+  const isMobile = useIsMobile();
   const {
     selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
     selectedPerson, searchQuery,
@@ -225,7 +227,7 @@ export default function App() {
         <FavoritesModal />
         <SettingsModal />
         <Toaster
-          position="bottom-right"
+          position={isMobile ? 'bottom-center' : 'bottom-right'}
           toastOptions={{
             style: {
               background: '#18181f',

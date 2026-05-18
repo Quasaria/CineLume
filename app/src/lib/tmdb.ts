@@ -7,6 +7,23 @@ export const IMG = 'https://image.tmdb.org/t/p/w500';
 export const BACK = 'https://image.tmdb.org/t/p/w1280';
 export const PROF = 'https://image.tmdb.org/t/p/w185';
 export const ORIG = 'https://image.tmdb.org/t/p/original';
+
+const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p';
+
+export function posterSrcSet(path: string | null | undefined): string | undefined {
+  if (!path) return undefined;
+  return [185, 342, 500].map((w) => `${TMDB_IMG_BASE}/w${w}${path} ${w}w`).join(', ');
+}
+
+export function backdropSrcSet(path: string | null | undefined): string | undefined {
+  if (!path) return undefined;
+  return [780, 1280].map((w) => `${TMDB_IMG_BASE}/w${w}${path} ${w}w`).join(', ');
+}
+
+export function profileSrcSet(path: string | null | undefined): string | undefined {
+  if (!path) return undefined;
+  return [`${TMDB_IMG_BASE}/w45${path} 45w`, `${TMDB_IMG_BASE}/w185${path} 185w`].join(', ');
+}
 export const TMDB_SITE = 'https://www.themoviedb.org/movie';
 
 function getApiKey(): string {

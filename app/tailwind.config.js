@@ -2,6 +2,12 @@
 module.exports = {
   darkMode: ["class"],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  future: {
+    // hover: appliquee uniquement sur les appareils qui supportent vraiment
+    // le hover (souris). Sur tactile, les hover:bg-... ne restent plus
+    // "allumes" apres un tap.
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       colors: {
