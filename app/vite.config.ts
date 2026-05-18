@@ -31,6 +31,13 @@ export default defineConfig(({ command }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,ico,png,woff2}'],
+        // skipWaiting + clientsClaim : la nouvelle version du SW s'active
+        // immediatement et prend le controle des pages ouvertes. Sans ca, les
+        // utilisateurs restaient bloques sur l'ancien bundle JS tant qu'ils
+        // n'avaient pas ferme tous les onglets.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/image\.tmdb\.org\/t\/p\//,
