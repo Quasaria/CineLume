@@ -73,6 +73,7 @@
     "close": "Close movie details",
     "status": {
       "Released": "Released",
+      "Upcoming": "Upcoming",
       "Post Production": "Post-prod",
       "In Production": "Production",
       "Planned": "Planned"

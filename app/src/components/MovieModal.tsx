@@ -101,7 +101,7 @@ export function MovieModal() {
               type="button"
               onClick={closeModal}
               aria-label={t('modal.close')}
-              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30"
+              className="absolute top-5 right-5 sm:top-5 sm:right-5 z-50 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30"
             >
               <X className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
@@ -166,22 +166,50 @@ export function MovieModal() {
                     )}
 
                     <div className="flex-1 min-w-0 pt-2">
-                      <div className="flex flex-wrap gap-2 mb-3 items-center">
-                        <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-300 text-xs font-bold border border-violet-500/20">
-                          {fmtDate(movie.release_date)}
-                        </span>
-                        {movie.runtime > 0 && (
-                          <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 text-white/50 text-xs font-medium border border-white/10">
-                            <Clock className="w-3 h-3" />
-                            {Math.floor(movie.runtime / 60)}h{String(movie.runtime % 60).padStart(2, '0')}
-                          </span>
-                        )}
-                        {movie.status && t(`modal.status.${movie.status}`, { defaultValue: '' }) && (
-                          <span className="px-3 py-1 rounded-full bg-white/5 text-white/60 text-xs font-medium border border-white/10">
-                            {t(`modal.status.${movie.status}`)}
-                          </span>
-                        )}
-                      </div>
+                      {(() => {
+                        // Derive le statut affiche du film a partir de la date de
+                        // sortie FR (ou primary mondiale en fallback) vs aujourd'hui,
+                        // pour eviter d'afficher "Sorti" sur un film prevu dans 2 jours
+                        // juste parce que TMDB a deja flag movie.status = Released
+                        // pour la sortie monde.
+                        const today = new Date().toISOString().split('T')[0];
+                        const frTheater = movie.release_dates?.results
+                          .find((r) => r.iso_3166_1 === selRegion)
+                          ?.release_dates
+                          .filter((d) => [2, 3].includes(d.type) && d.release_date)
+                          .map((d) => d.release_date.split('T')[0])
+                          .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s))
+                          .sort()[0];
+                        const refDate = frTheater || movie.release_date;
+                        const derivedStatus = refDate
+                          ? refDate <= today
+                            ? 'Released'
+                            : 'Upcoming'
+                          : null;
+
+                        return (
+                          <div className="flex flex-wrap gap-2 mb-3 items-center">
+                            <span className="px-3 py-1 rounded-full bg-violet-500/10 text-violet-300 text-xs font-bold border border-violet-500/20">
+                              {fmtDate(movie.release_date)}
+                            </span>
+                            {movie.runtime > 0 && (
+                              <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-white/5 text-white/50 text-xs font-medium border border-white/10">
+                                <Clock className="w-3 h-3" />
+                                {Math.floor(movie.runtime / 60)}h{String(movie.runtime % 60).padStart(2, '0')}
+                              </span>
+                            )}
+                            {derivedStatus && (
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                                derivedStatus === 'Upcoming'
+                                  ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30'
+                                  : 'bg-white/5 text-white/60 border-white/10'
+                              }`}>
+                                {t(`modal.status.${derivedStatus}`)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       <div className="flex items-start justify-between gap-4 mb-1">
                         <h2 className="text-2xl sm:text-4xl font-bold leading-tight">
@@ -218,10 +246,14 @@ export function MovieModal() {
                       )}
 
                       {(() => {
+                        // On filtre les entrees sans date valide (TMDB en met
+                        // parfois avec un release_date vide), sinon on affichait
+                        // "Date inconnue" alors que la vraie date est connue
+                        // par ailleurs dans le json.
                         const regional = movie.release_dates?.results
                           .find((r) => r.iso_3166_1 === selRegion)
                           ?.release_dates
-                          .filter((d) => [1, 2, 3, 4, 5, 6].includes(d.type))
+                          .filter((d) => [1, 2, 3, 4, 5, 6].includes(d.type) && d.release_date && /^\d{4}-\d{2}-\d{2}/.test(d.release_date))
                           .sort((a, b) => new Date(a.release_date).getTime() - new Date(b.release_date).getTime());
                         if (!regional || regional.length === 0) return null;
                         return (

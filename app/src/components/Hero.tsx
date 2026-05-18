@@ -67,9 +67,12 @@ export function Hero({ backdrops = [] }: HeroProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="mb-4 sm:mb-10 relative"
+      className="mb-2 sm:mb-10 relative"
     >
-      <div className="hero-stage absolute -top-14 sm:-top-16 -left-8 -right-8 sm:-left-12 sm:-right-12 h-[130px] sm:h-[460px] rounded-3xl overflow-hidden pointer-events-none">
+      {/* Hero stage avec slideshow : visible UNIQUEMENT en desktop.
+          Sur mobile l'image prenait trop de place pour zero info, on garde
+          juste le titre + date sur fond gradient ambient. */}
+      <div className="hero-stage hidden sm:block absolute -top-16 -left-12 -right-12 h-[460px] rounded-3xl overflow-hidden pointer-events-none">
         <AnimatePresence mode="popLayout">
           {currentBackdrop && (
             <motion.img
@@ -95,11 +98,11 @@ export function Hero({ backdrops = [] }: HeroProps) {
         <div className="hero-stage-sides absolute inset-0" />
       </div>
 
-      <div className="relative pt-3 sm:pt-12">
-        <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-1 sm:mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.65)]">
+      <div className="relative pt-0 sm:pt-12">
+        <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-0.5 sm:mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.65)]">
           {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
         </h1>
-        <p className="text-white/85 text-sm sm:text-lg font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">{label}</p>
+        <p className="text-white/70 sm:text-white/85 text-sm sm:text-lg font-light">{label}</p>
 
         {backdrops.length > 1 && (
           <div className="hidden sm:flex gap-1.5 mt-4" aria-hidden="true">

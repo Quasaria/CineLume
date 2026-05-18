@@ -62,12 +62,16 @@ export default function App() {
       // Filmographie : pas de filtre date, on garde la carriere complete.
       if (selectedPerson) return res;
 
+      // Theater = [2, 3] uniquement (sortie limitee + wide).
+      // On exclut le type 1 (avant-premiere/festival) qui amenait des films
+      // comme des projections-festival uniquement (films chinois/asiatiques
+      // sans vraie sortie nationale en France par exemple).
       const acceptedTypes =
         selReleaseMode === 'theater'
-          ? [1, 2, 3]
+          ? [2, 3]
           : selReleaseMode === 'platform'
             ? [4, 6]
-            : [1, 2, 3, 4, 6];
+            : [2, 3, 4, 6];
 
       // Recency 12 mois : exclut les films dont la premiere sortie mondiale
       // a plus d'un an. Bloque les re-projections d'anciens films (Night Swim
@@ -198,7 +202,7 @@ export default function App() {
 
         <Navbar />
 
-        <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-20">
+        <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-32 pb-20">
           <Hero backdrops={heroBackdrops} />
 
           <DateNavigator />
