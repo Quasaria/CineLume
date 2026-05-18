@@ -100,11 +100,11 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
               vote_average: movie.vote_average,
             });
           }}
-          className={`absolute top-2.5 left-2.5 z-20 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-all ${
+          className={`absolute top-2 left-2 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-all ${
             fav ? 'text-red-500' : 'text-white/80'
           }`}
         >
-          <Heart className={`w-3.5 h-3.5 ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
+          <Heart className={`w-4 h-4 ${fav ? 'fill-current' : ''}`} aria-hidden="true" />
         </motion.button>
 
         {movie.vote_average > 0 && (

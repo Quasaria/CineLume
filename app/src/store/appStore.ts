@@ -1,6 +1,7 @@
 import { create } from 'zustand';
+import { toast } from 'sonner';
 import type { FavoriteMovie, ViewMode } from '@/types/movie';
-import { getCurrentCinemaContext } from '@/lib/cinema-week';
+import { getCurrentCinemaContext, getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
 export type ReleaseMode = 'theater' | 'platform' | 'all';
 
@@ -120,7 +121,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setRegion: (region) => {
     localStorage.setItem('cinelume_region', region);
-    set({ selRegion: region });
+    const state = get();
+    const weeks = getCinemaWeeksOfMonth(state.selYear, state.selMonth, region);
+    const clampedWeek = Math.min(Math.max(state.selWeek, 1), Math.max(weeks.length, 1));
+    set({ selRegion: region, selWeek: clampedWeek });
   },
 
   setGenre: (genre) => {
@@ -146,18 +150,28 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleFav: (movie) => {
     const favs = [...get().favorites];
     const idx = favs.findIndex(f => f.id === movie.id);
-    if (idx > -1) {
+    const wasFav = idx > -1;
+    if (wasFav) {
       favs.splice(idx, 1);
     } else {
       favs.push(movie);
     }
-    localStorage.setItem('cinelume_favs', JSON.stringify(favs));
+    try {
+      localStorage.setItem('cinelume_favs', JSON.stringify(favs));
+    } catch {
+      // ignore
+    }
     set({ favorites: favs });
+    toast.success(wasFav ? `${movie.title} retiré des favoris` : `${movie.title} ajouté aux favoris`);
   },
 
   removeFav: (id) => {
     const favs = get().favorites.filter(f => f.id !== id);
-    localStorage.setItem('cinelume_favs', JSON.stringify(favs));
+    try {
+      localStorage.setItem('cinelume_favs', JSON.stringify(favs));
+    } catch {
+      // ignore
+    }
     set({ favorites: favs });
   },
 
