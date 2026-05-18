@@ -90,9 +90,12 @@ export default function App() {
             ? [4, 6]
             : [1, 2, 3, 4, 6];
 
-      // Recency 2 ans sur la primary worldwide date.
-      const startYear = parseInt(startStr.slice(0, 4), 10);
-      const recencyCutoff = `${startYear - 2}-01-01`;
+      // Recency 12 mois : excluet les vieux films (Night Swim 2024, etc.) qui
+      // auraient une re-projection FR cette semaine. On garde une marge raisonnable
+      // pour les films type Cannes-puis-FR-1-an-plus-tard.
+      const recencyCutoffDate = new Date(w.start);
+      recencyCutoffDate.setMonth(recencyCutoffDate.getMonth() - 12);
+      const recencyCutoff = formatDateISO(recencyCutoffDate);
 
       // Pays "proxy occidentaux" pour fallback quand TMDB n'a pas d'entree pour
       // la region selectionnee : si le film a une sortie theatrale dans un de
@@ -105,30 +108,38 @@ export default function App() {
           try {
             const rd = await getMovieReleaseDates(movie.id);
             // 1. Strict : si TMDB a une entree pour la region selectionnee, on
-            //    suit cette donnee a la lettre.
+            //    prend la PLUS ANCIENNE entree matchant le type. Le film
+            //    n'apparait que dans la semaine de cette premiere entree, jamais
+            //    dans plusieurs semaines successives.
             const regionEntry = rd.results.find((r) => r.iso_3166_1 === selRegion);
             if (regionEntry && regionEntry.release_dates.length > 0) {
-              const hit = regionEntry.release_dates.some((d) => {
-                if (!acceptedTypes.includes(d.type)) return false;
-                const day = (d.release_date || '').split('T')[0];
-                return day >= startStr && day <= endStr;
-              });
-              return hit ? movie : null;
+              const matching = regionEntry.release_dates
+                .filter((d) => acceptedTypes.includes(d.type))
+                .map((d) => (d.release_date || '').split('T')[0])
+                .filter((day) => !!day)
+                .sort();
+              if (matching.length === 0) return null;
+              const earliest = matching[0];
+              return earliest >= startStr && earliest <= endStr ? movie : null;
             }
             // 2. Fallback : pas de donnees pour la region. On regarde si le film
             //    a une sortie theatrale dans un pays proxy dans la semaine -> on
-            //    suppose qu'il sortira aussi dans la region. Catche les sorties
-            //    Hollywood dont TMDB n'a pas encore la donnee FR.
-            const proxyHit = PROXY_COUNTRIES.some((code) => {
+            //    suppose qu'il sortira aussi dans la region. Idem : on prend la
+            //    PLUS ANCIENNE entree proxy pour ne pas dupliquer.
+            const allProxyDates: string[] = [];
+            for (const code of PROXY_COUNTRIES) {
               const entry = rd.results.find((r) => r.iso_3166_1 === code);
-              if (!entry) return false;
-              return entry.release_dates.some((d) => {
-                if (!acceptedTypes.includes(d.type)) return false;
+              if (!entry) continue;
+              for (const d of entry.release_dates) {
+                if (!acceptedTypes.includes(d.type)) continue;
                 const day = (d.release_date || '').split('T')[0];
-                return day >= startStr && day <= endStr;
-              });
-            });
-            return proxyHit ? movie : null;
+                if (day) allProxyDates.push(day);
+              }
+            }
+            if (allProxyDates.length === 0) return null;
+            allProxyDates.sort();
+            const earliestProxy = allProxyDates[0];
+            return earliestProxy >= startStr && earliestProxy <= endStr ? movie : null;
           } catch {
             // En cas d'erreur reseau sur release_dates, on garde le film (best effort)
             return movie;
