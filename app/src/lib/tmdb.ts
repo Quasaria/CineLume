@@ -45,8 +45,16 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
 
   let releaseTypeQ = '';
   let providerQ = '';
+  let recencyQ = '';
   if (mode === 'theater') {
-    releaseTypeQ = '&with_release_type=1|2|3';
+    releaseTypeQ = '&with_release_type=2|3';
+    const start = new Date(params.startDate);
+    const cutoff = new Date(start);
+    cutoff.setFullYear(cutoff.getFullYear() - 2);
+    const y = cutoff.getFullYear();
+    const m = String(cutoff.getMonth() + 1).padStart(2, '0');
+    const d = String(cutoff.getDate()).padStart(2, '0');
+    recencyQ = `&primary_release_date.gte=${y}-${m}-${d}`;
   } else if (mode === 'platform') {
     releaseTypeQ = '&with_release_type=4|6';
     if (params.provider) {
@@ -54,7 +62,7 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
     }
   }
 
-  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}${releaseTypeQ}${providerQ}&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}&sort_by=popularity.desc&page=${params.page}`;
+  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}${releaseTypeQ}${providerQ}${recencyQ}&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}&sort_by=popularity.desc&page=${params.page}`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de connexion TMDB');
