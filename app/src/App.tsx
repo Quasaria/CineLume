@@ -22,10 +22,10 @@ interface DiscoverResponse {
 }
 
 export default function App() {
-  const { selYear, selMonth, selWeek, selRegion, selGenre, searchQuery } = useAppStore();
+  const { selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, searchQuery } = useAppStore();
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
-    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre],
+    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider],
     queryFn: async ({ pageParam = 1 }) => {
       const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
@@ -36,6 +36,8 @@ export default function App() {
         startDate: formatDateISO(w.start),
         endDate: formatDateISO(w.end),
         page: pageParam as number,
+        releaseMode: selReleaseMode,
+        provider: selProvider,
       });
       return res;
     },

@@ -17,13 +17,44 @@ export interface DiscoverParams {
   startDate: string;
   endDate: string;
   page: number;
+  releaseMode?: 'theater' | 'platform' | 'all';
+  provider?: string;
 }
+
+export interface Provider {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export const PROVIDERS: Provider[] = [
+  { id: '8', name: 'Netflix', color: '#e50914' },
+  { id: '119', name: 'Prime Video', color: '#00a8e1' },
+  { id: '337', name: 'Disney+', color: '#0e47a1' },
+  { id: '350', name: 'Apple TV+', color: '#a1a1a1' },
+  { id: '1899', name: 'Max', color: '#002be7' },
+  { id: '531', name: 'Paramount+', color: '#0064ff' },
+  { id: '381', name: 'Canal+', color: '#000000' },
+];
 
 export async function discoverMovies(params: DiscoverParams): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
   const apiKey = getApiKey();
   const region = params.region || 'FR';
+  const mode = params.releaseMode || 'theater';
   const genreQ = params.genre ? `&with_genres=${params.genre}` : '';
-  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}&with_release_type=2|3&sort_by=popularity.desc&page=${params.page}`;
+
+  let releaseTypeQ = '';
+  let providerQ = '';
+  if (mode === 'theater') {
+    releaseTypeQ = '&with_release_type=1|2|3';
+  } else if (mode === 'platform') {
+    releaseTypeQ = '&with_release_type=4|6';
+    if (params.provider) {
+      providerQ = `&with_watch_providers=${params.provider}&watch_region=${region}`;
+    }
+  }
+
+  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=fr-FR&region=${region}${genreQ}${releaseTypeQ}${providerQ}&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}&sort_by=popularity.desc&page=${params.page}`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de connexion TMDB');
