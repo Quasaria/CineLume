@@ -33,11 +33,14 @@ export function Navbar() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 safe-pt ${
-        scrolled
-          ? 'bg-[#050508]/85 backdrop-blur-xl shadow-lg shadow-black/20 border-b border-white/5'
-          : 'bg-transparent'
-      }`}
+      className="fixed top-0 w-full z-50 transition-colors duration-500 safe-pt nav-feather"
+      style={{
+        backgroundColor: scrolled ? 'color-mix(in srgb, var(--bg) 72%, transparent)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(20px) saturate(140%)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(140%)' : 'none',
+        // @ts-expect-error css custom property
+        '--feather-opacity': scrolled ? 1 : 0,
+      }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
         <button
@@ -116,7 +119,7 @@ export function Navbar() {
             className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors"
           >
             {isDark ? (
-              <Sun className="w-5 h-5 text-amber-400" aria-hidden="true" />
+              <Sun className="w-5 h-5 text-amber-300/80" aria-hidden="true" />
             ) : (
               <Moon className="w-5 h-5 text-white/70" aria-hidden="true" />
             )}

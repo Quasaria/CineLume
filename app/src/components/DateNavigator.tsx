@@ -38,8 +38,13 @@ export function DateNavigator() {
 
   return (
     <div
-      className="sticky z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-1.5 sm:py-3 mb-4 sm:mb-6 bg-[var(--bg)]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-lg shadow-black/20"
-      style={{ top: 'calc(4rem + env(safe-area-inset-top))' }}
+      className="sticky z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-1.5 sm:py-3 mb-4 sm:mb-6 nav-feather"
+      style={{
+        top: 'calc(4rem + env(safe-area-inset-top))',
+        backgroundColor: 'color-mix(in srgb, var(--bg) 92%, transparent)',
+        backdropFilter: 'blur(20px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+      }}
     >
       {/* Mobile : 2 lignes serrees (annee+actions, puis mois+semaines combinees).
           Desktop : 1 ligne avec tout. */}

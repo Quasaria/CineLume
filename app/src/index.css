@@ -337,6 +337,26 @@ html.light .border-white\/10.border-t-violet-500 {
   border-top-color: #7c3aed;
 }
 
+/* Navigation feather : remplace les border + shadow tranchants par un
+   degrade subtil sous la barre, pour fondre navbar et DateNav dans le
+   contenu page de facon fluide. */
+.nav-feather {
+  position: relative;
+}
+
+.nav-feather::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 18px;
+  background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+  pointer-events: none;
+  opacity: var(--feather-opacity, 1);
+  transition: opacity 0.5s ease;
+}
+
 /* Hero stage : slideshow de backdrops, integration theme */
 .hero-stage {
   z-index: 0;
