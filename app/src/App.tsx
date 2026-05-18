@@ -103,7 +103,12 @@ export default function App() {
               .sort();
             if (matching.length === 0) return null;
             const earliest = matching[0];
-            return earliest >= startStr && earliest <= endStr ? movie : null;
+            if (earliest < startStr || earliest > endStr) return null;
+            // On surcharge release_date par la date FR matchee pour que la
+            // carte affiche la vraie date de sortie FR, pas la primary mondiale
+            // (qui peut etre tres differente : ex. sortie FR 22 mai mais sortie
+            // mondiale wide 10 septembre).
+            return { ...movie, release_date: earliest };
           } catch {
             // Erreur reseau sur release_dates : on garde le film en best effort
             return movie;
