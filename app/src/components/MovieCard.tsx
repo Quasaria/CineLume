@@ -13,9 +13,7 @@ interface MovieCardProps {
 }
 
 export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
-  const { t, i18n } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _lang = i18n.language; // re-render quand la langue change
+  const { t } = useTranslation();
   const { isFav, toggleFav, openModal } = useAppStore();
   const fav = isFav(movie.id);
   const fmtDate = (d?: string) => fmtDateLocalized(d);
