@@ -65,9 +65,7 @@ function groupFavorites(favorites: FavoriteMovie[]): Group[] {
 }
 
 export function FavoritesModal() {
-  const { t, i18n } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _lang = i18n.language;
+  const { t } = useTranslation();
   const { isFavOpen, closeFavorites, favorites, removeFav, openModal } = useAppStore();
   const groups = useMemo(() => groupFavorites(favorites), [favorites]);
   const fmtDate = (d?: string) => fmtDateLocalized(d);
