@@ -8,6 +8,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 function fmtDate(d?: string) {
   if (!d) return 'Date inconnue';
+  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function fmtDateShort(d?: string) {
+  if (!d) return 'Date inconnue';
   return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
 }
 
@@ -23,8 +28,17 @@ const statusMap: Record<string, string> = {
   'Planned': 'Planifié',
 };
 
+const releaseTypeLabel: Record<number, string> = {
+  1: 'Avant-première',
+  2: 'Sortie limitée',
+  3: 'Sortie en salles',
+  4: 'Sortie numérique',
+  5: 'Sortie physique',
+  6: 'Sortie TV',
+};
+
 export function MovieModal() {
-  const { currentModalMovieId, closeModal, isFav, toggleFav } = useAppStore();
+  const { currentModalMovieId, closeModal, isFav, toggleFav, selRegion } = useAppStore();
   const [touchY, setTouchY] = useState(0);
 
   const { data: details, isLoading } = useQuery({
@@ -184,6 +198,27 @@ export function MovieModal() {
                           </span>
                         </p>
                       )}
+
+                      {(() => {
+                        const regional = movie.release_dates?.results
+                          .find((r) => r.iso_3166_1 === selRegion)
+                          ?.release_dates
+                          .filter((d) => releaseTypeLabel[d.type])
+                          .sort((a, b) => new Date(a.release_date).getTime() - new Date(b.release_date).getTime());
+                        if (!regional || regional.length === 0) return null;
+                        return (
+                          <div className="flex flex-wrap gap-1.5 mb-5">
+                            <span className="text-[10px] text-white/40 uppercase tracking-wider font-bold self-center mr-1">
+                              Sortie {selRegion}
+                            </span>
+                            {regional.map((r, i) => (
+                              <span key={i} className="text-[11px] text-white/60 bg-white/[0.04] border border-white/[0.08] rounded-md px-2 py-1">
+                                {releaseTypeLabel[r.type]} <span className="text-white font-semibold ml-1">{fmtDateShort(r.release_date)}</span>
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })()}
 
                       <div className="flex flex-wrap items-center gap-3 mb-5">
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">

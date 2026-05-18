@@ -316,3 +316,12 @@ html.light .border-white\/10.border-t-violet-500 {
   border-color: rgba(10, 10, 15, 0.1);
   border-top-color: #7c3aed;
 }
+
+/* Hero backdrop : très discret en light mode */
+html.light .hero-backdrop {
+  opacity: 0.1;
+}
+
+html.light .hero-backdrop-overlay {
+  background: linear-gradient(to top, #fafafa, rgba(250, 250, 250, 0.7), transparent);
+}

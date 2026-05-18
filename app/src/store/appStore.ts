@@ -55,7 +55,7 @@ if (isDark) {
 
 const initialRegion = localStorage.getItem('cinelume_region') || 'FR';
 const initialContext = getCurrentCinemaContext(initialRegion);
-const savedReleaseMode = (localStorage.getItem('cinelume_releasemode') as ReleaseMode) || 'all';
+const savedReleaseMode = (localStorage.getItem('cinelume_releasemode') as ReleaseMode) || 'theater';
 
 export const useAppStore = create<AppState>((set, get) => ({
   isDark,
