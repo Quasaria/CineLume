@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Heart, Sun, Moon, Settings, Film } from 'lucide-react';
+import { Search, Heart, Sun, Moon, Settings } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
+
+function LogoMark({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3.5 1.6" strokeLinecap="round" />
+      <path d="M10 8.5 L16 12 L10 15.5 Z" fill="currentColor" />
+    </svg>
+  );
+}
 
 export function Navbar() {
   const { isDark, toggleTheme, openFavorites, openSettings, favorites, searchQuery, setSearchQuery } = useAppStore();
@@ -41,9 +50,9 @@ export function Navbar() {
         >
           <motion.div
             whileHover={{ scale: 1.05, rotate: 3 }}
-            className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20"
+            className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/30 ring-1 ring-white/10"
           >
-            <Film className="w-5 h-5 text-white" />
+            <LogoMark className="w-5 h-5 text-white" />
           </motion.div>
           <span className="font-bold text-xl tracking-tight">
             Cine<span className="text-gradient">Lume</span>

@@ -1,12 +1,13 @@
-import { Film } from 'lucide-react';
-
 export function Footer() {
   return (
     <footer className="relative z-10 border-t border-white/5 py-8 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2 opacity-60">
-          <div className="w-5 h-5 rounded bg-gradient-to-br from-violet-600 to-cyan-500 flex items-center justify-center">
-            <Film className="w-3 h-3 text-white" />
+          <div className="w-5 h-5 rounded bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-500 flex items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 text-white">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="3.5 1.5" strokeLinecap="round" />
+              <path d="M10 8.5 L16 12 L10 15.5 Z" fill="currentColor" />
+            </svg>
           </div>
           <span className="font-bold text-white/80">CineLume</span>
           <span className="text-white/30 text-xs">© 2026</span>
