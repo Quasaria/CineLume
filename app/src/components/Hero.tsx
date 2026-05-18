@@ -67,12 +67,11 @@ export function Hero({ backdrops = [] }: HeroProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="mb-2 sm:mb-10 relative"
+      className="mb-4 sm:mb-10 relative"
     >
-      {/* Hero stage avec slideshow : visible UNIQUEMENT en desktop.
-          Sur mobile l'image prenait trop de place pour zero info, on garde
-          juste le titre + date sur fond gradient ambient. */}
-      <div className="hero-stage hidden sm:block absolute -top-16 -left-12 -right-12 h-[460px] rounded-3xl overflow-hidden pointer-events-none">
+      {/* Hero stage : sur mobile en flow normal (donne sa hauteur au wrapper),
+          sur desktop en absolute pour le grand effet billboard derriere le titre. */}
+      <div className="hero-stage relative h-[160px] -mx-4 rounded-2xl overflow-hidden sm:absolute sm:-top-16 sm:-left-12 sm:-right-12 sm:h-[460px] sm:rounded-3xl sm:mx-0 pointer-events-none">
         <AnimatePresence mode="popLayout">
           {currentBackdrop && (
             <motion.img
@@ -95,14 +94,16 @@ export function Hero({ backdrops = [] }: HeroProps) {
 
         <div className="hero-stage-grain absolute inset-0 mix-blend-overlay opacity-30 pointer-events-none" />
         <div className="hero-stage-overlay absolute inset-0" />
-        <div className="hero-stage-sides absolute inset-0" />
+        <div className="hero-stage-sides absolute inset-0 hidden sm:block" />
       </div>
 
-      <div className="relative pt-0 sm:pt-12">
-        <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-0.5 sm:mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.65)]">
+      {/* Titre : sur mobile pose en absolute en bas de l'image (overlay sur le
+          degrade dark), sur desktop en flow normal sous le hero absolute. */}
+      <div className="hero-title absolute left-0 right-0 bottom-3 px-4 z-10 sm:static sm:px-0 sm:pt-12">
+        <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-0.5 sm:mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.85)]">
           {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
         </h1>
-        <p className="text-white/70 sm:text-white/85 text-sm sm:text-lg font-light">{label}</p>
+        <p className="text-white/90 text-sm sm:text-lg font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{label}</p>
 
         {backdrops.length > 1 && (
           <div className="hidden sm:flex gap-1.5 mt-4" aria-hidden="true">
