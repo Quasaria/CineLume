@@ -37,10 +37,10 @@ export function Hero() {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="hero-title relative mb-4 sm:mb-10 pt-40 sm:pt-72 z-10"
     >
-      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-1 sm:mb-2 drop-shadow-[0_3px_16px_rgba(0,0,0,0.85)]">
+      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-1 sm:mb-2 [filter:drop-shadow(0_3px_12px_rgba(0,0,0,0.9))_drop-shadow(0_0_28px_rgba(0,0,0,0.6))]">
         {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
       </h1>
-      <p className="text-white/90 text-sm sm:text-lg font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">{label}</p>
+      <p className="text-white/95 text-sm sm:text-lg font-light [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.9))_drop-shadow(0_0_16px_rgba(0,0,0,0.5))]">{label}</p>
     </motion.div>
   );
 }
