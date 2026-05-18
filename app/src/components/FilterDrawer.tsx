@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Film, Tv, Sparkles } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/appStore';
 import type { ReleaseMode } from '@/store/appStore';
@@ -8,6 +8,7 @@ import { getGenres, PROVIDERS } from '@/lib/tmdb';
 import { useQuery } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useDragToClose } from '@/hooks/useDragToClose';
 
 const REGION_CODES = ['FR', 'US', 'GB', 'JP', 'DE', 'ES', 'IT', 'KR', 'CA', 'AU', 'BR', 'MX', 'IN', 'CN', 'RU', 'SE', 'NL', 'BE', 'CH', 'AT'] as const;
 const FLAGS: Record<string, string> = {
@@ -36,6 +37,8 @@ export function FilterDrawer() {
   const [tempGenre, setTempGenre] = useState(selGenre);
   const [tempMode, setTempMode] = useState<ReleaseMode>(selReleaseMode);
   const [tempProvider, setTempProvider] = useState(selProvider);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const dragHandlers = useDragToClose({ onClose: closeFilters, contentRef });
   useBodyScrollLock(isFilterOpen);
 
   const { data: genres } = useQuery({
@@ -90,6 +93,7 @@ export function FilterDrawer() {
             exit={isMobile ? { y: '100%' } : { x: '100%' }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="absolute left-0 right-0 bottom-0 sm:left-auto sm:top-0 sm:bottom-0 w-full sm:max-w-sm sm:h-full max-h-[90vh] sm:max-h-none bg-[#0f0f15] border-t sm:border-t-0 sm:border-l border-white/10 shadow-2xl flex flex-col rounded-t-3xl sm:rounded-none"
+            {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mt-3 mx-auto sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between p-5 pb-4 border-b border-white/10">
@@ -111,7 +115,7 @@ export function FilterDrawer() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-5 space-y-8 custom-scroll">
+            <div ref={contentRef} className="flex-1 overflow-y-auto p-5 space-y-8 custom-scroll overscroll-contain">
               <div>
                 <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-3">
                   {t('filters.releaseType')}

@@ -9,6 +9,7 @@ import { fmtDateLocalized } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useDragToClose } from '@/hooks/useDragToClose';
 
 export function MovieModal() {
   const { t, i18n } = useTranslation();
@@ -22,10 +23,9 @@ export function MovieModal() {
     if (!n) return t('common.na');
     return new Intl.NumberFormat(lang || 'fr', { style: 'currency', currency: 'USD', notation: 'compact' }).format(n);
   }
-  const [touchY, setTouchY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const dragHandlers = useDragToClose({ onClose: closeModal, contentRef });
 
   // Si la lightbox est ouverte, Echap la ferme en priorite avant la modale.
   useEffect(() => {
@@ -95,40 +95,7 @@ export function MovieModal() {
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full max-w-4xl max-h-[92dvh] sm:max-h-[85vh] bg-[#0f0f15] sm:rounded-3xl rounded-t-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col"
-            onTouchStart={(e) => {
-              if (window.innerWidth >= 640) return;
-              if (e.touches.length !== 1) return;
-              // Drag pour fermer uniquement si le contenu interne est tout en haut
-              // du scroll. Sinon l'utilisateur veut juste scroller dans la modale.
-              if (contentRef.current && contentRef.current.scrollTop > 0) {
-                setIsDragging(false);
-                return;
-              }
-              setTouchY(e.touches[0].clientY);
-              setIsDragging(true);
-            }}
-            onTouchMove={(e) => {
-              if (!isDragging || window.innerWidth >= 640 || e.touches.length !== 1) return;
-              const diff = e.touches[0].clientY - touchY;
-              if (diff > 0) e.currentTarget.style.transform = `translateY(${diff * 0.4}px)`;
-            }}
-            onTouchEnd={(e) => {
-              if (!isDragging || window.innerWidth >= 640) {
-                setIsDragging(false);
-                return;
-              }
-              const t = e.changedTouches[0];
-              if (!t) {
-                setIsDragging(false);
-                return;
-              }
-              if (t.clientY - touchY > 100) {
-                closeModal();
-              } else {
-                e.currentTarget.style.transform = '';
-              }
-              setIsDragging(false);
-            }}
+            {...dragHandlers}
           >
             <button
               type="button"
