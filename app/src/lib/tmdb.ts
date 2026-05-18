@@ -68,20 +68,13 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
 
   const personQ = params.personId ? `&with_people=${params.personId}` : '';
 
-  // Strategie de filtrage :
-  // - release_date.gte/lte + region : la sortie dans LA region (FR) doit etre dans la semaine
-  // - primary_release_date.gte = date - 2 ans : exclut les re-sorties / anniversaires d'anciens films
-  // (skippe les deux quand on filtre par personne pour voir toute la filmographie)
-  let dateQ = '';
-  if (!params.personId) {
-    const start = new Date(params.startDate);
-    const cutoff = new Date(start);
-    cutoff.setFullYear(cutoff.getFullYear() - 2);
-    const cy = cutoff.getFullYear();
-    const cm = String(cutoff.getMonth() + 1).padStart(2, '0');
-    const cd = String(cutoff.getDate()).padStart(2, '0');
-    dateQ = `&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}&primary_release_date.gte=${cy}-${cm}-${cd}`;
-  }
+  // Filtre par primary_release_date (date de premiere sortie mondiale du film).
+  // C'est le filtre le plus fiable de TMDB. Implicitement, un film de 1985 ne peut pas
+  // matcher une fenetre de 2026, donc pas besoin de recency separee.
+  // En mode filmographie, on skip le filtre date pour voir toute la carriere.
+  const dateQ = params.personId
+    ? ''
+    : `&primary_release_date.gte=${params.startDate}&primary_release_date.lte=${params.endDate}`;
   const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
   const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
 
