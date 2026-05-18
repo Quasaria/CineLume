@@ -38,9 +38,9 @@ export function Hero({ backdropUrl }: HeroProps) {
       className="mb-8 sm:mb-10 relative"
     >
       {backdropUrl && (
-        <div className="absolute -top-10 -left-10 -right-10 h-72 rounded-3xl overflow-hidden opacity-30 pointer-events-none">
+        <div className="hero-backdrop absolute -top-10 -left-10 -right-10 h-72 rounded-3xl overflow-hidden opacity-30 pointer-events-none">
           <img src={backdropUrl} alt="" className="w-full h-full object-cover blur-sm" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/60 to-transparent" />
+          <div className="hero-backdrop-overlay absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/60 to-transparent" />
         </div>
       )}
       <div className="relative">

@@ -82,7 +82,7 @@ export async function getMovieDetails(id: number): Promise<MovieDetails> {
     } catch {}
   }
 
-  const url = `${BASE}/movie/${id}?api_key=${apiKey}&language=fr-FR&append_to_response=credits,videos`;
+  const url = `${BASE}/movie/${id}?api_key=${apiKey}&language=fr-FR&append_to_response=credits,videos,release_dates`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur de chargement des détails');
   const data = await res.json();

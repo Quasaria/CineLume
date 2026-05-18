@@ -25,6 +25,21 @@ export interface MovieDetails extends Movie {
   videos: {
     results: Video[];
   };
+  release_dates?: {
+    results: ReleaseDatesByCountry[];
+  };
+}
+
+export interface ReleaseDatesByCountry {
+  iso_3166_1: string;
+  release_dates: ReleaseDateEntry[];
+}
+
+export interface ReleaseDateEntry {
+  certification: string;
+  release_date: string;
+  type: number;
+  note?: string;
 }
 
 export interface Genre {
