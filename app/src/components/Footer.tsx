@@ -10,7 +10,7 @@ export function Footer() {
             </svg>
           </div>
           <span className="font-bold text-white/80">CineLume</span>
-          <span className="text-white/30 text-xs">© 2026</span>
+          <span className="text-white/50 text-xs">© {new Date().getFullYear()}</span>
         </div>
         <div className="flex items-center gap-2 text-[10px] text-white/20">
           <span>Données</span>

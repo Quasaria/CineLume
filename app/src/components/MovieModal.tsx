@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { getMovieDetails, IMG, BACK, PROF, TMDB_SITE } from '@/lib/tmdb';
 import { fmtDateFR } from '@/lib/utils';
@@ -56,10 +57,23 @@ export function MovieModal() {
     if (!movie) return;
     const url = `${TMDB_SITE}/${movie.id}`;
     if (navigator.share) {
-      try { await navigator.share({ title: movie.title, url }); } catch {}
-    } else {
-      await navigator.clipboard.writeText(url);
+      try {
+        await navigator.share({ title: movie.title, url });
+      } catch {
+        // L'utilisateur a annule, on ignore
+      }
+      return;
     }
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success('Lien copié');
+      } catch {
+        toast.error('Impossible de copier le lien');
+      }
+      return;
+    }
+    toast.message('Partage non supporté', { description: url });
   }
 
   return (
@@ -85,15 +99,20 @@ export function MovieModal() {
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="relative w-full max-w-4xl max-h-[92dvh] sm:max-h-[85vh] bg-[#0f0f15] sm:rounded-3xl rounded-t-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col"
-            onTouchStart={(e) => setTouchY(e.touches[0].clientY)}
+            onTouchStart={(e) => {
+              if (e.touches.length !== 1) return;
+              setTouchY(e.touches[0].clientY);
+            }}
             onTouchMove={(e) => {
-              if (window.innerWidth >= 640) return;
+              if (window.innerWidth >= 640 || e.touches.length !== 1) return;
               const diff = e.touches[0].clientY - touchY;
               if (diff > 0) e.currentTarget.style.transform = `translateY(${diff * 0.4}px)`;
             }}
             onTouchEnd={(e) => {
               if (window.innerWidth >= 640) return;
-              if (e.changedTouches[0].clientY - touchY > 100) {
+              const t = e.changedTouches[0];
+              if (!t) return;
+              if (t.clientY - touchY > 100) {
                 closeModal();
               } else {
                 e.currentTarget.style.transform = '';
@@ -237,19 +256,25 @@ export function MovieModal() {
                       </div>
 
                       <div className="flex flex-wrap gap-3 mb-6">
-                        {movie.videos?.results?.find((v) => v.site === 'YouTube') && (
-                          <a
-                            href={`https://www.youtube.com/watch?v=${
-                              movie.videos.results.find((v) => v.site === 'YouTube')?.key
-                            }`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white transition-colors"
-                          >
-                            <Play className="w-4 h-4 fill-current" />
-                            Bande-annonce
-                          </a>
-                        )}
+                        {(() => {
+                          const yt = movie.videos?.results ?? [];
+                          const video =
+                            yt.find((v) => v.site === 'YouTube' && v.type === 'Trailer') ??
+                            yt.find((v) => v.site === 'YouTube' && v.type === 'Teaser') ??
+                            yt.find((v) => v.site === 'YouTube');
+                          if (!video) return null;
+                          return (
+                            <a
+                              href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.key)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white transition-colors"
+                            >
+                              <Play className="w-4 h-4 fill-current" aria-hidden="true" />
+                              {video.type === 'Trailer' ? 'Bande-annonce' : video.type === 'Teaser' ? 'Teaser' : 'Vidéo'}
+                            </a>
+                          );
+                        })()}
                         <a
                           href={`${TMDB_SITE}/${movie.id}`}
                           target="_blank"

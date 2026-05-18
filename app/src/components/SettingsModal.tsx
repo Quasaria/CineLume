@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -19,19 +20,27 @@ export function SettingsModal() {
 
   function save() {
     const key = apiKey.trim();
-    if (key) localStorage.setItem('tmdb_key', key);
-    else localStorage.removeItem('tmdb_key');
+    if (key) {
+      localStorage.setItem('tmdb_key', key);
+      toast.success('Clé API enregistrée');
+    } else {
+      localStorage.removeItem('tmdb_key');
+      toast.success('Clé API réinitialisée');
+    }
     queryClient.invalidateQueries();
     closeSettings();
   }
 
   function clearCache() {
+    let removed = 0;
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('md_') || key.startsWith('rd_') || key === 'genres_cache' || key === 'cinelume_cache') {
         localStorage.removeItem(key);
+        removed++;
       }
     });
     queryClient.invalidateQueries();
+    toast.success(removed > 0 ? `Cache vidé (${removed} entrées)` : 'Cache déjà vide');
     closeSettings();
   }
 
