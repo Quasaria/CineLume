@@ -28,8 +28,6 @@ export function DateNavigator() {
     }
   }, [weeks, selWeek, selYear, selMonth, setDate]);
 
-  // Auto-scroll vers le mois selectionne quand il change (utile sur mobile
-  // ou la barre defile horizontalement)
   useEffect(() => {
     activeMonthRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [selMonth, selYear]);
@@ -43,10 +41,10 @@ export function DateNavigator() {
       className="sticky z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 sm:py-3 mb-6 bg-[var(--bg)]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-lg shadow-black/20"
       style={{ top: 'calc(4rem + env(safe-area-inset-top))' }}
     >
-      {/* Mobile : 2 lignes (annee+actions sur ligne 1, mois+semaines sur ligne 2)
-          Desktop : 1 ligne avec tout */}
+      {/* Mobile : 3 lignes (annee+actions, mois, semaines).
+          Desktop : 1 ligne avec tout. */}
       <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
-        {/* Annee */}
+        {/* Annee (ligne 1 a gauche) */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <motion.button
             type="button"
@@ -73,8 +71,8 @@ export function DateNavigator() {
           </motion.button>
         </div>
 
-        {/* Actions a droite : Filtres + Aujourd'hui */}
-        <div className="ml-auto flex items-center gap-2 shrink-0 order-1 sm:order-3">
+        {/* Actions (ligne 1 a droite mobile, tout a droite desktop) */}
+        <div className="ml-auto flex items-center gap-2 shrink-0 sm:order-last">
           <motion.button
             type="button"
             whileTap={{ scale: 0.95 }}
@@ -93,17 +91,16 @@ export function DateNavigator() {
             type="button"
             whileTap={{ scale: 0.95 }}
             onClick={jumpToToday}
-            className="px-3 py-2 rounded-lg bg-violet-500/10 text-violet-300 text-xs sm:text-sm font-semibold hover:bg-violet-500/20 active:bg-violet-500/25 transition-colors border border-violet-500/30 flex items-center gap-1.5 min-h-11"
+            className="px-3 py-2 rounded-lg bg-violet-500/10 text-violet-300 text-xs sm:text-sm font-semibold hover:bg-violet-500/20 active:bg-violet-500/25 transition-colors border border-violet-500/30 flex items-center gap-1.5 min-w-11 min-h-11"
           >
             <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">{t('common.today')}</span>
           </motion.button>
         </div>
 
-        {/* Mois + semaines : sur la 2eme ligne en mobile, integre desktop */}
-        <div className="w-full sm:w-auto sm:flex-1 flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 sm:mx-0 sm:px-0 order-2">
+        {/* Mois (ligne 2 sur mobile, inline desktop avec divider) */}
+        <div className="w-full sm:w-auto sm:flex-1 flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0 sm:order-2">
           <div className="hidden sm:block w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent shrink-0" />
-
           <div className="flex gap-1 shrink-0 snap-x">
             {MONTHS.map((m, i) => (
               <motion.button
@@ -121,9 +118,11 @@ export function DateNavigator() {
               </motion.button>
             ))}
           </div>
+        </div>
 
-          <div className="w-px h-6 bg-gradient-to-b from-transparent via-white/25 to-transparent shrink-0 mx-1" />
-
+        {/* Semaines (ligne 3 sur mobile, inline desktop avec divider) */}
+        <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar -mx-1 px-1 sm:mx-0 sm:px-0 sm:order-3">
+          <div className="hidden sm:block w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent shrink-0" />
           <div className="flex gap-1 shrink-0 snap-x">
             {Array.from({ length: weeks }, (_, i) => i + 1).map((w) => (
               <motion.button

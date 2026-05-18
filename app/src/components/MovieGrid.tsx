@@ -24,7 +24,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
   const { t } = useTranslation();
   const { viewMode, setViewMode, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson, setSelectedPerson } = useAppStore();
   const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
-  const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'all' || !!selProvider || !!selectedPerson;
+  const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
 
   if (isError) {
     return (
@@ -115,7 +115,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
                   {selRegion}
                 </span>
               )}
-              {selReleaseMode !== 'all' && (
+              {selReleaseMode !== 'theater' && (
                 <span className="px-2 py-0.5 rounded-md bg-fuchsia-500/10 text-fuchsia-300 text-xs border border-fuchsia-500/20">
                   {t(`modes.${selReleaseMode}`)}
                 </span>
