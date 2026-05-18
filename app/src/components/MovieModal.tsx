@@ -188,6 +188,7 @@ export function MovieModal() {
                           {movie.title}
                         </h2>
                         <button
+                          type="button"
                           onClick={() =>
                             toggleFav({
                               id: movie.id,
@@ -199,7 +200,7 @@ export function MovieModal() {
                           }
                           aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
                           aria-pressed={isFav(movie.id)}
-                          className={`min-w-11 min-h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors shrink-0 mt-1 ${
+                          className={`hidden sm:flex min-w-11 min-h-11 items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors shrink-0 mt-1 ${
                             isFav(movie.id) ? 'text-red-500' : 'text-white/80'
                           }`}
                         >
@@ -257,7 +258,7 @@ export function MovieModal() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-6 sm:flex sm:flex-wrap sm:gap-3">
+                      <div className="hidden sm:flex sm:flex-wrap gap-3 mb-6">
                         {(() => {
                           const yt = movie.videos?.results ?? [];
                           const video =
@@ -358,6 +359,70 @@ export function MovieModal() {
                 </>
               ) : null}
             </div>
+
+            {/* Sticky action bar mobile : Bande-annonce + Favori + Partager */}
+            {movie && (
+              <div className="sm:hidden border-t border-white/10 bg-[#0f0f15]/95 backdrop-blur-md px-4 py-3 flex items-center gap-2 safe-pb shrink-0">
+                {(() => {
+                  const yt = movie.videos?.results ?? [];
+                  const video =
+                    yt.find((v) => v.site === 'YouTube' && v.type === 'Trailer') ??
+                    yt.find((v) => v.site === 'YouTube' && v.type === 'Teaser') ??
+                    yt.find((v) => v.site === 'YouTube');
+                  if (video) {
+                    return (
+                      <a
+                        href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.key)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-black font-semibold text-sm active:bg-cyan-400 transition-colors min-h-12"
+                      >
+                        <Play className="w-4 h-4 fill-current" aria-hidden="true" />
+                        {video.type === 'Trailer' ? t('modal.trailer') : video.type === 'Teaser' ? t('modal.teaser') : t('modal.video')}
+                      </a>
+                    );
+                  }
+                  return (
+                    <a
+                      href={`${TMDB_SITE}/${movie.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-black font-semibold text-sm active:bg-cyan-400 transition-colors min-h-12"
+                    >
+                      <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                      TMDB
+                    </a>
+                  );
+                })()}
+                <button
+                  type="button"
+                  onClick={() =>
+                    toggleFav({
+                      id: movie.id,
+                      title: movie.title,
+                      poster_path: movie.poster_path,
+                      release_date: movie.release_date,
+                      vote_average: movie.vote_average,
+                    })
+                  }
+                  aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
+                  aria-pressed={isFav(movie.id)}
+                  className={`min-w-12 min-h-12 flex items-center justify-center rounded-xl bg-white/8 active:bg-white/15 border border-white/10 transition-colors ${
+                    isFav(movie.id) ? 'text-red-500' : 'text-white/80'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${isFav(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={shareMovie}
+                  aria-label={t('modal.share')}
+                  className="min-w-12 min-h-12 flex items-center justify-center rounded-xl bg-white/8 active:bg-white/15 border border-white/10 text-white/80 transition-colors"
+                >
+                  <Share2 className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

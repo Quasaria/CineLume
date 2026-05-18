@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar, Filter } from 'lucide-react';
@@ -19,11 +19,24 @@ export function DateNavigator() {
   const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion).length;
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
 
+  const activeMonthRef = useRef<HTMLButtonElement>(null);
+  const activeWeekRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     if (weeks > 0 && selWeek > weeks) {
       setDate(selYear, selMonth, weeks);
     }
   }, [weeks, selWeek, selYear, selMonth, setDate]);
+
+  // Auto-scroll vers le mois selectionne quand il change (utile sur mobile
+  // ou la barre defile horizontalement)
+  useEffect(() => {
+    activeMonthRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [selMonth, selYear]);
+
+  useEffect(() => {
+    activeWeekRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }, [selWeek]);
 
   return (
     <div
@@ -91,13 +104,14 @@ export function DateNavigator() {
         <div className="w-full sm:w-auto sm:flex-1 flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 sm:mx-0 sm:px-0 order-2">
           <div className="hidden sm:block w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent shrink-0" />
 
-          <div className="flex gap-1 shrink-0">
+          <div className="flex gap-1 shrink-0 snap-x">
             {MONTHS.map((m, i) => (
               <motion.button
                 key={i}
+                ref={i === selMonth ? activeMonthRef : undefined}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setDate(selYear, i, 1)}
-                className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap min-h-10 ${
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap min-h-10 snap-center ${
                   i === selMonth
                     ? 'bg-white text-black shadow-md'
                     : 'text-white/75 hover:text-white hover:bg-white/5 active:bg-white/10'
@@ -110,13 +124,14 @@ export function DateNavigator() {
 
           <div className="w-px h-6 bg-gradient-to-b from-transparent via-white/25 to-transparent shrink-0 mx-1" />
 
-          <div className="flex gap-1 shrink-0">
+          <div className="flex gap-1 shrink-0 snap-x">
             {Array.from({ length: weeks }, (_, i) => i + 1).map((w) => (
               <motion.button
                 key={w}
+                ref={w === selWeek ? activeWeekRef : undefined}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setDate(selYear, selMonth, w)}
-                className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all min-h-10 ${
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all min-h-10 snap-center ${
                   w === selWeek
                     ? 'bg-white/15 text-white border border-white/20'
                     : 'text-white/75 hover:text-white hover:bg-white/5 active:bg-white/10'
