@@ -17,6 +17,8 @@
     "searchMoviePlaceholder": "Rechercher un film...",
     "favorites": "Mes favoris",
     "favoritesAria": "Mes favoris ({{count}})",
+    "watchlist": "Ma liste à voir",
+    "watchlistAria": "Ma liste à voir ({{count}})",
     "settings": "Paramètres",
     "themeDark": "Passer en mode sombre",
     "themeLight": "Passer en mode clair",
@@ -93,6 +95,12 @@
     "closeLightbox": "Fermer la vue agrandie",
     "prev": "Film précédent",
     "next": "Film suivant",
+    "closeTrailer": "Fermer la bande-annonce",
+    "viewActorFilmography": "Voir la filmographie de {{name}}",
+    "addToCalendar": "Ajouter au calendrier",
+    "calendarTitle": "Sortie cinéma : {{title}}",
+    "calendarDesc": "Sortie en salles{{region}}",
+    "calendarDownloaded": "Événement calendrier téléchargé",
     "status": {
       "Released": "Sorti",
       "Upcoming": "À venir",
@@ -183,6 +191,20 @@
     "singleTitle": "{{title}} sort cette semaine",
     "multiTitle": "{{count}} favoris sortent cette semaine",
     "view": "Voir"
+  },
+  "watchlist": {
+    "title": "À voir",
+    "empty": "Aucun film à voir pour l'instant",
+    "emptyHint": "Clique sur le marque-page d'un film pour l'ajouter",
+    "weekSection": "Cette semaine",
+    "upcomingSection": "À venir",
+    "releasedSection": "Sortis",
+    "undatedSection": "Date inconnue",
+    "remove": "Retirer {{title}} de la liste à voir",
+    "add": "Ajouter {{title}} à la liste à voir",
+    "added": "{{title}} ajouté à ta liste",
+    "removed": "{{title}} retiré de ta liste",
+    "close": "Fermer la liste à voir"
   },
   "persons": {
     "title": "Personnes",

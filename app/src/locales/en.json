@@ -17,6 +17,8 @@
     "searchMoviePlaceholder": "Search a movie...",
     "favorites": "My favorites",
     "favoritesAria": "My favorites ({{count}})",
+    "watchlist": "My watchlist",
+    "watchlistAria": "My watchlist ({{count}})",
     "settings": "Settings",
     "themeDark": "Switch to dark mode",
     "themeLight": "Switch to light mode",
@@ -93,6 +95,12 @@
     "closeLightbox": "Close fullscreen view",
     "prev": "Previous movie",
     "next": "Next movie",
+    "closeTrailer": "Close trailer",
+    "viewActorFilmography": "View {{name}}'s filmography",
+    "addToCalendar": "Add to calendar",
+    "calendarTitle": "Cinema release: {{title}}",
+    "calendarDesc": "Theatrical release{{region}}",
+    "calendarDownloaded": "Calendar event downloaded",
     "status": {
       "Released": "Released",
       "Upcoming": "Upcoming",
@@ -183,6 +191,20 @@
     "singleTitle": "{{title}} releases this week",
     "multiTitle": "{{count}} favorites release this week",
     "view": "View"
+  },
+  "watchlist": {
+    "title": "Watchlist",
+    "empty": "No movies in your watchlist yet",
+    "emptyHint": "Tap the bookmark on a movie to add it",
+    "weekSection": "This week",
+    "upcomingSection": "Upcoming",
+    "releasedSection": "Released",
+    "undatedSection": "Unknown date",
+    "remove": "Remove {{title}} from watchlist",
+    "add": "Add {{title}} to watchlist",
+    "added": "{{title}} added to watchlist",
+    "removed": "{{title}} removed from watchlist",
+    "close": "Close watchlist"
   },
   "persons": {
     "title": "People",

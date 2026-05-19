@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight, CalendarPlus, Bookmark } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { getMovieDetails, IMG, BACK, PROF, ORIG, TMDB_SITE, posterSrcSet, backdropSrcSet, profileSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
+import { generateICS, downloadICS, slugify } from '@/lib/calendar';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
@@ -20,7 +21,7 @@ interface MovieModalProps {
 export function MovieModal({ movies = [] }: MovieModalProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
-  const { currentModalMovieId, closeModal, openModal, isFav, toggleFav, selRegion } = useAppStore();
+  const { currentModalMovieId, closeModal, openModal, isFav, toggleFav, isInWatchlist, toggleWatchlist, selRegion } = useAppStore();
 
   // Index du film courant dans la liste affichee actuellement. Si l'user
   // est arrive via URL deep-link sur un film qui n'est pas dans la liste
@@ -48,20 +49,23 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
   }
   const contentRef = useRef<HTMLDivElement>(null);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const dragHandlers = useDragToClose({ onClose: closeModal, contentRef });
 
-  // Si la lightbox est ouverte, Echap la ferme en priorite avant la modale.
+  // Si la lightbox ou le trailer overlay est ouvert, Echap les ferme en
+  // priorite avant la modale principale.
   useEffect(() => {
-    if (!lightbox) return;
+    if (!lightbox && !trailerKey) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        setLightbox(null);
+        if (trailerKey) setTrailerKey(null);
+        else if (lightbox) setLightbox(null);
       }
     };
     window.addEventListener('keydown', handler, true);
     return () => window.removeEventListener('keydown', handler, true);
-  }, [lightbox]);
+  }, [lightbox, trailerKey]);
 
   // Navigation clavier prev/next dans la liste. On ne capture pas les fleches
   // quand l'user tape dans un input (sinon il ne peut plus deplacer son
@@ -93,6 +97,25 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
   const movie = details;
   useBodyScrollLock(currentModalMovieId !== null);
   useFocusRestore(currentModalMovieId !== null);
+
+  // Recupere le setter pour ouvrir une filmographie au click sur un cast
+  // member. On garde une reference imperatives pour eviter de subscribe.
+  function openPersonFilmography(id: number, name: string) {
+    useAppStore.getState().setSelectedPerson({ id, name });
+    closeModal();
+  }
+
+  function exportCalendar(movie: { id: number; title: string; release_date?: string }) {
+    if (!movie.release_date) return;
+    const ics = generateICS({
+      id: movie.id,
+      title: t('modal.calendarTitle', { title: movie.title }),
+      dateStr: movie.release_date.split('T')[0],
+      description: t('modal.calendarDesc', { region: selRegion ? ` (${selRegion})` : '' }),
+    });
+    downloadICS(ics, `${slugify(movie.title) || 'cinelume'}.ics`);
+    toast.success(t('modal.calendarDownloaded'));
+  }
 
   async function shareMovie() {
     if (!movie) return;
@@ -289,26 +312,48 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                         <h2 id="movie-modal-title" className="text-2xl sm:text-4xl font-bold leading-tight">
                           {movie.title}
                         </h2>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            toggleFav({
-                              id: movie.id,
-                              title: movie.title,
-                              poster_path: movie.poster_path,
-                              release_date: movie.release_date,
-                              vote_average: movie.vote_average,
-                              overview: movie.overview,
-                            })
-                          }
-                          aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
-                          aria-pressed={isFav(movie.id)}
-                          className={`hidden sm:flex min-w-11 min-h-11 items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors shrink-0 mt-1 ${
-                            isFav(movie.id) ? 'text-red-500' : 'text-white/80'
-                          }`}
-                        >
-                          <Heart className={`w-5 h-5 ${isFav(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
-                        </button>
+                        <div className="hidden sm:flex items-center gap-2 shrink-0 mt-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              toggleWatchlist({
+                                id: movie.id,
+                                title: movie.title,
+                                poster_path: movie.poster_path,
+                                release_date: movie.release_date,
+                                vote_average: movie.vote_average,
+                                overview: movie.overview,
+                              })
+                            }
+                            aria-label={isInWatchlist(movie.id) ? t('watchlist.remove', { title: movie.title }) : t('watchlist.add', { title: movie.title })}
+                            aria-pressed={isInWatchlist(movie.id)}
+                            className={`min-w-11 min-h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors ${
+                              isInWatchlist(movie.id) ? 'text-cyan-400' : 'text-white/80'
+                            }`}
+                          >
+                            <Bookmark className={`w-5 h-5 ${isInWatchlist(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              toggleFav({
+                                id: movie.id,
+                                title: movie.title,
+                                poster_path: movie.poster_path,
+                                release_date: movie.release_date,
+                                vote_average: movie.vote_average,
+                                overview: movie.overview,
+                              })
+                            }
+                            aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
+                            aria-pressed={isFav(movie.id)}
+                            className={`min-w-11 min-h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors ${
+                              isFav(movie.id) ? 'text-red-500' : 'text-white/80'
+                            }`}
+                          >
+                            <Heart className={`w-5 h-5 ${isFav(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
 
                       {movie.credits?.crew?.find((c) => c.job === 'Director') && (
@@ -374,15 +419,14 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                             yt.find((v) => v.site === 'YouTube');
                           if (!video) return null;
                           return (
-                            <a
-                              href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.key)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              type="button"
+                              onClick={() => setTrailerKey(video.key)}
                               className="col-span-2 sm:col-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white active:bg-cyan-500 transition-colors min-h-12"
                             >
                               <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                               {video.type === 'Trailer' ? t('modal.trailer') : video.type === 'Teaser' ? t('modal.teaser') : t('modal.video')}
-                            </a>
+                            </button>
                           );
                         })()}
                         <a
@@ -394,6 +438,16 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                           <ExternalLink className="w-4 h-4" aria-hidden="true" />
                           TMDB
                         </a>
+                        {movie.release_date && (
+                          <button
+                            type="button"
+                            onClick={() => exportCalendar(movie)}
+                            className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
+                          >
+                            <CalendarPlus className="w-4 h-4" aria-hidden="true" />
+                            {t('modal.addToCalendar')}
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={shareMovie}
@@ -435,28 +489,34 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                           <h3 className="font-bold text-white mb-3">{t('modal.cast')}</h3>
                           <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
                             {movie.credits.cast.slice(0, 10).map((actor) => (
-                              <div key={actor.id} className="flex flex-col items-center min-w-[65px]">
-                                <div className="w-14 h-14 rounded-full overflow-hidden mb-1.5 bg-white/5 border border-white/10 flex items-center justify-center">
+                              <button
+                                type="button"
+                                key={actor.id}
+                                onClick={() => openPersonFilmography(actor.id, actor.name)}
+                                aria-label={t('modal.viewActorFilmography', { name: actor.name })}
+                                className="flex flex-col items-center min-w-[65px] group bg-transparent border-0 p-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] rounded-lg"
+                              >
+                                <div className="w-14 h-14 rounded-full overflow-hidden mb-1.5 bg-white/5 border border-white/10 group-hover:border-violet-500/60 group-hover:shadow-lg group-hover:shadow-violet-500/30 transition-all flex items-center justify-center">
                                   {actor.profile_path ? (
                                     <img
                                       src={`${PROF}${actor.profile_path}`}
                                       srcSet={profileSrcSet(actor.profile_path)}
                                       sizes="56px"
-                                      alt={actor.name}
-                                      className="w-full h-full object-cover"
+                                      alt=""
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                       loading="lazy"
                                     />
                                   ) : (
                                     <Users className="w-4 h-4 text-white/20" aria-hidden="true" />
                                   )}
                                 </div>
-                                <span className="text-[11px] text-white font-medium text-center leading-tight w-full truncate">
+                                <span className="text-[11px] text-white font-medium text-center leading-tight w-full truncate group-hover:text-violet-300 transition-colors">
                                   {actor.name}
                                 </span>
                                 <span className="text-[10px] text-white/30 text-center leading-tight w-full truncate">
                                   {actor.character}
                                 </span>
-                              </div>
+                              </button>
                             ))}
                           </div>
                         </>
@@ -478,15 +538,14 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                     yt.find((v) => v.site === 'YouTube');
                   if (video) {
                     return (
-                      <a
-                        href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.key)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        type="button"
+                        onClick={() => setTrailerKey(video.key)}
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-black font-semibold text-sm active:bg-cyan-400 transition-colors min-h-12"
                       >
                         <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                         {video.type === 'Trailer' ? t('modal.trailer') : video.type === 'Teaser' ? t('modal.teaser') : t('modal.video')}
-                      </a>
+                      </button>
                     );
                   }
                   return (
@@ -501,6 +560,26 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                     </a>
                   );
                 })()}
+                <button
+                  type="button"
+                  onClick={() =>
+                    toggleWatchlist({
+                      id: movie.id,
+                      title: movie.title,
+                      poster_path: movie.poster_path,
+                      release_date: movie.release_date,
+                      vote_average: movie.vote_average,
+                      overview: movie.overview,
+                    })
+                  }
+                  aria-label={isInWatchlist(movie.id) ? t('watchlist.remove', { title: movie.title }) : t('watchlist.add', { title: movie.title })}
+                  aria-pressed={isInWatchlist(movie.id)}
+                  className={`min-w-12 min-h-12 flex items-center justify-center rounded-xl bg-white/8 active:bg-white/15 border border-white/10 transition-colors ${
+                    isInWatchlist(movie.id) ? 'text-cyan-400' : 'text-white/80'
+                  }`}
+                >
+                  <Bookmark className={`w-5 h-5 ${isInWatchlist(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
+                </button>
                 <button
                   type="button"
                   onClick={() =>
@@ -559,6 +638,45 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
             onClick={() => setLightbox(null)}
             aria-label={t('modal.closeLightbox')}
             className="absolute top-4 right-4 p-2.5 rounded-full bg-black/60 hover:bg-white/20 backdrop-blur-md transition-colors"
+          >
+            <X className="w-5 h-5 text-white" aria-hidden="true" />
+          </button>
+        </motion.div>
+      )}
+
+      {trailerKey && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[90] bg-black/95 flex items-center justify-center p-4 sm:p-8"
+          onClick={() => setTrailerKey(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('modal.trailer')}
+        >
+          <motion.div
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.92, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full max-w-5xl aspect-video"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(trailerKey)}?autoplay=1&rel=0&modestbranding=1`}
+              title={t('modal.trailer')}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="w-full h-full rounded-2xl shadow-2xl bg-black"
+            />
+          </motion.div>
+          <button
+            type="button"
+            onClick={() => setTrailerKey(null)}
+            aria-label={t('modal.closeTrailer')}
+            className="absolute top-4 right-4 p-2.5 rounded-full bg-black/60 hover:bg-white/20 backdrop-blur-md transition-colors z-10"
           >
             <X className="w-5 h-5 text-white" aria-hidden="true" />
           </button>

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Search, Heart, Sun, Moon, Settings, X } from 'lucide-react';
+import { Search, Heart, Sun, Moon, Settings, X, Bookmark } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 
@@ -16,7 +16,7 @@ function LogoMark({ className = '' }: { className?: string }) {
 
 export function Navbar() {
   const { t } = useTranslation();
-  const { isDark, toggleTheme, openFavorites, openSettings, favorites, searchQuery, setSearchQuery } = useAppStore();
+  const { isDark, toggleTheme, openFavorites, openSettings, openWatchlist, favorites, watchlist, searchQuery, setSearchQuery } = useAppStore();
   const [scrolled, setScrolled] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
   const desktopSearchRef = useRef<HTMLInputElement>(null);
@@ -39,6 +39,7 @@ export function Navbar() {
           state.currentModalMovieId !== null ||
           state.isFilterOpen ||
           state.isFavOpen ||
+          state.isWatchlistOpen ||
           state.isSettingsOpen
         ) {
           return;
@@ -57,6 +58,7 @@ export function Navbar() {
   }, []);
 
   const favCount = favorites.length;
+  const watchCount = watchlist.length;
 
   return (
     <motion.nav
@@ -140,6 +142,21 @@ export function Navbar() {
             className="sm:hidden min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors"
           >
             <Search className="w-5 h-5 text-white/70" aria-hidden="true" />
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={openWatchlist}
+            aria-label={watchCount > 0 ? t('nav.watchlistAria', { count: watchCount }) : t('nav.watchlist')}
+            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors relative"
+          >
+            <Bookmark className="w-5 h-5 text-white/70" aria-hidden="true" />
+            {watchCount > 0 && (
+              <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-cyan-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {watchCount}
+              </span>
+            )}
           </motion.button>
 
           <motion.button
