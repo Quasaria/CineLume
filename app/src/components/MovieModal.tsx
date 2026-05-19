@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight, CalendarPlus, Bookmark } from 'lucide-react';
+import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight, CalendarPlus, Bookmark, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -8,6 +8,9 @@ import { getMovieDetails, IMG, BACK, PROF, ORIG, TMDB_SITE, posterSrcSet, backdr
 import { fmtDateLocalized } from '@/lib/utils';
 import { generateICS, downloadICS, slugify } from '@/lib/calendar';
 import { letterboxdUrl } from '@/lib/letterboxd';
+import { genreChipClass } from '@/lib/genre-colors';
+import { WhereToWatch } from '@/components/WhereToWatch';
+import { SimilarFilms } from '@/components/SimilarFilms';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
@@ -401,6 +404,8 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                         );
                       })()}
 
+                      <WhereToWatch movieId={movie.id} region={selRegion} />
+
                       <div className="flex flex-wrap items-center gap-3 mb-5">
                         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
                           <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
@@ -413,7 +418,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                           {movie.genres?.slice(0, 4).map((g) => (
                             <span
                               key={g.id}
-                              className="px-2.5 py-1 rounded-lg bg-white/5 text-white/50 text-xs border border-white/5"
+                              className={`px-2.5 py-1 rounded-lg text-xs border font-medium ${genreChipClass(g.id)}`}
                             >
                               {g.name}
                             </span>
@@ -469,6 +474,16 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                             {t('modal.addToCalendar')}
                           </button>
                         )}
+                        <a
+                          href={`https://www.google.com/maps/search/${encodeURIComponent('cinéma ' + movie.title)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={t('modal.findCinema')}
+                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
+                        >
+                          <MapPin className="w-4 h-4" aria-hidden="true" />
+                          {t('modal.findCinema')}
+                        </a>
                         <button
                           type="button"
                           onClick={shareMovie}
@@ -542,6 +557,8 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                           </div>
                         </>
                       )}
+
+                      <SimilarFilms movieId={movie.id} />
                     </div>
                   </div>
                 </>

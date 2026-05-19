@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Menu, Folder, Settings as SettingsIcon, X } from 'lucide-react';
+import { Menu, Folder, Settings as SettingsIcon, X, Shuffle } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 
 /**
@@ -17,6 +18,27 @@ export function BurgerMenu() {
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  function pickRandom() {
+    const state = useAppStore.getState();
+    // Pool : watchlist en priorite (intent = a voir), favoris en fallback,
+    // sinon toutes les listes custom additionnees.
+    const pool = state.watchlist.length > 0
+      ? state.watchlist
+      : state.favorites.length > 0
+        ? state.favorites
+        : state.customLists.flatMap((l) => l.films);
+    if (pool.length === 0) {
+      toast.info(t('nav.surpriseEmpty'));
+      return;
+    }
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    toast.success(t('nav.surpriseToast', { title: pick.title }), {
+      duration: 5000,
+      action: { label: t('nav.surpriseSeeOther'), onClick: () => pickRandom() },
+    });
+    state.openModal(pick.id);
+  }
 
   // Click outside ferme le menu
   useEffect(() => {
@@ -75,6 +97,11 @@ export function BurgerMenu() {
               WebkitBackdropFilter: 'blur(20px) saturate(140%)',
             }}
           >
+            <MenuItem
+              icon={Shuffle}
+              label={t('nav.surprise')}
+              onClick={() => handleItem(pickRandom)}
+            />
             <MenuItem
               icon={Folder}
               label={t('nav.myLists')}

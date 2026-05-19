@@ -14,6 +14,8 @@ import { useFocusRestore } from '@/hooks/useFocusRestore';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { invalidateApiKeyCache } from '@/lib/tmdb';
 import { parseLetterboxdCSV, importFromLetterboxd, exportToLetterboxdCSV } from '@/lib/letterboxd';
+import { computeUserStats } from '@/lib/userStats';
+import type { FavoriteMovie, CustomList } from '@/types/movie';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -21,10 +23,56 @@ const LANG_LABEL: Record<SupportedLang, string> = {
   en: 'English',
 };
 
+interface StatsSectionProps {
+  favorites: FavoriteMovie[];
+  watchlist: FavoriteMovie[];
+  customLists: CustomList[];
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}
+
+function StatsSection({ favorites, watchlist, customLists, t }: StatsSectionProps) {
+  const stats = computeUserStats(favorites, watchlist, customLists);
+  if (stats.totalTracked === 0) return null;
+  return (
+    <section className="py-3 border-t border-white/5">
+      <h3 className="text-xs text-white/50 uppercase tracking-wider font-bold mb-3">
+        {t('settings.statsTitle')}
+      </h3>
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard label={t('settings.statsTracked')} value={String(stats.totalTracked)} accent="violet" />
+        <StatCard label={t('settings.statsThisWeek')} value={String(stats.thisWeek)} accent="cyan" />
+        <StatCard label={t('settings.statsUpcomingMonth')} value={String(stats.upcomingThisMonth)} accent="fuchsia" />
+        <StatCard label={t('settings.statsLists')} value={String(stats.customListsCount)} accent="emerald" />
+      </div>
+      {stats.nextUpcoming && (
+        <p className="mt-3 text-xs text-white/60">
+          <span className="text-white/45">{t('settings.statsNext')}</span>{' '}
+          <span className="text-white font-semibold">{stats.nextUpcoming.title}</span>
+        </p>
+      )}
+    </section>
+  );
+}
+
+function StatCard({ label, value, accent }: { label: string; value: string; accent: 'violet' | 'cyan' | 'fuchsia' | 'emerald' }) {
+  const styles: Record<typeof accent, string> = {
+    violet: 'border-violet-500/20 bg-violet-500/[0.06] text-violet-300',
+    cyan: 'border-cyan-500/20 bg-cyan-500/[0.06] text-cyan-300',
+    fuchsia: 'border-fuchsia-500/20 bg-fuchsia-500/[0.06] text-fuchsia-300',
+    emerald: 'border-emerald-500/20 bg-emerald-500/[0.06] text-emerald-300',
+  };
+  return (
+    <div className={`p-3 rounded-xl border ${styles[accent]}`}>
+      <p className="text-2xl font-bold tabular-nums">{value}</p>
+      <p className="text-[11px] uppercase tracking-wider opacity-80 leading-tight">{label}</p>
+    </div>
+  );
+}
+
 export function SettingsModal() {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
-  const { isSettingsOpen, closeSettings, isDark, toggleTheme } = useAppStore();
+  const { isSettingsOpen, closeSettings, isDark, toggleTheme, blindMode, toggleBlindMode, favorites, watchlist, customLists } = useAppStore();
   const [apiKey, setApiKey] = useState('');
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported',
@@ -286,6 +334,16 @@ export function SettingsModal() {
                 </div>
                 <Switch checked={!isDark} onCheckedChange={toggleTheme} aria-label={t('settings.themeToggleDesc')} />
               </div>
+
+              <div className="flex items-center justify-between py-3 border-t border-white/5">
+                <div className="min-w-0 pr-3">
+                  <p className="text-sm font-medium">{t('settings.blindMode')}</p>
+                  <p className="text-xs text-white/50">{t('settings.blindModeDesc')}</p>
+                </div>
+                <Switch checked={blindMode} onCheckedChange={toggleBlindMode} aria-label={t('settings.blindMode')} />
+              </div>
+
+              <StatsSection favorites={favorites} watchlist={watchlist} customLists={customLists} t={t} />
 
               <div className="flex items-center justify-between py-3 border-t border-white/5 gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">

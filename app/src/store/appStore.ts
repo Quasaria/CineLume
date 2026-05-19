@@ -26,6 +26,9 @@ interface AppState {
   favorites: FavoriteMovie[];
   watchlist: FavoriteMovie[];
   customLists: CustomList[];
+  blindMode: boolean;
+  sortBy: 'popularity' | 'date' | 'rating';
+  runtimeMax: number | null;  // minutes, null = no filter
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
   isFavOpen: boolean;
@@ -67,16 +70,56 @@ interface AppState {
   closeLists: () => void;
   openSettings: () => void;
   closeSettings: () => void;
+  toggleBlindMode: () => void;
+  setSortBy: (s: 'popularity' | 'date' | 'rating') => void;
+  setRuntimeMax: (n: number | null) => void;
 }
 
+// Theme : si l'user a explicitement choisi, on respecte. Sinon on suit
+// prefers-color-scheme de l'OS. Defaut dark si pas de preference (e.g.
+// vieux browsers sans matchMedia).
 const savedTheme = localStorage.getItem('cinelume_theme');
-const isDark = savedTheme ? savedTheme === 'dark' : true;
+let isDark: boolean;
+if (savedTheme === 'dark') {
+  isDark = true;
+} else if (savedTheme === 'light') {
+  isDark = false;
+} else if (typeof window !== 'undefined' && window.matchMedia) {
+  isDark = !window.matchMedia('(prefers-color-scheme: light)').matches;
+} else {
+  isDark = true;
+}
 
 if (isDark) {
   document.documentElement.classList.add('dark');
+  document.documentElement.classList.remove('light');
 } else {
   document.documentElement.classList.remove('dark');
   document.documentElement.classList.add('light');
+}
+
+// Si pas de preference user, on ecoute les changements OS pour basculer
+// automatiquement. Listener attache une seule fois au module load.
+if (!savedTheme && typeof window !== 'undefined' && window.matchMedia) {
+  const mq = window.matchMedia('(prefers-color-scheme: light)');
+  mq.addEventListener('change', (e) => {
+    const stillNoPreference = !localStorage.getItem('cinelume_theme');
+    if (!stillNoPreference) return;
+    const nowDark = !e.matches;
+    if (nowDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    }
+    useAppStore.setState({ isDark: nowDark });
+  });
+}
+
+const savedBlindMode = localStorage.getItem('cinelume_blind_mode') === '1';
+if (savedBlindMode) {
+  document.documentElement.classList.add('blind-mode');
 }
 
 const initialRegion = localStorage.getItem('cinelume_region') || 'FR';
@@ -167,6 +210,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   favorites: safeParseFavs(),
   watchlist: safeParseWatchlist(),
   customLists: safeParseCustomLists(),
+  blindMode: savedBlindMode,
+  sortBy: (localStorage.getItem('cinelume_sort') as 'popularity' | 'date' | 'rating') || 'popularity',
+  runtimeMax: (() => {
+    const raw = localStorage.getItem('cinelume_runtime_max');
+    if (!raw) return null;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  })(),
   currentModalMovieId: null,
   isFilterOpen: false,
   isFavOpen: false,
@@ -359,4 +410,38 @@ export const useAppStore = create<AppState>((set, get) => ({
   closeLists: () => set({ isListsOpen: false }),
   openSettings: () => set({ isSettingsOpen: true }),
   closeSettings: () => set({ isSettingsOpen: false }),
+
+  toggleBlindMode: () => {
+    const next = !get().blindMode;
+    try {
+      localStorage.setItem('cinelume_blind_mode', next ? '1' : '0');
+    } catch {
+      // ignore
+    }
+    if (next) {
+      document.documentElement.classList.add('blind-mode');
+    } else {
+      document.documentElement.classList.remove('blind-mode');
+    }
+    set({ blindMode: next });
+  },
+
+  setSortBy: (s) => {
+    try {
+      localStorage.setItem('cinelume_sort', s);
+    } catch {
+      // ignore
+    }
+    set({ sortBy: s });
+  },
+
+  setRuntimeMax: (n) => {
+    try {
+      if (n === null) localStorage.removeItem('cinelume_runtime_max');
+      else localStorage.setItem('cinelume_runtime_max', String(n));
+    } catch {
+      // ignore
+    }
+    set({ runtimeMax: n });
+  },
 }));

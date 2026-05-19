@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, List, SlidersHorizontal, AlertCircle, RefreshCw, X, User, Calendar, Search } from 'lucide-react';
+import { LayoutGrid, List, SlidersHorizontal, AlertCircle, RefreshCw, X, User, Calendar, Search, ArrowUpDown } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { PROVIDERS } from '@/lib/tmdb';
 import { MovieCard } from './MovieCard';
@@ -58,6 +58,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
     setSelectedPerson, setRegion, setGenre, setReleaseMode, setProvider,
     setSearchQuery, jumpToToday, openFilters,
     searchQuery,
+    sortBy, setSortBy,
   } = useAppStore();
   const provider = selProvider ? PROVIDERS.find((p) => p.id === selProvider) : undefined;
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
@@ -245,6 +246,21 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {!selectedPerson && (
+            <div className="relative">
+              <select
+                aria-label={t('grid.sortBy')}
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'popularity' | 'date' | 'rating')}
+                className="appearance-none min-h-11 sm:min-h-9 pl-8 pr-3 text-xs sm:text-sm font-medium bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 cursor-pointer"
+              >
+                <option value="popularity">{t('grid.sortPopularity')}</option>
+                <option value="date">{t('grid.sortDate')}</option>
+                <option value="rating">{t('grid.sortRating')}</option>
+              </select>
+              <ArrowUpDown className="w-3.5 h-3.5 text-white/55 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+            </div>
+          )}
           <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/10" role="group" aria-label={t('grid.viewModeGroup')}>
             <button
               type="button"

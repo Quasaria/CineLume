@@ -32,13 +32,14 @@ export function FilterDrawer() {
   const isMobile = useIsMobile();
   const {
     isFilterOpen, closeFilters,
-    selRegion, selGenre, selReleaseMode, selProvider,
-    setRegion, setGenre, setReleaseMode, setProvider,
+    selRegion, selGenre, selReleaseMode, selProvider, runtimeMax,
+    setRegion, setGenre, setReleaseMode, setProvider, setRuntimeMax,
   } = useAppStore();
   const [tempRegion, setTempRegion] = useState(selRegion);
   const [tempGenre, setTempGenre] = useState(selGenre);
   const [tempMode, setTempMode] = useState<ReleaseMode>(selReleaseMode);
   const [tempProvider, setTempProvider] = useState(selProvider);
+  const [tempRuntimeMax, setTempRuntimeMax] = useState<number | null>(runtimeMax);
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeFilters, contentRef });
   useBodyScrollLock(isFilterOpen);
@@ -55,14 +56,16 @@ export function FilterDrawer() {
       setTempGenre(selGenre);
       setTempMode(selReleaseMode);
       setTempProvider(selProvider);
+      setTempRuntimeMax(runtimeMax);
     }
-  }, [isFilterOpen, selRegion, selGenre, selReleaseMode, selProvider]);
+  }, [isFilterOpen, selRegion, selGenre, selReleaseMode, selProvider, runtimeMax]);
 
   function apply() {
     setRegion(tempRegion);
     setGenre(tempGenre);
     setReleaseMode(tempMode);
     setProvider(tempMode === 'platform' ? tempProvider : '');
+    setRuntimeMax(tempRuntimeMax);
     closeFilters();
   }
 
@@ -71,13 +74,15 @@ export function FilterDrawer() {
     setTempGenre('');
     setTempMode('theater');
     setTempProvider('');
+    setTempRuntimeMax(null);
   }
 
   const activeCount =
     (tempRegion !== 'FR' ? 1 : 0) +
     (tempGenre ? 1 : 0) +
     (tempMode !== 'theater' ? 1 : 0) +
-    (tempProvider ? 1 : 0);
+    (tempProvider ? 1 : 0) +
+    (tempRuntimeMax !== null ? 1 : 0);
 
   return (
     <AnimatePresence>
@@ -252,6 +257,41 @@ export function FilterDrawer() {
                     );
                   })}
                 </div>
+              </div>
+
+              <div>
+                <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-3">
+                  {t('filters.maxRuntime')}
+                </h3>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={60}
+                    max={240}
+                    step={15}
+                    value={tempRuntimeMax ?? 240}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value, 10);
+                      setTempRuntimeMax(v >= 240 ? null : v);
+                    }}
+                    aria-label={t('filters.maxRuntime')}
+                    className="flex-1 accent-violet-500"
+                  />
+                  <span className="text-sm font-bold tabular-nums w-16 text-right">
+                    {tempRuntimeMax === null
+                      ? t('filters.runtimeAny')
+                      : `${Math.floor(tempRuntimeMax / 60)}h${String(tempRuntimeMax % 60).padStart(2, '0')}`}
+                  </span>
+                </div>
+                {tempRuntimeMax !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setTempRuntimeMax(null)}
+                    className="mt-2 text-xs text-violet-300 hover:text-violet-200"
+                  >
+                    {t('filters.runtimeReset')}
+                  </button>
+                )}
               </div>
             </div>
 
