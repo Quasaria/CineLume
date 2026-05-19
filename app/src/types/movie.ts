@@ -80,6 +80,10 @@ export interface FavoriteMovie {
   poster_path: string | null;
   release_date: string;
   vote_average: number;
+  // Optionnels : enrichissement pour permettre d'afficher plus d'info dans le
+  // strip (synopsis, genres) sans re-fetcher TMDB. Les favoris existants
+  // crees avant cette migration n'ont pas ces champs, l'UI s'adapte.
+  overview?: string;
 }
 
 export type ViewMode = 'grid' | 'list';
