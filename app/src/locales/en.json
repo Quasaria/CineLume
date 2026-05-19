@@ -22,6 +22,8 @@
     "menu": "Menu",
     "myLists": "My lists",
     "surprise": "Surprise me",
+    "surpriseDesc": "Pick a random movie from your watchlist",
+    "myListsDesc": "Create your own movie collections",
     "surpriseEmpty": "Add movies to your watchlist to pick from",
     "surpriseToast": "How about watching \"{{title}}\"?",
     "surpriseSeeOther": "Another one",

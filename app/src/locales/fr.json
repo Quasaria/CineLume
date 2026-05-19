@@ -22,6 +22,8 @@
     "menu": "Menu",
     "myLists": "Mes listes",
     "surprise": "Pioche un film",
+    "surpriseDesc": "Tire un film au hasard dans ta watchlist",
+    "myListsDesc": "Crée tes propres collections de films",
     "surpriseEmpty": "Ajoute des films à ta watchlist pour piocher",
     "surpriseToast": "Et si tu regardais « {{title}} » ?",
     "surpriseSeeOther": "Un autre",
