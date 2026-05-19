@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Search, Heart, Sun, Moon, Settings, X, Bookmark } from 'lucide-react';
+import { Search, Heart, Sun, Moon, X, Bookmark } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
+import { BurgerMenu } from '@/components/BurgerMenu';
 
 function LogoMark({ className = '' }: { className?: string }) {
   return (
@@ -16,7 +17,7 @@ function LogoMark({ className = '' }: { className?: string }) {
 
 export function Navbar() {
   const { t } = useTranslation();
-  const { isDark, toggleTheme, openFavorites, openSettings, openWatchlist, favorites, watchlist, searchQuery, setSearchQuery } = useAppStore();
+  const { isDark, toggleTheme, openFavorites, openWatchlist, favorites, watchlist, searchQuery, setSearchQuery } = useAppStore();
   const [scrolled, setScrolled] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
   const desktopSearchRef = useRef<HTMLInputElement>(null);
@@ -188,15 +189,7 @@ export function Navbar() {
             )}
           </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={openSettings}
-            aria-label={t('nav.settings')}
-            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors"
-          >
-            <Settings className="w-5 h-5 text-white/70" aria-hidden="true" />
-          </motion.button>
+          <BurgerMenu />
         </div>
       </div>
 
