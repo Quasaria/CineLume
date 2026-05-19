@@ -52,6 +52,7 @@ export function FavoritesStrip() {
   const { t } = useTranslation();
   const favorites = useAppStore((s) => s.favorites);
   const openModal = useAppStore((s) => s.openModal);
+  const toggleFav = useAppStore((s) => s.toggleFav);
   const selYear = useAppStore((s) => s.selYear);
   const selMonth = useAppStore((s) => s.selMonth);
   const selWeek = useAppStore((s) => s.selWeek);
@@ -97,6 +98,7 @@ export function FavoritesStrip() {
             fav={fav}
             index={i}
             onOpen={() => openModal(fav.id)}
+            onToggleFav={() => toggleFav(fav)}
             t={t}
           />
         ))}
@@ -109,26 +111,52 @@ interface FeaturedCardProps {
   fav: FavoriteMovie;
   index: number;
   onOpen: () => void;
+  onToggleFav: () => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }
 
-function FeaturedCard({ fav, index, onOpen, t }: FeaturedCardProps) {
+function FeaturedCard({ fav, index, onOpen, onToggleFav, t }: FeaturedCardProps) {
   const fmtDateLong = (d?: string) => fmtDateLocalized(d, { day: 'numeric', month: 'long', year: 'numeric' });
   const days = daysUntil(fav.release_date);
   const countdown = countdownLabel(days, t);
 
   return (
-    <motion.button
-      type="button"
+    <motion.div
+      role="button"
+      tabIndex={0}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.06, 0.3), duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.99 }}
       onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpen();
+        }
+      }}
       aria-label={t('favorites.viewFavorite', { title: fav.title })}
-      className="favorites-featured w-full flex items-stretch gap-3 sm:gap-5 p-3 sm:p-4 rounded-2xl text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+      className="favorites-featured relative w-full flex items-stretch gap-3 sm:gap-5 p-3 sm:p-4 pr-12 sm:pr-14 rounded-2xl text-left group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
     >
+      {/* Bouton retirer favori en haut a droite : evite a l'user d'ouvrir
+          la modale juste pour decocher. stopPropagation pour ne pas
+          declencher l'open de la card. min-w-11 min-h-11 pour le touch
+          target iOS HIG. */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFav();
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+        aria-label={t('favorites.remove', { title: fav.title })}
+        aria-pressed="true"
+        className="absolute top-2 right-2 z-10 min-w-11 min-h-11 flex items-center justify-center rounded-full text-red-500 hover:bg-red-500/15 active:bg-red-500/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+      >
+        <Heart className="w-5 h-5 fill-current" aria-hidden="true" />
+      </button>
+
       {/* Poster a gauche */}
       <div className="w-[88px] sm:w-[112px] aspect-[2/3] rounded-xl overflow-hidden bg-[#13131a] shrink-0 shadow-xl shadow-black/40 ring-1 ring-white/10">
         {fav.poster_path ? (
@@ -183,6 +211,6 @@ function FeaturedCard({ fav, index, onOpen, t }: FeaturedCardProps) {
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
         </span>
       </div>
-    </motion.button>
+    </motion.div>
   );
 }
