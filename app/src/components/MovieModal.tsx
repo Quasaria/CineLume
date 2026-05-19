@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
@@ -11,11 +11,33 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
+import type { Movie } from '@/types/movie';
 
-export function MovieModal() {
+interface MovieModalProps {
+  movies?: Movie[];
+}
+
+export function MovieModal({ movies = [] }: MovieModalProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
-  const { currentModalMovieId, closeModal, isFav, toggleFav, selRegion } = useAppStore();
+  const { currentModalMovieId, closeModal, openModal, isFav, toggleFav, selRegion } = useAppStore();
+
+  // Index du film courant dans la liste affichee actuellement. Si l'user
+  // est arrive via URL deep-link sur un film qui n'est pas dans la liste
+  // courante, l'index est -1 et on n'affiche pas les chevrons prev/next.
+  const currentIndex = currentModalMovieId !== null
+    ? movies.findIndex((m) => m.id === currentModalMovieId)
+    : -1;
+  const canPrev = currentIndex > 0;
+  const canNext = currentIndex >= 0 && currentIndex < movies.length - 1;
+
+  const goPrev = useCallback(() => {
+    if (canPrev) openModal(movies[currentIndex - 1].id);
+  }, [canPrev, currentIndex, movies, openModal]);
+
+  const goNext = useCallback(() => {
+    if (canNext) openModal(movies[currentIndex + 1].id);
+  }, [canNext, currentIndex, movies, openModal]);
 
   const fmtDate = (d?: string) => fmtDateLocalized(d, { day: 'numeric', month: 'long', year: 'numeric' });
   const fmtDateShort = (d?: string) => fmtDateLocalized(d);
@@ -41,9 +63,30 @@ export function MovieModal() {
     return () => window.removeEventListener('keydown', handler, true);
   }, [lightbox]);
 
+  // Navigation clavier prev/next dans la liste. On ne capture pas les fleches
+  // quand l'user tape dans un input (sinon il ne peut plus deplacer son
+  // curseur), ni quand la lightbox est ouverte (priorite a la lightbox).
+  useEffect(() => {
+    if (currentModalMovieId === null) return;
+    const handler = (e: KeyboardEvent) => {
+      if (lightbox) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      if (e.key === 'ArrowLeft' && canPrev) {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === 'ArrowRight' && canNext) {
+        e.preventDefault();
+        goNext();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [currentModalMovieId, lightbox, canPrev, canNext, goPrev, goNext]);
+
   const { data: details, isLoading } = useQuery({
     queryKey: ['movieDetails', currentModalMovieId, lang],
-    queryFn: () => getMovieDetails(currentModalMovieId!),
+    queryFn: ({ signal }) => getMovieDetails(currentModalMovieId!, signal),
     enabled: currentModalMovieId !== null,
   });
 
@@ -110,6 +153,32 @@ export function MovieModal() {
             >
               <X className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
+
+            {/* Prev/Next : visibles uniquement si le film courant est dans la
+                liste actuelle (sinon on ne sait pas dans quoi naviguer).
+                Position top-left, en miroir du bouton X a top-right. */}
+            {currentIndex >= 0 && (
+              <div className="absolute top-5 left-5 z-50 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  disabled={!canPrev}
+                  aria-label={t('modal.prev')}
+                  className="min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-5 h-5 text-white" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={!canNext}
+                  aria-label={t('modal.next')}
+                  className="min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-5 h-5 text-white" aria-hidden="true" />
+                </button>
+              </div>
+            )}
 
             <div className="w-12 h-1.5 rounded-full bg-white/40 absolute top-2.5 left-1/2 -translate-x-1/2 sm:hidden z-50" aria-hidden="true" />
 

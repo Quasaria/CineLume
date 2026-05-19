@@ -1,13 +1,15 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { MotionConfig } from 'framer-motion';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { discoverMovies, searchMovies, searchPersons, getMovieReleaseDates, BACK } from '@/lib/tmdb';
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { HeroBackdrop } from '@/components/HeroBackdrop';
@@ -32,11 +34,14 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
   const {
     selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
     selectedPerson, searchQuery,
+    currentModalMovieId, isFilterOpen, isFavOpen, isSettingsOpen,
   } = useAppStore();
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
+  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isSettingsOpen;
 
   useModalUrlSync();
 
@@ -208,6 +213,18 @@ export default function App() {
     [movies],
   );
 
+  // Pull-to-refresh : sur mobile, tirer la page vers le bas depuis le haut
+  // declenche un refresh de toutes les queries. Desactive quand une modale
+  // est ouverte pour eviter d'intercepter ses gestures (drag-to-close,
+  // scroll interne, etc.). Le SW NetworkFirst de TMDB cache 6h donc parfois
+  // on veut forcer.
+  const { pullDistance, isRefreshing } = usePullToRefresh({
+    onRefresh: async () => {
+      await queryClient.invalidateQueries();
+    },
+    enabled: isMobile && !anyModalOpen,
+  });
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] selection:bg-violet-500/30 relative">
@@ -217,6 +234,31 @@ export default function App() {
         <a href="#main" className="skip-to-content">
           {t('nav.skipToContent')}
         </a>
+
+        {/* Indicateur pull-to-refresh : descend progressivement avec le doigt,
+            puis spinne pendant le refresh. Fixed top, au-dessus de tout en
+            z-index. Invisible quand pullDistance == 0. */}
+        {(pullDistance > 0 || isRefreshing) && (
+          <div
+            className="fixed top-0 left-1/2 -translate-x-1/2 z-[55] pointer-events-none"
+            style={{
+              transform: `translate(-50%, ${Math.min(pullDistance, 100)}px)`,
+              opacity: isRefreshing ? 1 : Math.min(pullDistance / 50, 1),
+              transition: isRefreshing ? 'transform 0.3s ease' : undefined,
+            }}
+            aria-hidden="true"
+          >
+            <div className="mt-3 w-10 h-10 rounded-full bg-[var(--bg)]/95 backdrop-blur-md border border-white/15 flex items-center justify-center shadow-xl shadow-black/40">
+              <RefreshCw
+                className={`w-5 h-5 text-violet-400 ${isRefreshing ? 'animate-spin' : ''}`}
+                style={!isRefreshing ? {
+                  transform: `rotate(${Math.min(pullDistance * 4, 360)}deg)`,
+                  transition: 'transform 0.05s linear',
+                } : undefined}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="ambient-bg" />
 
@@ -251,7 +293,7 @@ export default function App() {
         <Footer />
 
         <FilterDrawer />
-        <MovieModal />
+        <MovieModal movies={movies} />
         <FavoritesModal />
         <SettingsModal />
         <Toaster

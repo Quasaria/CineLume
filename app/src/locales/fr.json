@@ -91,6 +91,8 @@
     "expandBackdrop": "Voir l'image en grand",
     "expandPoster": "Voir l'affiche en grand",
     "closeLightbox": "Fermer la vue agrandie",
+    "prev": "Film précédent",
+    "next": "Film suivant",
     "status": {
       "Released": "Sorti",
       "Upcoming": "À venir",

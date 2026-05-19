@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Search, Heart, Sun, Moon, Settings, X } from 'lucide-react';
@@ -19,11 +19,41 @@ export function Navbar() {
   const { isDark, toggleTheme, openFavorites, openSettings, favorites, searchQuery, setSearchQuery } = useAppStore();
   const [scrolled, setScrolled] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
+  const desktopSearchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Raccourci clavier Cmd+K (Mac) / Ctrl+K (Win/Linux) pour ouvrir la
+  // recherche, pattern standard adopte par Linear, GitHub, Notion etc.
+  // Bloque si une modale est deja ouverte ou si l'utilisateur tape dans
+  // un champ texte (sinon ca volerait le focus pendant la saisie).
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        const state = useAppStore.getState();
+        if (
+          state.currentModalMovieId !== null ||
+          state.isFilterOpen ||
+          state.isFavOpen ||
+          state.isSettingsOpen
+        ) {
+          return;
+        }
+        e.preventDefault();
+        if (window.innerWidth >= 640) {
+          desktopSearchRef.current?.focus();
+          desktopSearchRef.current?.select();
+        } else {
+          setSearchVisible(true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
   const favCount = favorites.length;
@@ -81,12 +111,20 @@ export function Navbar() {
             <label className="sr-only" htmlFor="navbar-search">{t('nav.search')}</label>
             <Input
               id="navbar-search"
+              ref={desktopSearchRef}
               type="search"
               placeholder={t('nav.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-48 lg:w-64 bg-white/5 border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0 focus:w-56 lg:focus:w-72 transition-all duration-300"
+              className="w-48 lg:w-64 bg-white/5 border-white/10 rounded-xl pl-9 pr-12 py-2 text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0 focus:w-56 lg:focus:w-72 transition-all duration-300"
             />
+            <kbd className="hidden lg:flex absolute right-2.5 top-1/2 -translate-y-1/2 items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-white/[0.07] border border-white/10 text-[10px] font-mono font-bold text-white/50 pointer-events-none">
+              {typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent) ? (
+                <><span className="text-[11px] leading-none">⌘</span>K</>
+              ) : (
+                <>Ctrl K</>
+              )}
+            </kbd>
           </div>
 
           <motion.button
