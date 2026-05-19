@@ -91,6 +91,8 @@
     "expandBackdrop": "View image fullscreen",
     "expandPoster": "View poster fullscreen",
     "closeLightbox": "Close fullscreen view",
+    "prev": "Previous movie",
+    "next": "Next movie",
     "status": {
       "Released": "Released",
       "Upcoming": "Upcoming",
