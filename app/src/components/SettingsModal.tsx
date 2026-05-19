@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Trash2, Globe } from 'lucide-react';
+import { Save, Trash2, Globe, Bell, Download } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { invalidateApiKeyCache } from '@/lib/tmdb';
 import type { SupportedLang } from '@/i18n';
 
@@ -24,9 +25,13 @@ export function SettingsModal() {
   const isMobile = useIsMobile();
   const { isSettingsOpen, closeSettings, isDark, toggleTheme } = useAppStore();
   const [apiKey, setApiKey] = useState('');
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported',
+  );
   const queryClient = useQueryClient();
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeSettings, contentRef });
+  const { canInstall, isInstalled, install } = useInstallPrompt();
   useBodyScrollLock(isSettingsOpen);
   useFocusRestore(isSettingsOpen);
 
@@ -35,8 +40,55 @@ export function SettingsModal() {
   useEffect(() => {
     if (isSettingsOpen) {
       setApiKey(localStorage.getItem('tmdb_key') || '');
+      // Refresh la permission notif a chaque ouverture, l'user peut l'avoir
+      // changee dans les settings navigateur entre temps.
+      if (typeof Notification !== 'undefined') {
+        setNotifPermission(Notification.permission);
+      }
     }
   }, [isSettingsOpen]);
+
+  async function toggleNotifications() {
+    if (typeof Notification === 'undefined') {
+      toast.info(t('settings.notificationsUnsupported'));
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      toast.info(t('settings.notificationsRevokeHint'));
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      toast.info(t('settings.notificationsBlockedHint'));
+      return;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      setNotifPermission(result);
+      if (result === 'granted') {
+        toast.success(t('settings.notificationsEnabled'));
+        // Petit ping immediat pour confirmer que ca marche
+        try {
+          new Notification(t('settings.notificationsTestTitle'), {
+            body: t('settings.notificationsTestBody'),
+            icon: `${import.meta.env.BASE_URL || '/'}icon.svg`,
+            tag: 'cinelume-test',
+          });
+        } catch {
+          // ignore
+        }
+      }
+    } catch {
+      toast.error(t('settings.notificationsError'));
+    }
+  }
+
+  async function handleInstall() {
+    const accepted = await install();
+    if (accepted) {
+      toast.success(t('settings.installed'));
+      closeSettings();
+    }
+  }
 
   function save() {
     const key = apiKey.trim();
@@ -152,6 +204,61 @@ export function SettingsModal() {
                 </div>
                 <Switch checked={!isDark} onCheckedChange={toggleTheme} aria-label={t('settings.themeToggleDesc')} />
               </div>
+
+              <div className="flex items-center justify-between py-3 border-t border-white/5 gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Bell className={`w-4 h-4 shrink-0 ${notifPermission === 'granted' ? 'text-violet-300' : 'text-white/60'}`} aria-hidden="true" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{t('settings.notifications')}</p>
+                    <p className="text-xs text-white/50 truncate">
+                      {notifPermission === 'granted'
+                        ? t('settings.notificationsGranted')
+                        : notifPermission === 'denied'
+                          ? t('settings.notificationsDenied')
+                          : notifPermission === 'unsupported'
+                            ? t('settings.notificationsUnsupported')
+                            : t('settings.notificationsDesc')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleNotifications}
+                  disabled={notifPermission === 'unsupported'}
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                    notifPermission === 'granted'
+                      ? 'bg-violet-500/15 text-violet-300 border border-violet-500/30'
+                      : notifPermission === 'denied'
+                        ? 'bg-white/5 text-white/40 border border-white/10 cursor-help'
+                        : 'bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 border border-violet-500/30'
+                  } disabled:opacity-40 disabled:cursor-not-allowed`}
+                >
+                  {notifPermission === 'granted'
+                    ? t('settings.notificationsOn')
+                    : notifPermission === 'denied'
+                      ? t('settings.notificationsBlocked')
+                      : t('settings.notificationsEnable')}
+                </button>
+              </div>
+
+              {canInstall && !isInstalled && (
+                <div className="flex items-center justify-between py-3 border-t border-white/5 gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Download className="w-4 h-4 text-cyan-300 shrink-0" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{t('settings.installApp')}</p>
+                      <p className="text-xs text-white/50">{t('settings.installAppDesc')}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleInstall}
+                    className="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-xs font-bold hover:bg-cyan-500/25 transition-colors"
+                  >
+                    {t('settings.install')}
+                  </button>
+                </div>
+              )}
 
               <div className="flex items-center justify-between py-3 border-t border-white/5">
                 <div>

@@ -149,7 +149,30 @@
     "keyReset": "API key reset",
     "cacheCleared_one": "Cache cleared ({{count}} entry)",
     "cacheCleared_other": "Cache cleared ({{count}} entries)",
-    "cacheEmpty": "Cache already empty"
+    "cacheEmpty": "Cache already empty",
+    "notifications": "Notifications",
+    "notificationsDesc": "Reminders when a favorite releases",
+    "notificationsGranted": "Enabled",
+    "notificationsDenied": "Blocked in browser",
+    "notificationsUnsupported": "Not supported in this browser",
+    "notificationsEnable": "Enable",
+    "notificationsOn": "On",
+    "notificationsBlocked": "Blocked",
+    "notificationsEnabled": "Notifications enabled",
+    "notificationsBlockedHint": "You blocked notifications. Re-enable them in your browser settings.",
+    "notificationsRevokeHint": "To disable, go to your browser settings.",
+    "notificationsError": "Couldn't enable notifications",
+    "notificationsTestTitle": "Here we go!",
+    "notificationsTestBody": "You'll be notified when a favorite of yours releases.",
+    "installApp": "Install app",
+    "installAppDesc": "Quick access from your home screen",
+    "install": "Install",
+    "installed": "App installed"
+  },
+  "notifications": {
+    "singleTitle": "{{title}} releases this week",
+    "multiTitle": "{{count}} favorites release this week",
+    "view": "View"
   },
   "persons": {
     "title": "People",

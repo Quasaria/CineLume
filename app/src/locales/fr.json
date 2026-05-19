@@ -149,7 +149,30 @@
     "keyReset": "Clé API réinitialisée",
     "cacheCleared_one": "Cache vidé ({{count}} entrée)",
     "cacheCleared_other": "Cache vidé ({{count}} entrées)",
-    "cacheEmpty": "Cache déjà vide"
+    "cacheEmpty": "Cache déjà vide",
+    "notifications": "Notifications",
+    "notificationsDesc": "Rappels quand un favori sort",
+    "notificationsGranted": "Activées",
+    "notificationsDenied": "Bloquées dans le navigateur",
+    "notificationsUnsupported": "Non supportées sur ce navigateur",
+    "notificationsEnable": "Activer",
+    "notificationsOn": "Activées",
+    "notificationsBlocked": "Bloquées",
+    "notificationsEnabled": "Notifications activées",
+    "notificationsBlockedHint": "Tu as bloqué les notifications. Réactive-les dans les réglages du navigateur.",
+    "notificationsRevokeHint": "Pour désactiver, va dans les réglages du navigateur.",
+    "notificationsError": "Impossible d'activer les notifications",
+    "notificationsTestTitle": "C'est parti !",
+    "notificationsTestBody": "Tu seras prévenu·e quand un de tes favoris sortira.",
+    "installApp": "Installer l'application",
+    "installAppDesc": "Accès rapide depuis l'écran d'accueil",
+    "install": "Installer",
+    "installed": "Application installée"
+  },
+  "notifications": {
+    "singleTitle": "{{title}} sort cette semaine",
+    "multiTitle": "{{count}} favoris sortent cette semaine",
+    "view": "Voir"
   },
   "persons": {
     "title": "Personnes",

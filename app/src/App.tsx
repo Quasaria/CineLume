@@ -10,6 +10,7 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { useReleaseNotifications } from '@/hooks/useReleaseNotifications';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { HeroBackdrop } from '@/components/HeroBackdrop';
@@ -44,6 +45,7 @@ export default function App() {
   const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isSettingsOpen;
 
   useModalUrlSync();
+  useReleaseNotifications();
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
     queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, lang],
