@@ -87,3 +87,10 @@ export interface FavoriteMovie {
 }
 
 export type ViewMode = 'grid' | 'list';
+
+export interface CustomList {
+  id: string;
+  name: string;
+  films: FavoriteMovie[];
+  createdAt: number;
+}

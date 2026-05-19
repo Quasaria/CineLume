@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { toast } from 'sonner';
-import type { FavoriteMovie, ViewMode } from '@/types/movie';
+import type { FavoriteMovie, ViewMode, CustomList } from '@/types/movie';
 import { getCurrentCinemaContext, getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 import i18n from '@/i18n';
 
@@ -25,10 +25,12 @@ interface AppState {
   selectedPerson: SelectedPerson | null;
   favorites: FavoriteMovie[];
   watchlist: FavoriteMovie[];
+  customLists: CustomList[];
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
   isFavOpen: boolean;
   isWatchlistOpen: boolean;
+  isListsOpen: boolean;
   isSettingsOpen: boolean;
 
   toggleTheme: () => void;
@@ -47,6 +49,12 @@ interface AppState {
   toggleWatchlist: (movie: FavoriteMovie) => void;
   removeFromWatchlist: (id: number) => void;
   isInWatchlist: (id: number) => boolean;
+  createList: (name: string) => string;
+  renameList: (id: string, name: string) => void;
+  deleteList: (id: string) => void;
+  addFilmToList: (listId: string, film: FavoriteMovie) => void;
+  removeFilmFromList: (listId: string, filmId: number) => void;
+  isFilmInList: (listId: string, filmId: number) => boolean;
   openModal: (id: number) => void;
   closeModal: () => void;
   openFilters: () => void;
@@ -55,6 +63,8 @@ interface AppState {
   closeFavorites: () => void;
   openWatchlist: () => void;
   closeWatchlist: () => void;
+  openLists: () => void;
+  closeLists: () => void;
   openSettings: () => void;
   closeSettings: () => void;
 }
@@ -105,6 +115,37 @@ function safeParseWatchlist(): FavoriteMovie[] {
   return safeParseList('cinelume_watchlist');
 }
 
+function safeParseCustomLists(): CustomList[] {
+  try {
+    const raw = localStorage.getItem('cinelume_custom_lists');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((l): l is CustomList =>
+      typeof l === 'object' &&
+      l !== null &&
+      typeof l.id === 'string' &&
+      typeof l.name === 'string' &&
+      Array.isArray(l.films) &&
+      typeof l.createdAt === 'number',
+    );
+  } catch {
+    return [];
+  }
+}
+
+function persistCustomLists(lists: CustomList[]) {
+  try {
+    localStorage.setItem('cinelume_custom_lists', JSON.stringify(lists));
+  } catch {
+    // quota plein, on ignore
+  }
+}
+
+function genId(): string {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
 const VIEW_MODES_VALID: readonly ViewMode[] = ['grid', 'list'] as const;
 const rawViewMode = localStorage.getItem('cinelume_view_mode');
 const savedViewMode: ViewMode = VIEW_MODES_VALID.includes(rawViewMode as ViewMode)
@@ -125,10 +166,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedPerson: null,
   favorites: safeParseFavs(),
   watchlist: safeParseWatchlist(),
+  customLists: safeParseCustomLists(),
   currentModalMovieId: null,
   isFilterOpen: false,
   isFavOpen: false,
   isWatchlistOpen: false,
+  isListsOpen: false,
   isSettingsOpen: false,
 
   toggleTheme: () => {
@@ -259,6 +302,51 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   isInWatchlist: (id) => get().watchlist.some(f => f.id === id),
 
+  createList: (name) => {
+    const id = genId();
+    const list: CustomList = { id, name: name.trim() || i18n.t('lists.defaultName'), films: [], createdAt: Date.now() };
+    const next = [...get().customLists, list];
+    persistCustomLists(next);
+    set({ customLists: next });
+    return id;
+  },
+
+  renameList: (id, name) => {
+    const next = get().customLists.map(l => l.id === id ? { ...l, name: name.trim() || l.name } : l);
+    persistCustomLists(next);
+    set({ customLists: next });
+  },
+
+  deleteList: (id) => {
+    const next = get().customLists.filter(l => l.id !== id);
+    persistCustomLists(next);
+    set({ customLists: next });
+  },
+
+  addFilmToList: (listId, film) => {
+    const next = get().customLists.map(l => {
+      if (l.id !== listId) return l;
+      if (l.films.some(f => f.id === film.id)) return l;
+      return { ...l, films: [...l.films, film] };
+    });
+    persistCustomLists(next);
+    set({ customLists: next });
+  },
+
+  removeFilmFromList: (listId, filmId) => {
+    const next = get().customLists.map(l => {
+      if (l.id !== listId) return l;
+      return { ...l, films: l.films.filter(f => f.id !== filmId) };
+    });
+    persistCustomLists(next);
+    set({ customLists: next });
+  },
+
+  isFilmInList: (listId, filmId) => {
+    const list = get().customLists.find(l => l.id === listId);
+    return list ? list.films.some(f => f.id === filmId) : false;
+  },
+
   openModal: (id) => set({ currentModalMovieId: id }),
   closeModal: () => set({ currentModalMovieId: null }),
   openFilters: () => set({ isFilterOpen: true }),
@@ -267,6 +355,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   closeFavorites: () => set({ isFavOpen: false }),
   openWatchlist: () => set({ isWatchlistOpen: true }),
   closeWatchlist: () => set({ isWatchlistOpen: false }),
+  openLists: () => set({ isListsOpen: true }),
+  closeLists: () => set({ isListsOpen: false }),
   openSettings: () => set({ isSettingsOpen: true }),
   closeSettings: () => set({ isSettingsOpen: false }),
 }));

@@ -446,6 +446,14 @@ html.light ::-webkit-scrollbar-thumb:hover {
   background: rgba(124, 58, 237, 0.32);
 }
 
+/* Burger menu dropdown : profite des overrides bg-* deja en place, mais
+   on ajoute une ombre marquee en light mode pour bien le detacher de la
+   page derriere. */
+html.light .burger-menu {
+  box-shadow: 0 20px 40px -10px rgba(10, 10, 30, 0.18), 0 4px 12px rgba(10, 10, 30, 0.08);
+  border-color: rgba(10, 10, 30, 0.1);
+}
+
 /* Navbar scrolled shadow contrast */
 html.light .shadow-black\/20 { box-shadow: 0 4px 12px rgba(10, 10, 15, 0.08); }
 
@@ -631,9 +639,21 @@ html.light .movie-card .text-amber-400 {
 }
 
 /* Bouton "Aujourd'hui" : violet plus contraste en light */
-html.light .text-violet-300 {
-  color: #6d28d9;
-}
+html.light .text-violet-200 { color: #5b21b6; }
+html.light .text-violet-300 { color: #6d28d9; }
+html.light .text-violet-400 { color: #7c3aed; }
+html.light .fill-violet-500 { fill: #7c3aed; }
+
+html.light .text-amber-400 { color: #b45309; }
+html.light .fill-amber-400 { fill: #b45309; }
+
+html.light .text-fuchsia-300 { color: #86198f; }
+html.light .text-fuchsia-400 { color: #c026d3; }
+html.light .fill-fuchsia-500 { fill: #c026d3; }
+
+html.light .text-rose-400 { color: #be123c; }
+html.light .text-orange-400 { color: #c2410c; }
+html.light .text-green-400 { color: #15803d; }
 html.light .bg-violet-500\/10 {
   background-color: rgba(124, 58, 237, 0.08);
 }
