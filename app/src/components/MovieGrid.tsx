@@ -8,6 +8,33 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import type { Movie } from '@/types/movie';
 
+interface FilterChipProps {
+  label: string;
+  color: 'violet' | 'fuchsia' | 'emerald' | 'cyan';
+  onClear: () => void;
+  ariaLabel: string;
+}
+
+function FilterChip({ label, color, onClear, ariaLabel }: FilterChipProps) {
+  const styles: Record<FilterChipProps['color'], string> = {
+    violet: 'bg-violet-500/10 text-violet-300 border-violet-500/20 hover:bg-violet-500/20',
+    fuchsia: 'bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/20 hover:bg-fuchsia-500/20',
+    emerald: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20',
+    cyan: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20 hover:bg-cyan-500/20',
+  };
+  return (
+    <button
+      type="button"
+      onClick={onClear}
+      aria-label={ariaLabel}
+      className={`pl-2 pr-1 py-0.5 rounded-md text-xs border flex items-center gap-1 transition-colors ${styles[color]}`}
+    >
+      <span>{label}</span>
+      <X className="w-3 h-3 opacity-70" aria-hidden="true" />
+    </button>
+  );
+}
+
 interface MovieGridProps {
   movies: Movie[];
   isLoading: boolean;
@@ -22,7 +49,11 @@ interface MovieGridProps {
 
 export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults, isError, errorMessage, onRetry }: MovieGridProps) {
   const { t } = useTranslation();
-  const { viewMode, setViewMode, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson, setSelectedPerson } = useAppStore();
+  const {
+    viewMode, setViewMode,
+    selRegion, selGenre, selReleaseMode, selProvider, selectedPerson,
+    setSelectedPerson, setRegion, setGenre, setReleaseMode, setProvider,
+  } = useAppStore();
   const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
 
@@ -103,45 +134,60 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-white/60 font-medium">
-            {t('grid.movies', { count: totalResults })}
+      <div className="flex items-center justify-between mb-6 gap-3">
+        <div className="flex items-center gap-3 flex-wrap min-w-0">
+          <span className="text-sm text-white/60 font-medium shrink-0">
+            {t('grid.movies', { count: totalResults })}{hasNextPage ? '+' : ''}
           </span>
           {hasActiveFilter && (
             <div className="flex items-center gap-1.5 flex-wrap">
               {selRegion !== 'FR' && selRegion && (
-                <span className="px-2 py-0.5 rounded-md bg-violet-500/10 text-violet-300 text-xs border border-violet-500/20">
-                  {selRegion}
-                </span>
+                <FilterChip
+                  label={selRegion}
+                  color="violet"
+                  ariaLabel={t('grid.clearFilter', { name: selRegion })}
+                  onClear={() => setRegion('FR')}
+                />
               )}
               {selReleaseMode !== 'theater' && (
-                <span className="px-2 py-0.5 rounded-md bg-fuchsia-500/10 text-fuchsia-300 text-xs border border-fuchsia-500/20">
-                  {t(`modes.${selReleaseMode}`)}
-                </span>
+                <FilterChip
+                  label={t(`modes.${selReleaseMode}`)}
+                  color="fuchsia"
+                  ariaLabel={t('grid.clearFilter', { name: t(`modes.${selReleaseMode}`) })}
+                  onClear={() => {
+                    setReleaseMode('theater');
+                    setProvider('');
+                  }}
+                />
               )}
               {providerName && (
-                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 text-xs border border-emerald-500/20">
-                  {providerName}
-                </span>
+                <FilterChip
+                  label={providerName}
+                  color="emerald"
+                  ariaLabel={t('grid.clearFilter', { name: providerName })}
+                  onClear={() => setProvider('')}
+                />
               )}
               {selGenre && (
-                <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 text-xs border border-cyan-500/20">
-                  Genre
-                </span>
+                <FilterChip
+                  label={t('grid.genreLabel')}
+                  color="cyan"
+                  ariaLabel={t('grid.clearFilter', { name: t('grid.genreLabel') })}
+                  onClear={() => setGenre('')}
+                />
               )}
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10" role="group" aria-label={t('grid.viewModeGroup')}>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/10" role="group" aria-label={t('grid.viewModeGroup')}>
             <button
               type="button"
               onClick={() => setViewMode('grid')}
               aria-label={t('grid.viewGrid')}
               aria-pressed={viewMode === 'grid'}
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`min-w-11 min-h-11 sm:min-w-9 sm:min-h-9 flex items-center justify-center rounded-lg transition-all ${
                 viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'
               }`}
             >
@@ -152,7 +198,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
               onClick={() => setViewMode('list')}
               aria-label={t('grid.viewList')}
               aria-pressed={viewMode === 'list'}
-              className={`p-1.5 rounded-lg transition-all ${
+              className={`min-w-11 min-h-11 sm:min-w-9 sm:min-h-9 flex items-center justify-center rounded-lg transition-all ${
                 viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white'
               }`}
             >

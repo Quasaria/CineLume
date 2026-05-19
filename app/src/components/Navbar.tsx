@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Search, Heart, Sun, Moon, Settings } from 'lucide-react';
+import { Search, Heart, Sun, Moon, Settings, X } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 
@@ -48,9 +48,13 @@ export function Navbar() {
           aria-label={t('nav.home')}
           className="flex items-center gap-3 cursor-pointer group bg-transparent border-0 p-0"
           onClick={() => {
+            // jumpToToday reset deja searchQuery + selectedPerson maintenant,
+            // mais on rappelle setSearchQuery par securite (au cas ou le user
+            // tape pendant qu'il clique sur le logo).
             const store = useAppStore.getState();
             store.jumpToToday();
             store.setSearchQuery('');
+            setSearchVisible(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
@@ -137,28 +141,47 @@ export function Navbar() {
         </div>
       </div>
 
-      {searchVisible && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          className="sm:hidden px-4 pb-3"
-        >
-          <div className="relative">
-            <Search className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
-            <label className="sr-only" htmlFor="navbar-search-mobile">{t('nav.search')}</label>
-            <Input
-              id="navbar-search-mobile"
-              type="search"
-              placeholder={t('nav.searchMoviePlaceholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0"
-              autoFocus
-            />
-          </div>
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {searchVisible && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="sm:hidden px-4 pb-3 overflow-hidden"
+          >
+            <div className="relative flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-white/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+                <label className="sr-only" htmlFor="navbar-search-mobile">{t('nav.search')}</label>
+                <Input
+                  id="navbar-search-mobile"
+                  type="search"
+                  placeholder={t('nav.searchMoviePlaceholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setSearchVisible(false);
+                  }}
+                  className="w-full bg-white/5 border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0"
+                  autoFocus
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSearchVisible(false);
+                }}
+                aria-label={t('common.close')}
+                className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors shrink-0"
+              >
+                <X className="w-5 h-5 text-white/70" aria-hidden="true" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 }

@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
+import { useFocusRestore } from '@/hooks/useFocusRestore';
 
 export function MovieModal() {
   const { t, i18n } = useTranslation();
@@ -48,6 +49,7 @@ export function MovieModal() {
 
   const movie = details;
   useBodyScrollLock(currentModalMovieId !== null);
+  useFocusRestore(currentModalMovieId !== null);
 
   async function shareMovie() {
     if (!movie) return;
@@ -94,6 +96,9 @@ export function MovieModal() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="movie-modal-title"
             className="relative w-full max-w-4xl max-h-[92dvh] sm:max-h-[85vh] bg-[#0f0f15] sm:rounded-3xl rounded-t-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col"
             {...dragHandlers}
           >
@@ -123,7 +128,7 @@ export function MovieModal() {
                       <button
                         type="button"
                         onClick={() => setLightbox(`${ORIG}${movie.backdrop_path}`)}
-                        aria-label="Voir l'image en grand"
+                        aria-label={t('modal.expandBackdrop')}
                         className="block w-full h-full cursor-zoom-in"
                       >
                         <img
@@ -136,7 +141,7 @@ export function MovieModal() {
                         />
                         <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/50 backdrop-blur-md text-white text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
                           <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />
-                          Agrandir
+                          {t('modal.expand')}
                         </span>
                       </button>
                     ) : (
@@ -151,7 +156,7 @@ export function MovieModal() {
                       <button
                         type="button"
                         onClick={() => setLightbox(`${ORIG}${movie.poster_path}`)}
-                        aria-label="Voir l'affiche en grand"
+                        aria-label={t('modal.expandPoster')}
                         className="hidden sm:block w-44 lg:w-52 shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#18181f] self-start sticky top-6 cursor-zoom-in group/poster"
                       >
                         <img
@@ -212,7 +217,7 @@ export function MovieModal() {
                       })()}
 
                       <div className="flex items-start justify-between gap-4 mb-1">
-                        <h2 className="text-2xl sm:text-4xl font-bold leading-tight">
+                        <h2 id="movie-modal-title" className="text-2xl sm:text-4xl font-bold leading-tight">
                           {movie.title}
                         </h2>
                         <button
@@ -481,7 +486,7 @@ export function MovieModal() {
           <button
             type="button"
             onClick={() => setLightbox(null)}
-            aria-label={t('common.close')}
+            aria-label={t('modal.closeLightbox')}
             className="absolute top-4 right-4 p-2.5 rounded-full bg-black/60 hover:bg-white/20 backdrop-blur-md transition-colors"
           >
             <X className="w-5 h-5 text-white" aria-hidden="true" />

@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
+import { useFocusRestore } from '@/hooks/useFocusRestore';
 
 const REGION_CODES = ['FR', 'US', 'GB', 'JP', 'DE', 'ES', 'IT', 'KR', 'CA', 'AU', 'BR', 'MX', 'IN', 'CN', 'RU', 'SE', 'NL', 'BE', 'CH', 'AT'] as const;
 const FLAGS: Record<string, string> = {
@@ -40,10 +41,11 @@ export function FilterDrawer() {
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeFilters, contentRef });
   useBodyScrollLock(isFilterOpen);
+  useFocusRestore(isFilterOpen);
 
   const { data: genres } = useQuery({
     queryKey: ['genres', lang],
-    queryFn: getGenres,
+    queryFn: ({ signal }) => getGenres(signal),
   });
 
   useEffect(() => {
@@ -92,13 +94,16 @@ export function FilterDrawer() {
             animate={isMobile ? { y: 0 } : { x: 0 }}
             exit={isMobile ? { y: '100%' } : { x: '100%' }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-0 right-0 bottom-0 sm:left-auto sm:top-0 sm:bottom-0 w-full sm:max-w-sm sm:h-full max-h-[90vh] sm:max-h-none bg-[#0f0f15] border-t sm:border-t-0 sm:border-l border-white/10 shadow-2xl flex flex-col rounded-t-3xl sm:rounded-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="filter-modal-title"
+            className="absolute left-0 right-0 bottom-0 sm:left-auto sm:top-0 sm:bottom-0 w-full sm:max-w-sm sm:h-full max-h-[90dvh] sm:max-h-none bg-[#0f0f15] border-t sm:border-t-0 sm:border-l border-white/10 shadow-2xl flex flex-col rounded-t-3xl sm:rounded-none"
             {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mt-3 mx-auto sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between p-5 pb-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
-                <h2 className="font-bold text-xl">{t('filters.title')}</h2>
+                <h2 id="filter-modal-title" className="font-bold text-xl">{t('filters.title')}</h2>
                 {activeCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs font-bold border border-violet-500/30">
                     {t('filters.active', { count: activeCount })}

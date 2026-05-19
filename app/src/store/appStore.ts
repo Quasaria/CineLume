@@ -90,9 +90,15 @@ function safeParseFavs(): FavoriteMovie[] {
   }
 }
 
+const VIEW_MODES_VALID: readonly ViewMode[] = ['grid', 'list'] as const;
+const rawViewMode = localStorage.getItem('cinelume_view_mode');
+const savedViewMode: ViewMode = VIEW_MODES_VALID.includes(rawViewMode as ViewMode)
+  ? (rawViewMode as ViewMode)
+  : 'grid';
+
 export const useAppStore = create<AppState>((set, get) => ({
   isDark,
-  viewMode: 'grid',
+  viewMode: savedViewMode,
   searchQuery: '',
   selYear: initialContext.year,
   selMonth: initialContext.month,
@@ -121,7 +127,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ isDark: newDark });
   },
 
-  setViewMode: (mode) => set({ viewMode: mode }),
+  setViewMode: (mode) => {
+    try {
+      localStorage.setItem('cinelume_view_mode', mode);
+    } catch {
+      // ignore
+    }
+    set({ viewMode: mode });
+  },
   setSearchQuery: (q) => set({ searchQuery: q }),
 
   setDate: (year, month, week) => {
@@ -156,8 +169,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   jumpToToday: () => {
+    // "Aujourd'hui" : on retombe sur les vraies sorties du jour. Reset aussi
+    // la recherche et le mode filmographie sinon le bouton ne fait rien de
+    // visible quand l'utilisateur etait dans un de ces modes.
     const ctx = getCurrentCinemaContext(get().selRegion);
-    set({ selYear: ctx.year, selMonth: ctx.month, selWeek: ctx.week });
+    set({
+      selYear: ctx.year,
+      selMonth: ctx.month,
+      selWeek: ctx.week,
+      searchQuery: '',
+      selectedPerson: null,
+    });
   },
 
   toggleFav: (movie) => {

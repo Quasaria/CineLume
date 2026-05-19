@@ -10,6 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
+import { useFocusRestore } from '@/hooks/useFocusRestore';
+import { invalidateApiKeyCache } from '@/lib/tmdb';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -26,6 +28,7 @@ export function SettingsModal() {
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeSettings, contentRef });
   useBodyScrollLock(isSettingsOpen);
+  useFocusRestore(isSettingsOpen);
 
   const currentLang = (i18n.language || 'fr').split('-')[0] as SupportedLang;
 
@@ -44,6 +47,7 @@ export function SettingsModal() {
       localStorage.removeItem('tmdb_key');
       toast.success(t('settings.keyReset'));
     }
+    invalidateApiKeyCache();
     queryClient.invalidateQueries();
     closeSettings();
   }
@@ -83,18 +87,24 @@ export function SettingsModal() {
             onClick={closeSettings}
           />
           <motion.div
-            ref={contentRef}
             initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
             exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-md w-full max-h-[90vh] sm:max-h-none overflow-y-auto overscroll-contain border border-white/10 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-modal-title"
+            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[90dvh] sm:max-h-none overflow-hidden border border-white/10 shadow-2xl flex flex-col"
             {...dragHandlers}
           >
-            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
-            <h3 className="font-bold text-xl mb-6">{t('settings.title')}</h3>
+            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mt-3 sm:hidden shrink-0" aria-hidden="true" />
+            {/* Inner scrollable : separe le drag target (panel exterieur) du
+                scroll target (ce div). Sinon le drag-to-close bloque des que
+                l'utilisateur scrolle dans la modale. */}
+            <div ref={contentRef} className="overflow-y-auto overscroll-contain px-5 pt-3 pb-6 sm:p-6 flex-1">
+              <h3 id="settings-modal-title" className="font-bold text-xl mb-6">{t('settings.title')}</h3>
 
-            <div className="space-y-5">
+              <div className="space-y-5">
               <div>
                 <label htmlFor="settings-apikey" className="text-xs text-white/50 uppercase tracking-wider font-bold mb-2 block">
                   {t('settings.apiKey')}
@@ -159,22 +169,23 @@ export function SettingsModal() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-white/5">
-              <button
-                type="button"
-                onClick={closeSettings}
-                className="px-4 py-2 rounded-xl text-white/60 hover:text-white text-sm font-medium transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={save}
-                className="px-4 py-2 rounded-xl btn-primary text-white text-sm font-semibold bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" aria-hidden="true" />
-                {t('common.save')}
-              </button>
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={closeSettings}
+                  className="px-4 py-2 rounded-xl text-white/60 hover:text-white text-sm font-medium transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={save}
+                  className="px-4 py-2 rounded-xl btn-primary text-white text-sm font-semibold bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" aria-hidden="true" />
+                  {t('common.save')}
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>
