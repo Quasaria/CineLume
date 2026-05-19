@@ -73,9 +73,13 @@ export function DateNavigator() {
       className="sticky z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2 sm:py-3 mb-4 sm:mb-6 nav-feather"
       style={{
         top: 'calc(4rem + env(safe-area-inset-top))',
-        backgroundColor: 'color-mix(in srgb, var(--bg) 92%, transparent)',
-        backdropFilter: 'blur(20px) saturate(140%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+        // 96% au lieu de 92% : sans ca, sur un backdrop hero bien colore
+        // (carte meteo rouge/vert par exemple), les couleurs traversaient
+        // le blur et le saturate(140%) les amplifiait, rendant les boutons
+        // illisibles. On enleve aussi le saturate qui exagerait ce probleme.
+        backgroundColor: 'color-mix(in srgb, var(--bg) 96%, transparent)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
       }}
     >
       {/* MOBILE : option B simple. Ligne 1 = chevrons + Mois Annee + actions.

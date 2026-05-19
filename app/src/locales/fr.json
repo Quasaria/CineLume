@@ -124,7 +124,10 @@
     "close": "Fermer la liste des favoris",
     "stripTitle": "Tes favoris cette semaine",
     "stripAria": "Films favoris qui sortent cette semaine",
-    "viewFavorite": "Voir la fiche de {{title}}"
+    "stripCount_one": "1 film que tu suis sort cette semaine",
+    "stripCount_other": "{{count}} films que tu suis sortent cette semaine",
+    "viewFavorite": "Voir la fiche de {{title}}",
+    "openDetails": "Voir la fiche"
   },
   "filters": {
     "title": "Filtres",
