@@ -24,9 +24,11 @@ interface AppState {
   selProvider: string;
   selectedPerson: SelectedPerson | null;
   favorites: FavoriteMovie[];
+  watchlist: FavoriteMovie[];
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
   isFavOpen: boolean;
+  isWatchlistOpen: boolean;
   isSettingsOpen: boolean;
 
   toggleTheme: () => void;
@@ -42,12 +44,17 @@ interface AppState {
   toggleFav: (movie: FavoriteMovie) => void;
   removeFav: (id: number) => void;
   isFav: (id: number) => boolean;
+  toggleWatchlist: (movie: FavoriteMovie) => void;
+  removeFromWatchlist: (id: number) => void;
+  isInWatchlist: (id: number) => boolean;
   openModal: (id: number) => void;
   closeModal: () => void;
   openFilters: () => void;
   closeFilters: () => void;
   openFavorites: () => void;
   closeFavorites: () => void;
+  openWatchlist: () => void;
+  closeWatchlist: () => void;
   openSettings: () => void;
   closeSettings: () => void;
 }
@@ -79,15 +86,23 @@ const savedReleaseMode: ReleaseMode = RELEASE_MODES_VALID.includes(rawMode as Re
   ? (rawMode as ReleaseMode)
   : 'theater';
 
-function safeParseFavs(): FavoriteMovie[] {
+function safeParseList(key: string): FavoriteMovie[] {
   try {
-    const raw = localStorage.getItem('cinelume_favs');
+    const raw = localStorage.getItem(key);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
+}
+
+function safeParseFavs(): FavoriteMovie[] {
+  return safeParseList('cinelume_favs');
+}
+
+function safeParseWatchlist(): FavoriteMovie[] {
+  return safeParseList('cinelume_watchlist');
 }
 
 const VIEW_MODES_VALID: readonly ViewMode[] = ['grid', 'list'] as const;
@@ -109,9 +124,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   selProvider: localStorage.getItem('cinelume_provider') || '',
   selectedPerson: null,
   favorites: safeParseFavs(),
+  watchlist: safeParseWatchlist(),
   currentModalMovieId: null,
   isFilterOpen: false,
   isFavOpen: false,
+  isWatchlistOpen: false,
   isSettingsOpen: false,
 
   toggleTheme: () => {
@@ -212,12 +229,44 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   isFav: (id) => get().favorites.some(f => f.id === id),
 
+  toggleWatchlist: (movie) => {
+    const list = [...get().watchlist];
+    const idx = list.findIndex(f => f.id === movie.id);
+    const wasIn = idx > -1;
+    if (wasIn) {
+      list.splice(idx, 1);
+    } else {
+      list.push(movie);
+    }
+    try {
+      localStorage.setItem('cinelume_watchlist', JSON.stringify(list));
+    } catch {
+      // ignore
+    }
+    set({ watchlist: list });
+    toast.success(i18n.t(wasIn ? 'watchlist.removed' : 'watchlist.added', { title: movie.title }));
+  },
+
+  removeFromWatchlist: (id) => {
+    const list = get().watchlist.filter(f => f.id !== id);
+    try {
+      localStorage.setItem('cinelume_watchlist', JSON.stringify(list));
+    } catch {
+      // ignore
+    }
+    set({ watchlist: list });
+  },
+
+  isInWatchlist: (id) => get().watchlist.some(f => f.id === id),
+
   openModal: (id) => set({ currentModalMovieId: id }),
   closeModal: () => set({ currentModalMovieId: null }),
   openFilters: () => set({ isFilterOpen: true }),
   closeFilters: () => set({ isFilterOpen: false }),
   openFavorites: () => set({ isFavOpen: true }),
   closeFavorites: () => set({ isFavOpen: false }),
+  openWatchlist: () => set({ isWatchlistOpen: true }),
+  closeWatchlist: () => set({ isWatchlistOpen: false }),
   openSettings: () => set({ isSettingsOpen: true }),
   closeSettings: () => set({ isSettingsOpen: false }),
 }));

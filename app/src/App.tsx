@@ -21,6 +21,7 @@ import { FavoritesStrip } from '@/components/FavoritesStrip';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { MovieModal } from '@/components/MovieModal';
 import { FavoritesModal } from '@/components/FavoritesModal';
+import { WatchlistModal } from '@/components/WatchlistModal';
 import { SettingsModal } from '@/components/SettingsModal';
 import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/sonner';
@@ -40,10 +41,10 @@ export default function App() {
   const {
     selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
     selectedPerson, searchQuery,
-    currentModalMovieId, isFilterOpen, isFavOpen, isSettingsOpen,
+    currentModalMovieId, isFilterOpen, isFavOpen, isWatchlistOpen, isSettingsOpen,
   } = useAppStore();
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
-  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isSettingsOpen;
+  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isWatchlistOpen || isSettingsOpen;
 
   useModalUrlSync();
   useReleaseNotifications();
@@ -307,6 +308,7 @@ export default function App() {
         <FilterDrawer />
         <MovieModal movies={movies} />
         <FavoritesModal />
+        <WatchlistModal />
         <SettingsModal />
         <Toaster
           position={isMobile ? 'bottom-center' : 'bottom-right'}
