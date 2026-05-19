@@ -65,9 +65,13 @@ export function Navbar() {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="fixed top-0 w-full z-50 transition-colors duration-500 safe-pt nav-feather"
       style={{
-        backgroundColor: scrolled ? 'color-mix(in srgb, var(--bg) 72%, transparent)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px) saturate(140%)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(140%)' : 'none',
+        // 85% opacity quand scrolled : assez transparent pour laisser passer
+        // un soupcon d'ambiance mais opaque assez pour que les icones restent
+        // lisibles meme par-dessus une image hero coloree. On enleve le
+        // saturate(140%) qui amplifiait les couleurs derriere.
+        backgroundColor: scrolled ? 'color-mix(in srgb, var(--bg) 85%, transparent)' : 'transparent',
+        backdropFilter: scrolled ? 'blur(24px)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(24px)' : 'none',
         // @ts-expect-error css custom property
         '--feather-opacity': scrolled ? 1 : 0,
       }}

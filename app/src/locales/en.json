@@ -124,7 +124,10 @@
     "close": "Close favorites list",
     "stripTitle": "Your favorites this week",
     "stripAria": "Favorite movies releasing this week",
-    "viewFavorite": "Open {{title}}"
+    "stripCount_one": "1 movie you follow releases this week",
+    "stripCount_other": "{{count}} movies you follow release this week",
+    "viewFavorite": "Open {{title}}",
+    "openDetails": "View details"
   },
   "filters": {
     "title": "Filters",
