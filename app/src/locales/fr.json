@@ -21,7 +21,8 @@
     "themeDark": "Passer en mode sombre",
     "themeLight": "Passer en mode clair",
     "home": "Retour à l'accueil — CineLume",
-    "openSearch": "Ouvrir la recherche"
+    "openSearch": "Ouvrir la recherche",
+    "skipToContent": "Aller au contenu"
   },
   "hero": {
     "title": "Sorties",
@@ -53,7 +54,18 @@
     "filmographyOf": "Filmographie de",
     "removePersonFilter": "Retirer le filtre par personne",
     "clearFilter": "Retirer le filtre {{name}}",
-    "genreLabel": "Genre"
+    "genreLabel": "Genre",
+    "loadingLabel": "Chargement des sorties cinéma",
+    "emptySearch": "Aucun résultat pour « {{query}} »",
+    "emptySearchHint": "Essaie un autre titre, un acteur ou un réalisateur.",
+    "emptyPerson": "Aucun film trouvé pour {{name}}",
+    "emptyPersonHint": "La filmographie est peut-être indisponible sur TMDB.",
+    "emptyFiltered": "Rien ne correspond à ces filtres",
+    "emptyFilteredHint": "Ces filtres combinés sont trop stricts pour cette semaine. Essaye de les assouplir.",
+    "emptyWeek": "Pas de sortie cette semaine",
+    "emptyWeekHint": "Aucun film n'est prévu sur ce créneau. Essaye une semaine voisine ou reviens à aujourd'hui.",
+    "clearSearch": "Effacer la recherche",
+    "openFilters": "Modifier les filtres"
   },
   "modes": {
     "all": "Tout",

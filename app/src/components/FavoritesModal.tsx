@@ -108,11 +108,11 @@ export function FavoritesModal() {
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between mb-4">
-              <h3 id="favorites-modal-title" className="font-bold text-xl flex items-center gap-2">
-                <Heart className="w-5 h-5 text-red-500 fill-red-500" aria-hidden="true" />
+              <h3 id="favorites-modal-title" className="font-bold text-2xl tracking-tight flex items-center gap-2.5">
+                <Heart className="w-6 h-6 text-red-500 fill-red-500" aria-hidden="true" />
                 {t('favorites.title')}
                 {favorites.length > 0 && (
-                  <span className="text-white/60 text-sm font-medium">({favorites.length})</span>
+                  <span className="text-white/55 text-sm font-medium">({favorites.length})</span>
                 )}
               </h3>
               <button

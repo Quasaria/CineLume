@@ -21,7 +21,8 @@
     "themeDark": "Switch to dark mode",
     "themeLight": "Switch to light mode",
     "home": "Back to home — CineLume",
-    "openSearch": "Open search"
+    "openSearch": "Open search",
+    "skipToContent": "Skip to content"
   },
   "hero": {
     "title": "Theatrical",
@@ -53,7 +54,18 @@
     "filmographyOf": "Filmography of",
     "removePersonFilter": "Remove person filter",
     "clearFilter": "Remove {{name}} filter",
-    "genreLabel": "Genre"
+    "genreLabel": "Genre",
+    "loadingLabel": "Loading cinema releases",
+    "emptySearch": "No results for \"{{query}}\"",
+    "emptySearchHint": "Try another title, actor or director.",
+    "emptyPerson": "No movies found for {{name}}",
+    "emptyPersonHint": "Filmography may be unavailable on TMDB.",
+    "emptyFiltered": "Nothing matches these filters",
+    "emptyFilteredHint": "These combined filters are too strict for this week. Try loosening them.",
+    "emptyWeek": "No release this week",
+    "emptyWeekHint": "No movie is scheduled for this slot. Try a neighbouring week or jump back to today.",
+    "clearSearch": "Clear search",
+    "openFilters": "Open filters"
   },
   "modes": {
     "all": "All",

@@ -21,11 +21,20 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
   if (viewMode === 'list') {
     return (
       <motion.div
+        role="button"
+        tabIndex={0}
+        aria-label={`${movie.title}, ${fmtDate(movie.release_date)}`}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: Math.min(index * 0.04, 0.4), duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="flex gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer group active:scale-[0.99]"
+        className="flex gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer group active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
         onClick={() => openModal(movie.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openModal(movie.id);
+          }
+        }}
       >
         <div className="w-20 h-28 rounded-xl overflow-hidden bg-white/5 shrink-0 relative">
           <img
@@ -84,8 +93,17 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
       className="movie-card"
     >
       <div
-        className="relative rounded-2xl overflow-hidden bg-[#13131a] border border-white/[0.06] cursor-pointer group aspect-[2/3] movie-card-inner transition-transform duration-150 active:scale-[0.97]"
+        role="button"
+        tabIndex={0}
+        aria-label={`${movie.title}, ${fmtDate(movie.release_date)}`}
+        className="relative rounded-2xl overflow-hidden bg-[#13131a] border border-white/[0.06] cursor-pointer group aspect-[2/3] movie-card-inner transition-transform duration-150 active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
         onClick={() => openModal(movie.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openModal(movie.id);
+          }
+        }}
       >
         <motion.button
           type="button"
@@ -119,18 +137,28 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
 
         <img
           src={`${IMG}${movie.poster_path}`}
+          srcSet={posterSrcSet(movie.poster_path)}
+          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
           alt={movie.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
+          decoding="async"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-85 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-85 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity" />
 
+        {/* Bottom info bar : titre + date toujours visibles. Sur hover (desktop),
+            on revele aussi un extrait du synopsis qui slide-up depuis le bas. */}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-          <h3 className="text-white font-bold text-base leading-tight mb-1 line-clamp-2 group-hover:text-violet-300 transition-colors">
+          <h3 className="text-white font-bold text-base sm:text-[15px] leading-tight mb-1 line-clamp-2 group-hover:text-violet-300 transition-colors">
             {movie.title}
           </h3>
-          <p className="text-white/70 text-xs sm:text-[13px] font-medium">{fmtDate(movie.release_date)}</p>
+          <p className="text-white/70 text-xs font-medium">{fmtDate(movie.release_date)}</p>
+          {movie.overview && (
+            <p className="text-white/65 text-[11px] leading-snug line-clamp-3 mt-1.5 max-h-0 opacity-0 group-hover:max-h-20 group-hover:opacity-100 group-focus-within:max-h-20 group-focus-within:opacity-100 transition-all duration-300 overflow-hidden">
+              {movie.overview}
+            </p>
+          )}
         </div>
       </div>
     </motion.div>

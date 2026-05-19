@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
+import { ProviderBadge } from '@/components/ProviderBadge';
 
 const REGION_CODES = ['FR', 'US', 'GB', 'JP', 'DE', 'ES', 'IT', 'KR', 'CA', 'AU', 'BR', 'MX', 'IN', 'CN', 'RU', 'SE', 'NL', 'BE', 'CH', 'AT'] as const;
 const FLAGS: Record<string, string> = {
@@ -103,7 +104,7 @@ export function FilterDrawer() {
             <div className="w-12 h-1.5 rounded-full bg-white/30 mt-3 mx-auto sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between p-5 pb-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
-                <h2 id="filter-modal-title" className="font-bold text-xl">{t('filters.title')}</h2>
+                <h2 id="filter-modal-title" className="font-bold text-2xl tracking-tight">{t('filters.title')}</h2>
                 {activeCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs font-bold border border-violet-500/30">
                     {t('filters.active', { count: activeCount })}
@@ -176,15 +177,18 @@ export function FilterDrawer() {
                       return (
                         <button
                           key={p.id}
+                          type="button"
                           onClick={() => setTempProvider(active ? '' : p.id)}
-                          className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border flex items-center gap-1.5 ${
+                          aria-pressed={active}
+                          className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border flex items-center gap-2 ${
                             active
                               ? 'border-violet-500/60 bg-violet-500/15 text-white'
                               : 'border-white/10 bg-white/[0.03] text-white/70 hover:bg-white/5'
                           }`}
                         >
-                          {active && <Check className="w-3 h-3 text-violet-300" />}
+                          <ProviderBadge provider={p} size="sm" />
                           {p.name}
+                          {active && <Check className="w-3 h-3 text-violet-300" aria-hidden="true" />}
                         </button>
                       );
                     })}
