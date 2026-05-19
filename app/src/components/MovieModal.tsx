@@ -7,6 +7,7 @@ import { useAppStore } from '@/store/appStore';
 import { getMovieDetails, IMG, BACK, PROF, ORIG, TMDB_SITE, posterSrcSet, backdropSrcSet, profileSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { generateICS, downloadICS, slugify } from '@/lib/calendar';
+import { letterboxdUrl } from '@/lib/letterboxd';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
@@ -437,6 +438,16 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                         >
                           <ExternalLink className="w-4 h-4" aria-hidden="true" />
                           TMDB
+                        </a>
+                        <a
+                          href={letterboxdUrl(movie.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={t('modal.viewOnLetterboxd')}
+                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
+                        >
+                          <span className="w-4 h-4 rounded-sm bg-gradient-to-br from-orange-500 via-green-500 to-blue-500 flex items-center justify-center text-[8px] font-black text-white" aria-hidden="true">L</span>
+                          Letterboxd
                         </a>
                         {movie.release_date && (
                           <button
