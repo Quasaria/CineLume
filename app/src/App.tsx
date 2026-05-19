@@ -17,6 +17,7 @@ import { HeroBackdrop } from '@/components/HeroBackdrop';
 import { DateNavigator } from '@/components/DateNavigator';
 import { MovieGrid } from '@/components/MovieGrid';
 import { PersonStrip } from '@/components/PersonStrip';
+import { FavoritesStrip } from '@/components/FavoritesStrip';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { MovieModal } from '@/components/MovieModal';
 import { FavoritesModal } from '@/components/FavoritesModal';
@@ -277,6 +278,12 @@ export default function App() {
           <Hero />
 
           <DateNavigator />
+
+          {/* Strip "favoris cette semaine" : visible uniquement en mode
+              discover (pas search ni filmographie ou la notion de semaine
+              n'a pas de sens). N'affiche rien si aucun favori ne tombe
+              dans la fenetre semaine selectionnee. */}
+          {!isSearchMode && !selectedPerson && <FavoritesStrip />}
 
           {persons.length > 0 && isSearchMode && (
             <PersonStrip persons={persons} />
