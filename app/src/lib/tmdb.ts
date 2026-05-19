@@ -77,6 +77,8 @@ export interface DiscoverParams {
   releaseMode?: 'theater' | 'platform' | 'all';
   provider?: string;
   personId?: number | null;
+  sortBy?: 'popularity' | 'date' | 'rating';
+  runtimeMax?: number | null;
 }
 
 export interface PersonSearchResult {
@@ -132,8 +134,33 @@ export async function discoverMovies(params: DiscoverParams, signal?: AbortSigna
   const dateQ = params.personId
     ? ''
     : `&release_date.gte=${params.startDate}&release_date.lte=${params.endDate}`;
-  const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
-  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
+
+  // Sort_by : par defaut popularity.desc. En mode filmographie on garde
+  // primary_release_date.desc (carriere chronologique inversee).
+  let sortQ: string;
+  if (params.personId) {
+    sortQ = 'primary_release_date.desc';
+  } else if (params.sortBy === 'date') {
+    sortQ = 'primary_release_date.asc';
+  } else if (params.sortBy === 'rating') {
+    sortQ = 'vote_average.desc';
+  } else {
+    sortQ = 'popularity.desc';
+  }
+
+  // Runtime max : TMDB support with_runtime.lte en minutes. On ne filtre
+  // pas en mode filmographie ni quand pas defini.
+  const runtimeQ = !params.personId && params.runtimeMax
+    ? `&with_runtime.lte=${params.runtimeMax}`
+    : '';
+
+  // Vote count minimum quand on sort par rating : sinon on aurait des
+  // films notes 10/10 par 3 personnes en haut.
+  const voteCountQ = params.sortBy === 'rating' && !params.personId
+    ? '&vote_count.gte=50'
+    : '';
+
+  const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}${runtimeQ}${voteCountQ}&sort_by=${sortQ}&page=${params.page}`;
 
   const res = await fetch(url, { signal });
   if (!res.ok) throw handleResponseError(res);
@@ -261,6 +288,72 @@ function evictOldCacheEntries(prefix: string, count: number) {
   }
   entries.sort((a, b) => a.exp - b.exp);
   entries.slice(0, count).forEach((e) => localStorage.removeItem(e.key));
+}
+
+export interface WatchProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string;
+}
+
+export interface WatchProvidersByRegion {
+  link?: string;
+  flatrate?: WatchProvider[];   // streaming inclus dans l'abonnement
+  rent?: WatchProvider[];        // location
+  buy?: WatchProvider[];         // achat
+}
+
+export interface WatchProvidersResponse {
+  id?: number;
+  results: Record<string, WatchProvidersByRegion>;  // par code pays
+}
+
+export async function getWatchProviders(id: number, signal?: AbortSignal): Promise<WatchProvidersResponse> {
+  const apiKey = getApiKey();
+  const cacheKey = `wp_${id}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed.exp > Date.now()) return parsed.data as WatchProvidersResponse;
+    } catch {
+      localStorage.removeItem(cacheKey);
+    }
+  }
+  const url = `${BASE}/movie/${id}/watch/providers?api_key=${apiKey}`;
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
+  const data = (await res.json()) as WatchProvidersResponse;
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ data, exp: Date.now() + 86400000 * 7 }));
+  } catch {
+    // ignore
+  }
+  return data;
+}
+
+export async function getSimilarMovies(id: number, signal?: AbortSignal): Promise<{ results: Movie[] }> {
+  const apiKey = getApiKey();
+  const cacheKey = `sim_${id}_${tmdbLang()}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed.exp > Date.now()) return parsed.data as { results: Movie[] };
+    } catch {
+      localStorage.removeItem(cacheKey);
+    }
+  }
+  const url = `${BASE}/movie/${id}/recommendations?api_key=${apiKey}&language=${tmdbLang()}&page=1`;
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
+  const data = (await res.json()) as { results: Movie[] };
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ data, exp: Date.now() + 86400000 * 3 }));
+  } catch {
+    // ignore
+  }
+  return data;
 }
 
 export async function getGenres(signal?: AbortSignal): Promise<Genre[]> {

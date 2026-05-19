@@ -454,6 +454,57 @@ html.light .burger-menu {
   border-color: rgba(10, 10, 30, 0.1);
 }
 
+/* Mode 'Cinephile aveugle' : anti-spoiler. Floute les posters et masque
+   les titres pour decouvrir l'app sans rien savoir des films. Le tap
+   sur une card retire le flou (via :focus-within ou :hover) pour pouvoir
+   reveler manuellement quand on veut. */
+html.blind-mode .movie-card img,
+html.blind-mode .hero-bg-img {
+  filter: blur(22px) saturate(0.7);
+}
+
+html.blind-mode .movie-card:hover img,
+html.blind-mode .movie-card:focus-within img {
+  filter: blur(0);
+  transition: filter 0.3s ease;
+}
+
+html.blind-mode .movie-card h3,
+html.blind-mode .hero-title h1 span:first-child,
+html.blind-mode .hero-title p {
+  color: transparent !important;
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.35);
+  user-select: none;
+}
+
+html.blind-mode .movie-card:hover h3,
+html.blind-mode .movie-card:focus-within h3 {
+  color: inherit !important;
+  text-shadow: none;
+  transition: color 0.3s ease;
+}
+
+/* En blind mode, on garde les notes visibles (rating chip et star) pour
+   guider sans spoiler. */
+html.blind-mode .blind-spoiler {
+  filter: blur(8px);
+  user-select: none;
+}
+html.blind-mode .blind-spoiler:hover,
+html.blind-mode .blind-spoiler:focus-within {
+  filter: blur(0);
+  transition: filter 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.blind-mode .movie-card img,
+  html.blind-mode .movie-card:hover img,
+  html.blind-mode .hero-bg-img,
+  html.blind-mode .blind-spoiler {
+    transition: none;
+  }
+}
+
 /* Navbar scrolled shadow contrast */
 html.light .shadow-black\/20 { box-shadow: 0 4px 12px rgba(10, 10, 15, 0.08); }
 

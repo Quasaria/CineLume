@@ -46,6 +46,7 @@ export default function App() {
   const {
     selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
     selectedPerson, searchQuery,
+    sortBy, runtimeMax,
     currentModalMovieId, isFilterOpen, isFavOpen, isWatchlistOpen, isListsOpen, isSettingsOpen,
   } = useAppStore();
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
@@ -55,7 +56,7 @@ export default function App() {
   useReleaseNotifications();
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
-    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, lang],
+    queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, sortBy, runtimeMax, lang],
     queryFn: async ({ pageParam = 1, signal }) => {
       const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
@@ -72,6 +73,8 @@ export default function App() {
         releaseMode: selReleaseMode,
         provider: selProvider,
         personId: selectedPerson?.id ?? null,
+        sortBy,
+        runtimeMax,
       }, signal);
 
       // Filmographie : pas de filtre date, on garde la carriere complete.
