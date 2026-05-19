@@ -100,11 +100,14 @@ export function BurgerMenu() {
             <MenuItem
               icon={Shuffle}
               label={t('nav.surprise')}
+              description={t('nav.surpriseDesc')}
               onClick={() => handleItem(pickRandom)}
+              accent="violet"
             />
             <MenuItem
               icon={Folder}
               label={t('nav.myLists')}
+              description={t('nav.myListsDesc')}
               badge={customListsCount > 0 ? customListsCount : undefined}
               onClick={() => handleItem(openLists)}
             />
@@ -124,20 +127,28 @@ export function BurgerMenu() {
 interface MenuItemProps {
   icon: typeof Folder;
   label: string;
+  description?: string;
   badge?: number;
+  accent?: 'violet' | 'default';
   onClick: () => void;
 }
 
-function MenuItem({ icon: Icon, label, badge, onClick }: MenuItemProps) {
+function MenuItem({ icon: Icon, label, description, badge, accent = 'default', onClick }: MenuItemProps) {
+  const iconClass = accent === 'violet' ? 'text-violet-400' : 'text-white/60';
   return (
     <button
       type="button"
       role="menuitem"
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 active:bg-white/10 transition-colors text-sm font-medium text-white"
+      className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 active:bg-white/10 transition-colors text-white"
     >
-      <Icon className="w-4 h-4 text-white/60 shrink-0" aria-hidden="true" />
-      <span className="flex-1 min-w-0 truncate">{label}</span>
+      <Icon className={`w-5 h-5 shrink-0 ${iconClass}`} aria-hidden="true" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold truncate">{label}</p>
+        {description && (
+          <p className="text-[11px] text-white/50 leading-tight truncate">{description}</p>
+        )}
+      </div>
       {badge !== undefined && (
         <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
           {badge}

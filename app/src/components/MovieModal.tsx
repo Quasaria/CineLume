@@ -426,7 +426,10 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                         </div>
                       </div>
 
-                      <div className="hidden sm:flex sm:flex-wrap gap-3 mb-6">
+                      {/* Action bar desktop : 1 action primaire (trailer) +
+                          5 actions secondaires en icones compactes alignees a
+                          droite. Plus aere que 6 boutons texte de meme poids. */}
+                      <div className="hidden sm:flex items-center gap-2 mb-6">
                         {(() => {
                           const yt = movie.videos?.results ?? [];
                           const video =
@@ -438,87 +441,95 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                             <button
                               type="button"
                               onClick={() => setTrailerKey(video.key)}
-                              className="col-span-2 sm:col-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white active:bg-cyan-500 transition-colors min-h-12"
+                              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-cyan-400 hover:text-white active:bg-cyan-500 transition-colors min-h-12 shadow-md"
                             >
                               <Play className="w-4 h-4 fill-current" aria-hidden="true" />
                               {video.type === 'Trailer' ? t('modal.trailer') : video.type === 'Teaser' ? t('modal.teaser') : t('modal.video')}
                             </button>
                           );
                         })()}
-                        <a
-                          href={`${TMDB_SITE}/${movie.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
-                        >
-                          <ExternalLink className="w-4 h-4" aria-hidden="true" />
-                          TMDB
-                        </a>
-                        <a
-                          href={letterboxdUrl(movie.id)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={t('modal.viewOnLetterboxd')}
-                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
-                        >
-                          <span className="w-4 h-4 rounded-sm bg-gradient-to-br from-orange-500 via-green-500 to-blue-500 flex items-center justify-center text-[8px] font-black text-white" aria-hidden="true">L</span>
-                          Letterboxd
-                        </a>
-                        {movie.release_date && (
+
+                        <div className="ml-auto flex items-center gap-1">
+                          <a
+                            href={`${TMDB_SITE}/${movie.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="TMDB"
+                            title="TMDB"
+                            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 text-white/80 hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10"
+                          >
+                            <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                          </a>
+                          <a
+                            href={letterboxdUrl(movie.id)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={t('modal.viewOnLetterboxd')}
+                            title={t('modal.viewOnLetterboxd')}
+                            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10"
+                          >
+                            <span className="w-4 h-4 rounded-sm bg-gradient-to-br from-orange-500 via-green-500 to-blue-500 flex items-center justify-center text-[8px] font-black text-white" aria-hidden="true">L</span>
+                          </a>
+                          {movie.release_date && (
+                            <button
+                              type="button"
+                              onClick={() => exportCalendar(movie)}
+                              aria-label={t('modal.addToCalendar')}
+                              title={t('modal.addToCalendar')}
+                              className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 text-white/80 hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10"
+                            >
+                              <CalendarPlus className="w-4 h-4" aria-hidden="true" />
+                            </button>
+                          )}
+                          <a
+                            href={`https://www.google.com/maps/search/${encodeURIComponent('cinéma ' + movie.title)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={t('modal.findCinema')}
+                            title={t('modal.findCinema')}
+                            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 text-white/80 hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10"
+                          >
+                            <MapPin className="w-4 h-4" aria-hidden="true" />
+                          </a>
                           <button
                             type="button"
-                            onClick={() => exportCalendar(movie)}
-                            className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
+                            onClick={shareMovie}
+                            aria-label={t('modal.share')}
+                            title={t('modal.share')}
+                            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 text-white/80 hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10"
                           >
-                            <CalendarPlus className="w-4 h-4" aria-hidden="true" />
-                            {t('modal.addToCalendar')}
+                            <Share2 className="w-4 h-4" aria-hidden="true" />
                           </button>
-                        )}
-                        <a
-                          href={`https://www.google.com/maps/search/${encodeURIComponent('cinéma ' + movie.title)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={t('modal.findCinema')}
-                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
-                        >
-                          <MapPin className="w-4 h-4" aria-hidden="true" />
-                          {t('modal.findCinema')}
-                        </a>
-                        <button
-                          type="button"
-                          onClick={shareMovie}
-                          className="flex items-center justify-center sm:justify-start gap-2 px-5 py-3 rounded-xl bg-white/5 text-white font-semibold text-sm hover:bg-white/10 active:bg-white/15 transition-colors border border-white/10 min-h-12"
-                        >
-                          <Share2 className="w-4 h-4" aria-hidden="true" />
-                          {t('modal.share')}
-                        </button>
+                        </div>
                       </div>
 
-                      {(movie.budget || movie.revenue || movie.vote_count) && (
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                          <div>
-                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.budget')}</p>
-                            <p className="text-sm font-semibold">{fmtCurrency(movie.budget)}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.revenue')}</p>
-                            <p className="text-sm font-semibold">{fmtCurrency(movie.revenue)}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.language')}</p>
-                            <p className="text-sm font-semibold uppercase">{movie.original_language || t('common.na')}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">{t('modal.votes')}</p>
-                            <p className="text-sm font-semibold">{movie.vote_count?.toLocaleString(lang || 'fr') || '0'}</p>
-                          </div>
-                        </div>
-                      )}
-
                       <h3 className="font-bold text-white mb-2">{t('modal.synopsis')}</h3>
-                      <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-8">
+                      <p className="text-white/70 text-sm sm:text-base leading-relaxed mb-6">
                         {movie.overview || t('modal.noSynopsis')}
                       </p>
+
+                      {/* Stats secondaires : on ne montre QUE les cellules avec
+                          une vraie valeur (pas de N/A inutiles qui prennent de
+                          la place pour rien sur les sorties recentes). Affiche
+                          en ligne compacte au lieu d'un gros panel grid. */}
+                      {(() => {
+                        const stats: Array<{ label: string; value: string }> = [];
+                        if (movie.budget > 0) stats.push({ label: t('modal.budget'), value: fmtCurrency(movie.budget) });
+                        if (movie.revenue > 0) stats.push({ label: t('modal.revenue'), value: fmtCurrency(movie.revenue) });
+                        if (movie.original_language) stats.push({ label: t('modal.language'), value: movie.original_language.toUpperCase() });
+                        if (movie.vote_count > 50) stats.push({ label: t('modal.votes'), value: movie.vote_count.toLocaleString(lang || 'fr') });
+                        if (stats.length === 0) return null;
+                        return (
+                          <div className="flex flex-wrap gap-x-5 gap-y-2 mb-6 text-xs text-white/55">
+                            {stats.map((s) => (
+                              <span key={s.label}>
+                                <span className="uppercase tracking-wider text-white/40">{s.label} </span>
+                                <span className="text-white/85 font-semibold">{s.value}</span>
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })()}
 
                       {movie.credits?.cast && movie.credits.cast.length > 0 && (
                         <>
