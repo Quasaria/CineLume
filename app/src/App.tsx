@@ -32,6 +32,8 @@ const FavoritesModal = lazy(() => import('@/components/FavoritesModal').then((m)
 const WatchlistModal = lazy(() => import('@/components/WatchlistModal').then((m) => ({ default: m.WatchlistModal })));
 const ListsModal = lazy(() => import('@/components/ListsModal').then((m) => ({ default: m.ListsModal })));
 const SettingsModal = lazy(() => import('@/components/SettingsModal').then((m) => ({ default: m.SettingsModal })));
+const PickerModal = lazy(() => import('@/components/PickerModal').then((m) => ({ default: m.PickerModal })));
+const SwipeMode = lazy(() => import('@/components/SwipeMode').then((m) => ({ default: m.SwipeMode })));
 
 interface DiscoverResponse {
   results: Movie[];
@@ -48,10 +50,10 @@ export default function App() {
     selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
     selectedPerson, searchQuery,
     sortBy, runtimeMax,
-    currentModalMovieId, isFilterOpen, isFavOpen, isWatchlistOpen, isListsOpen, isSettingsOpen,
+    currentModalMovieId, isFilterOpen, isFavOpen, isWatchlistOpen, isListsOpen, isSettingsOpen, isPickerOpen, isSwipeOpen,
   } = useAppStore();
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
-  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isWatchlistOpen || isListsOpen || isSettingsOpen;
+  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isWatchlistOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen;
 
   useModalUrlSync();
   useReleaseNotifications();
@@ -221,6 +223,8 @@ export default function App() {
       import('@/components/WatchlistModal');
       import('@/components/ListsModal');
       import('@/components/SettingsModal');
+      import('@/components/PickerModal');
+      import('@/components/SwipeMode');
     });
   }, []);
 
@@ -232,6 +236,8 @@ export default function App() {
         if (store.isFilterOpen) store.closeFilters();
         if (store.isFavOpen) store.closeFavorites();
         if (store.isSettingsOpen) store.closeSettings();
+        if (store.isPickerOpen) store.closePicker();
+        if (store.isSwipeOpen) store.closeSwipe();
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -346,6 +352,8 @@ export default function App() {
           <WatchlistModal />
           <ListsModal />
           <SettingsModal />
+          <PickerModal />
+          <SwipeMode />
         </Suspense>
         <Toaster
           position={isMobile ? 'bottom-center' : 'bottom-right'}

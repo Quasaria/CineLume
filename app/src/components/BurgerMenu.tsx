@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Menu, Folder, Settings as SettingsIcon, X, Shuffle } from 'lucide-react';
-import { toast } from 'sonner';
+import { Menu, Folder, Settings as SettingsIcon, X, Shuffle, Layers } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 
 /**
@@ -14,31 +13,12 @@ export function BurgerMenu() {
   const { t } = useTranslation();
   const openLists = useAppStore((s) => s.openLists);
   const openSettings = useAppStore((s) => s.openSettings);
+  const openPicker = useAppStore((s) => s.openPicker);
+  const openSwipe = useAppStore((s) => s.openSwipe);
   const customListsCount = useAppStore((s) => s.customLists.length);
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  function pickRandom() {
-    const state = useAppStore.getState();
-    // Pool : watchlist en priorite (intent = a voir), favoris en fallback,
-    // sinon toutes les listes custom additionnees.
-    const pool = state.watchlist.length > 0
-      ? state.watchlist
-      : state.favorites.length > 0
-        ? state.favorites
-        : state.customLists.flatMap((l) => l.films);
-    if (pool.length === 0) {
-      toast.info(t('nav.surpriseEmpty'));
-      return;
-    }
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    toast.success(t('nav.surpriseToast', { title: pick.title }), {
-      duration: 5000,
-      action: { label: t('nav.surpriseSeeOther'), onClick: () => pickRandom() },
-    });
-    state.openModal(pick.id);
-  }
 
   // Click outside ferme le menu
   useEffect(() => {
@@ -101,7 +81,14 @@ export function BurgerMenu() {
               icon={Shuffle}
               label={t('nav.surprise')}
               description={t('nav.surpriseDesc')}
-              onClick={() => handleItem(pickRandom)}
+              onClick={() => handleItem(openPicker)}
+              accent="violet"
+            />
+            <MenuItem
+              icon={Layers}
+              label={t('nav.swipe')}
+              description={t('nav.swipeDesc')}
+              onClick={() => handleItem(openSwipe)}
               accent="violet"
             />
             <MenuItem
