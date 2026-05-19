@@ -17,6 +17,7 @@ import { HeroBackdrop } from '@/components/HeroBackdrop';
 import { DateNavigator } from '@/components/DateNavigator';
 import { MovieGrid } from '@/components/MovieGrid';
 import { PersonStrip } from '@/components/PersonStrip';
+import { PersonHeader } from '@/components/PersonHeader';
 import { FavoritesStrip } from '@/components/FavoritesStrip';
 import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/sonner';
@@ -307,7 +308,9 @@ export default function App() {
         <main id="main" className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-20">
           <Hero />
 
-          <DateNavigator />
+          {/* DateNavigator masque en mode personne : la filmographie n'est
+              pas decoupee par semaine, c'est la carriere complete. */}
+          {!selectedPerson && <DateNavigator />}
 
           {/* Strip "favoris cette semaine" : visible uniquement en mode
               discover (pas search ni filmographie ou la notion de semaine
@@ -318,6 +321,8 @@ export default function App() {
           {persons.length > 0 && isSearchMode && (
             <PersonStrip persons={persons} />
           )}
+
+          {selectedPerson && <PersonHeader />}
 
           <MovieGrid
             movies={movies}

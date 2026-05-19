@@ -23,6 +23,7 @@ interface AppState {
   selReleaseMode: ReleaseMode;
   selProvider: string;
   selectedPerson: SelectedPerson | null;
+  previousFilmId: number | null;  // pour le bouton 'retour au film' depuis la vue personne
   favorites: FavoriteMovie[];
   watchlist: FavoriteMovie[];
   customLists: CustomList[];
@@ -45,6 +46,8 @@ interface AppState {
   setReleaseMode: (mode: ReleaseMode) => void;
   setProvider: (provider: string) => void;
   setSelectedPerson: (person: SelectedPerson | null) => void;
+  openPersonFromFilm: (person: SelectedPerson, fromFilmId: number) => void;
+  goBackToFilm: () => void;
   jumpToToday: () => void;
   toggleFav: (movie: FavoriteMovie) => void;
   removeFav: (id: number) => void;
@@ -207,6 +210,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   selReleaseMode: savedReleaseMode,
   selProvider: localStorage.getItem('cinelume_provider') || '',
   selectedPerson: null,
+  previousFilmId: null,
   favorites: safeParseFavs(),
   watchlist: safeParseWatchlist(),
   customLists: safeParseCustomLists(),
@@ -276,7 +280,26 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setSelectedPerson: (person) => {
-    set({ selectedPerson: person, searchQuery: '' });
+    set({ selectedPerson: person, searchQuery: '', previousFilmId: person ? get().previousFilmId : null });
+  },
+
+  // Appele depuis la modale film quand l'user clique sur un acteur du cast :
+  // on memorise le film d'origine pour pouvoir y revenir via le bouton 'retour'.
+  openPersonFromFilm: (person, fromFilmId) => {
+    set({
+      selectedPerson: person,
+      searchQuery: '',
+      previousFilmId: fromFilmId,
+      currentModalMovieId: null,
+    });
+  },
+
+  goBackToFilm: () => {
+    const filmId = get().previousFilmId;
+    set({ selectedPerson: null, previousFilmId: null });
+    if (filmId !== null) {
+      set({ currentModalMovieId: filmId });
+    }
   },
 
   jumpToToday: () => {

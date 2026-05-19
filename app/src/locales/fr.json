@@ -291,6 +291,16 @@
       "Crew": "Équipe"
     }
   },
+  "person": {
+    "back": "Retour",
+    "backToFilm": "Retour au film",
+    "filmography": "Filmographie",
+    "biography": "Biographie",
+    "showMore": "Voir plus",
+    "showLess": "Voir moins",
+    "noBio": "Aucune biographie disponible.",
+    "loading": "Chargement…"
+  },
   "share": {
     "linkCopied": "Lien copié",
     "copyError": "Impossible de copier le lien",

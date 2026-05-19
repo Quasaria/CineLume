@@ -182,23 +182,6 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
 
   return (
     <div>
-      {selectedPerson && (
-        <div className="flex items-center gap-2 mb-4">
-          <span className="inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-violet-500/15 border border-violet-500/40 text-violet-200 text-sm font-medium">
-            <User className="w-3.5 h-3.5" aria-hidden="true" />
-            {t('grid.filmographyOf')} <span className="font-bold">{selectedPerson.name}</span>
-            <button
-              type="button"
-              onClick={() => setSelectedPerson(null)}
-              aria-label={t('grid.removePersonFilter')}
-              className="ml-1 p-0.5 rounded-full hover:bg-violet-500/30 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" aria-hidden="true" />
-            </button>
-          </span>
-        </div>
-      )}
-
       <div className="flex items-center justify-between mb-6 gap-3">
         <div className="flex items-center gap-3 flex-wrap min-w-0">
           <span className="text-sm text-white/60 font-medium shrink-0">

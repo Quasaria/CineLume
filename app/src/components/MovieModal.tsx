@@ -102,11 +102,16 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
   useBodyScrollLock(currentModalMovieId !== null);
   useFocusRestore(currentModalMovieId !== null);
 
-  // Recupere le setter pour ouvrir une filmographie au click sur un cast
-  // member. On garde une reference imperatives pour eviter de subscribe.
+  // Click sur un acteur/realisateur dans la modale : ouvre la page personne
+  // dediee. On memorise le film d'origine pour le bouton 'retour au film'.
   function openPersonFilmography(id: number, name: string) {
-    useAppStore.getState().setSelectedPerson({ id, name });
-    closeModal();
+    const fromId = currentModalMovieId;
+    if (fromId !== null) {
+      useAppStore.getState().openPersonFromFilm({ id, name }, fromId);
+    } else {
+      useAppStore.getState().setSelectedPerson({ id, name });
+      closeModal();
+    }
   }
 
   function exportCalendar(movie: { id: number; title: string; release_date?: string }) {
