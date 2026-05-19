@@ -219,11 +219,14 @@ export default function App() {
   // declenche un refresh de toutes les queries. Desactive quand une modale
   // est ouverte pour eviter d'intercepter ses gestures (drag-to-close,
   // scroll interne, etc.). Le SW NetworkFirst de TMDB cache 6h donc parfois
-  // on veut forcer.
+  // on veut forcer. onRefresh stabilise via useCallback pour ne pas re-bind
+  // les listeners touch a chaque render parent.
+  const handlePullRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries();
+  }, [queryClient]);
+
   const { pullDistance, isRefreshing } = usePullToRefresh({
-    onRefresh: async () => {
-      await queryClient.invalidateQueries();
-    },
+    onRefresh: handlePullRefresh,
     enabled: isMobile && !anyModalOpen,
   });
 

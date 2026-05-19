@@ -50,13 +50,18 @@ export function useInstallPrompt() {
 
   async function install(): Promise<boolean> {
     if (!installEvent) return false;
-    await installEvent.prompt();
-    const { outcome } = await installEvent.userChoice;
-    if (outcome === 'accepted') {
+    try {
+      await installEvent.prompt();
+      const { outcome } = await installEvent.userChoice;
+      // Per spec, le prompt event ne peut etre utilise qu'une fois (que
+      // l'user accepte ou refuse). On reset dans les deux cas pour eviter
+      // de garder "Installer" actif avec un event consume.
       setInstallEvent(null);
-      return true;
+      return outcome === 'accepted';
+    } catch {
+      setInstallEvent(null);
+      return false;
     }
-    return false;
   }
 
   return {
