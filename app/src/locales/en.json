@@ -121,7 +121,10 @@
     "addToFav": "Add {{title}} to favorites",
     "added": "{{title}} added to favorites",
     "removed": "{{title}} removed from favorites",
-    "close": "Close favorites list"
+    "close": "Close favorites list",
+    "stripTitle": "Your favorites this week",
+    "stripAria": "Favorite movies releasing this week",
+    "viewFavorite": "Open {{title}}"
   },
   "filters": {
     "title": "Filters",
