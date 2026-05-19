@@ -130,6 +130,67 @@ button, a {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Focus ring global cohérent : ring violet sur les éléments interactifs
+   quand on navigue au clavier. focus-visible évite le ring inutile au tap
+   souris. Outline-offset 2px pour le détacher du bord du composant. */
+:where(button, a, [role="button"], [role="dialog"] *, input, select, textarea):focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+html.light :where(button, a, [role="button"], [role="dialog"] *, input, select, textarea):focus-visible {
+  outline-color: #7c3aed;
+}
+
+/* Skip-to-content link : invisible jusqu'à ce que le user clavier le tab.
+   Premier élément du DOM, permet de sauter la navbar et atterrir direct
+   sur le contenu principal. */
+.skip-to-content {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: #7c3aed;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  transition: top 0.2s ease;
+}
+
+.skip-to-content:focus {
+  top: calc(env(safe-area-inset-top) + 1rem);
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Poster shimmer pour le skeleton de chargement : effet de balayage diagonal
+   subtil, plus cinema que la simple barre grise. */
+@keyframes posterShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.poster-shimmer {
+  background-image: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  background-size: 200% 100%;
+  animation: posterShimmer 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poster-shimmer {
+    animation: none;
+  }
+}
+
 /* Safe area iOS pour la navbar et le contenu bas */
 .safe-pt {
   padding-top: max(0px, env(safe-area-inset-top));

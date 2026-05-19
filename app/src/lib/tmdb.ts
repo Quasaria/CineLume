@@ -91,16 +91,18 @@ export interface Provider {
   id: string;
   name: string;
   color: string;
+  initial: string;
+  textColor?: string;
 }
 
 export const PROVIDERS: Provider[] = [
-  { id: '8', name: 'Netflix', color: '#e50914' },
-  { id: '119', name: 'Prime Video', color: '#00a8e1' },
-  { id: '337', name: 'Disney+', color: '#0e47a1' },
-  { id: '350', name: 'Apple TV+', color: '#a1a1a1' },
-  { id: '1899', name: 'Max', color: '#002be7' },
-  { id: '531', name: 'Paramount+', color: '#0064ff' },
-  { id: '381', name: 'Canal+', color: '#000000' },
+  { id: '8', name: 'Netflix', color: '#e50914', initial: 'N' },
+  { id: '119', name: 'Prime Video', color: '#00a8e1', initial: 'P' },
+  { id: '337', name: 'Disney+', color: '#0e47a1', initial: 'D+' },
+  { id: '350', name: 'Apple TV+', color: '#000000', initial: 'tv' },
+  { id: '1899', name: 'Max', color: '#002be7', initial: 'M' },
+  { id: '531', name: 'Paramount+', color: '#0064ff', initial: 'P+' },
+  { id: '381', name: 'Canal+', color: '#000000', initial: 'C+' },
 ];
 
 export async function discoverMovies(params: DiscoverParams, signal?: AbortSignal): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {

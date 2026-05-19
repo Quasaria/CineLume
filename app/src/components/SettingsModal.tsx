@@ -102,7 +102,7 @@ export function SettingsModal() {
                 scroll target (ce div). Sinon le drag-to-close bloque des que
                 l'utilisateur scrolle dans la modale. */}
             <div ref={contentRef} className="overflow-y-auto overscroll-contain px-5 pt-3 pb-6 sm:p-6 flex-1">
-              <h3 id="settings-modal-title" className="font-bold text-xl mb-6">{t('settings.title')}</h3>
+              <h3 id="settings-modal-title" className="font-bold text-2xl tracking-tight mb-6">{t('settings.title')}</h3>
 
               <div className="space-y-5">
               <div>

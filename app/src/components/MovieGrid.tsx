@@ -1,15 +1,16 @@
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, List, SlidersHorizontal, AlertCircle, RefreshCw, X, User } from 'lucide-react';
+import { LayoutGrid, List, SlidersHorizontal, AlertCircle, RefreshCw, X, User, Calendar, Search } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { PROVIDERS } from '@/lib/tmdb';
 import { MovieCard } from './MovieCard';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { ProviderBadge } from '@/components/ProviderBadge';
 import type { Movie } from '@/types/movie';
 
 interface FilterChipProps {
-  label: string;
+  label: ReactNode;
   color: 'violet' | 'fuchsia' | 'emerald' | 'cyan';
   onClear: () => void;
   ariaLabel: string;
@@ -27,13 +28,15 @@ function FilterChip({ label, color, onClear, ariaLabel }: FilterChipProps) {
       type="button"
       onClick={onClear}
       aria-label={ariaLabel}
-      className={`pl-2 pr-1 py-0.5 rounded-md text-xs border flex items-center gap-1 transition-colors ${styles[color]}`}
+      className={`pl-2 pr-1.5 py-1 rounded-md text-xs border flex items-center gap-1.5 transition-colors ${styles[color]}`}
     >
-      <span>{label}</span>
+      {label}
       <X className="w-3 h-3 opacity-70" aria-hidden="true" />
     </button>
   );
 }
+
+const GRID_CLASSES = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5';
 
 interface MovieGridProps {
   movies: Movie[];
@@ -53,9 +56,12 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
     viewMode, setViewMode,
     selRegion, selGenre, selReleaseMode, selProvider, selectedPerson,
     setSelectedPerson, setRegion, setGenre, setReleaseMode, setProvider,
+    setSearchQuery, jumpToToday, openFilters,
+    searchQuery,
   } = useAppStore();
-  const providerName = selProvider ? PROVIDERS.find((p) => p.id === selProvider)?.name : '';
+  const provider = selProvider ? PROVIDERS.find((p) => p.id === selProvider) : undefined;
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
+  const isSearching = !!searchQuery;
 
   if (isError) {
     return (
@@ -85,13 +91,12 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="relative rounded-2xl overflow-hidden aspect-[2/3] bg-white/5">
-            <Skeleton className="absolute inset-0 bg-white/[0.04]" />
+      <div className={GRID_CLASSES} aria-label={t('grid.loadingLabel')} role="status">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className="relative rounded-2xl overflow-hidden aspect-[2/3] bg-gradient-to-br from-white/[0.04] to-white/[0.02] border border-white/[0.04] poster-shimmer">
             <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 space-y-2">
-              <Skeleton className="h-4 w-3/4 bg-white/10 rounded" />
-              <Skeleton className="h-3 w-1/2 bg-white/[0.08] rounded" />
+              <div className="h-3.5 w-3/4 rounded bg-white/[0.07]" />
+              <div className="h-2.5 w-1/2 rounded bg-white/[0.05]" />
             </div>
           </div>
         ))}
@@ -100,17 +105,76 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
   }
 
   if (movies.length === 0) {
+    // Empty state contextuel : on aide l'user a sortir de cette impasse
+    // selon ce qu'il a actuellement actif (recherche / filtre / week vide).
+    let title = t('grid.empty');
+    let hint = t('grid.emptyHint');
+    let Icon = SlidersHorizontal;
+
+    if (isSearching) {
+      title = t('grid.emptySearch', { query: searchQuery });
+      hint = t('grid.emptySearchHint');
+      Icon = Search;
+    } else if (selectedPerson) {
+      title = t('grid.emptyPerson', { name: selectedPerson.name });
+      hint = t('grid.emptyPersonHint');
+      Icon = User;
+    } else if (hasActiveFilter) {
+      title = t('grid.emptyFiltered');
+      hint = t('grid.emptyFilteredHint');
+      Icon = SlidersHorizontal;
+    } else {
+      title = t('grid.emptyWeek');
+      hint = t('grid.emptyWeekHint');
+      Icon = Calendar;
+    }
+
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="py-20 text-center"
+        className="py-16 sm:py-20 text-center px-4"
       >
-        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-white/5 flex items-center justify-center">
-          <SlidersHorizontal className="w-10 h-10 text-white/40" />
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-500/10 to-cyan-500/10 border border-white/10 flex items-center justify-center">
+          <Icon className="w-9 h-9 text-white/50" aria-hidden="true" />
         </div>
-        <p className="text-white/70 text-lg font-medium mb-1">{t('grid.empty')}</p>
-        <p className="text-white/50 text-sm">{t('grid.emptyHint')}</p>
+        <p className="text-white/85 text-lg font-semibold mb-1.5">{title}</p>
+        <p className="text-white/50 text-sm max-w-md mx-auto mb-6">{hint}</p>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {isSearching && (
+            <Button
+              onClick={() => setSearchQuery('')}
+              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-semibold"
+            >
+              {t('grid.clearSearch')}
+            </Button>
+          )}
+          {selectedPerson && (
+            <Button
+              onClick={() => setSelectedPerson(null)}
+              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-semibold"
+            >
+              {t('grid.removePersonFilter')}
+            </Button>
+          )}
+          {hasActiveFilter && !isSearching && !selectedPerson && (
+            <Button
+              onClick={openFilters}
+              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-semibold"
+            >
+              {t('grid.openFilters')}
+            </Button>
+          )}
+          {!isSearching && !selectedPerson && (
+            <Button
+              onClick={jumpToToday}
+              className="px-4 py-2.5 rounded-xl btn-primary bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white text-sm font-semibold flex items-center gap-1.5"
+            >
+              <Calendar className="w-4 h-4" aria-hidden="true" />
+              {t('common.today')}
+            </Button>
+          )}
+        </div>
       </motion.div>
     );
   }
@@ -160,11 +224,11 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
                   }}
                 />
               )}
-              {providerName && (
+              {provider && (
                 <FilterChip
-                  label={providerName}
+                  label={<span className="flex items-center gap-1.5"><ProviderBadge provider={provider} size="sm" />{provider.name}</span>}
                   color="emerald"
-                  ariaLabel={t('grid.clearFilter', { name: providerName })}
+                  ariaLabel={t('grid.clearFilter', { name: provider.name })}
                   onClear={() => setProvider('')}
                 />
               )}
@@ -211,7 +275,7 @@ export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMo
       <div
         className={
           viewMode === 'grid'
-            ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5'
+            ? GRID_CLASSES
             : 'flex flex-col gap-3'
         }
       >

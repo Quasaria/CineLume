@@ -29,7 +29,7 @@ interface DiscoverResponse {
 }
 
 export default function App() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const isMobile = useIsMobile();
   const {
@@ -211,6 +211,13 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] selection:bg-violet-500/30 relative">
+        {/* Skip-to-content : premier element focusable du DOM. Au TAB initial,
+            l'utilisateur clavier voit le lien apparaitre et peut sauter la
+            navbar pour atterrir directement sur le contenu. */}
+        <a href="#main" className="skip-to-content">
+          {t('nav.skipToContent')}
+        </a>
+
         <div className="ambient-bg" />
 
         {/* Image backdrop pleine largeur en haut de la page, sans cadre,
