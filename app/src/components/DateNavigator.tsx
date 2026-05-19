@@ -171,7 +171,10 @@ export function DateNavigator() {
           </motion.button>
         </div>
 
-        <div className="flex-1 flex items-center gap-3 overflow-x-auto no-scrollbar -mx-1 px-1">
+        {/* Mois : scrollable horizontalement si pas assez de place. flex-1
+            min-w-0 permet au container de se compresser au lieu de pousser
+            les semaines hors champ. */}
+        <div className="flex-1 min-w-0 flex items-center gap-3 overflow-x-auto no-scrollbar -mx-1 px-1">
           <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent shrink-0" />
           <div className="flex gap-1 shrink-0 snap-x items-center">
             {MONTHS.map((m, i) => (
@@ -190,30 +193,33 @@ export function DateNavigator() {
               </motion.button>
             ))}
           </div>
-
-          {weeks > 0 && (
-            <>
-              <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent shrink-0" />
-              <div className="flex gap-1 shrink-0 snap-x items-center">
-                {Array.from({ length: weeks }, (_, i) => i + 1).map((w) => (
-                  <motion.button
-                    key={w}
-                    ref={w === selWeek ? activeWeekRef : undefined}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setDate(selYear, selMonth, w)}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all snap-center ${
-                      w === selWeek
-                        ? 'bg-violet-500/20 text-violet-200 border border-violet-500/40'
-                        : 'text-white/65 hover:text-white hover:bg-white/5 active:bg-white/10'
-                    }`}
-                  >
-                    S{w}
-                  </motion.button>
-                ))}
-              </div>
-            </>
-          )}
         </div>
+
+        {/* Semaines : zone fixe shrink-0 a droite des mois, TOUJOURS visible
+            (avant les actions). Ne se fait plus pousser hors champ par les
+            boutons filtres/aujourd'hui. */}
+        {weeks > 0 && (
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-px h-7 bg-gradient-to-b from-transparent via-white/25 to-transparent" />
+            <div className="flex gap-1 items-center">
+              {Array.from({ length: weeks }, (_, i) => i + 1).map((w) => (
+                <motion.button
+                  key={w}
+                  ref={w === selWeek ? activeWeekRef : undefined}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setDate(selYear, selMonth, w)}
+                  className={`px-3 lg:px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    w === selWeek
+                      ? 'bg-violet-500/20 text-violet-200 border border-violet-500/40'
+                      : 'text-white/65 hover:text-white hover:bg-white/5 active:bg-white/10'
+                  }`}
+                >
+                  S{w}
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 shrink-0">
           <motion.button
