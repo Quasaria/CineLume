@@ -468,6 +468,9 @@ html.light .favorites-featured:hover {
 html.light .favorites-featured-title {
   color: #0a0a0f;
 }
+html.light .favorites-featured-overview {
+  color: rgba(10, 10, 15, 0.6);
+}
 
 /* Hero stage (legacy) : conserve pour compat .hero-stage-grain */
 .hero-stage {

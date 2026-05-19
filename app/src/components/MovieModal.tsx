@@ -298,6 +298,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                               poster_path: movie.poster_path,
                               release_date: movie.release_date,
                               vote_average: movie.vote_average,
+                              overview: movie.overview,
                             })
                           }
                           aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
@@ -509,6 +510,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                       poster_path: movie.poster_path,
                       release_date: movie.release_date,
                       vote_average: movie.vote_average,
+                      overview: movie.overview,
                     })
                   }
                   aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
