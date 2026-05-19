@@ -426,8 +426,11 @@ html.light .border-white\/10.border-t-violet-500 {
   transform-origin: center;
 }
 
+/* Light mode : on assombrit fortement l'image et on la desature pour
+   qu'elle ne crie pas sur la page claire. Le titre blanc force au-dessus
+   reste lisible quel que soit le contenu de l'image. */
 html.light .hero-bg-img {
-  filter: blur(4px) saturate(0.85) brightness(1.05);
+  filter: blur(6px) saturate(0.4) brightness(0.55) opacity(0.6);
 }
 
 /* Mask radial commun pour tous les layers du hero backdrop : image, grain,
@@ -437,6 +440,33 @@ html.light .hero-bg-img {
 .hero-mask {
   -webkit-mask-image: radial-gradient(ellipse 110% 60% at 50% 28%, black 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.35) 62%, transparent 85%);
   mask-image: radial-gradient(ellipse 110% 60% at 50% 28%, black 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.35) 62%, transparent 85%);
+}
+
+/* Favorites featured card : look discret pour ne pas dominer la page,
+   accent violet subtil. */
+.favorites-featured {
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.favorites-featured:hover {
+  background: rgba(124, 58, 237, 0.10);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+.favorites-featured-title {
+  color: #ffffff;
+}
+
+html.light .favorites-featured {
+  background: rgba(124, 58, 237, 0.04);
+  border-color: rgba(124, 58, 237, 0.2);
+}
+html.light .favorites-featured:hover {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+html.light .favorites-featured-title {
+  color: #0a0a0f;
 }
 
 /* Hero stage (legacy) : conserve pour compat .hero-stage-grain */
