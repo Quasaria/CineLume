@@ -51,7 +51,9 @@
     "viewList": "Affichage en liste",
     "viewModeGroup": "Mode d'affichage",
     "filmographyOf": "Filmographie de",
-    "removePersonFilter": "Retirer le filtre par personne"
+    "removePersonFilter": "Retirer le filtre par personne",
+    "clearFilter": "Retirer le filtre {{name}}",
+    "genreLabel": "Genre"
   },
   "modes": {
     "all": "Tout",
@@ -73,6 +75,10 @@
     "cast": "Distribution",
     "releaseIn": "Sortie {{region}}",
     "close": "Fermer la fiche film",
+    "expand": "Agrandir",
+    "expandBackdrop": "Voir l'image en grand",
+    "expandPoster": "Voir l'affiche en grand",
+    "closeLightbox": "Fermer la vue agrandie",
     "status": {
       "Released": "Sorti",
       "Upcoming": "À venir",

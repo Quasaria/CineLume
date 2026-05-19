@@ -51,7 +51,9 @@
     "viewList": "List view",
     "viewModeGroup": "View mode",
     "filmographyOf": "Filmography of",
-    "removePersonFilter": "Remove person filter"
+    "removePersonFilter": "Remove person filter",
+    "clearFilter": "Remove {{name}} filter",
+    "genreLabel": "Genre"
   },
   "modes": {
     "all": "All",
@@ -73,6 +75,10 @@
     "cast": "Cast",
     "releaseIn": "{{region}} release",
     "close": "Close movie details",
+    "expand": "Expand",
+    "expandBackdrop": "View image fullscreen",
+    "expandPoster": "View poster fullscreen",
+    "closeLightbox": "Close fullscreen view",
     "status": {
       "Released": "Released",
       "Upcoming": "Upcoming",

@@ -423,15 +423,10 @@ html.light .hero-stage p {
   /* shadows seront override via le drop-shadow Tailwind */
 }
 
-/* Light mode hero title : on garde du texte blanc avec un halo blanc-au-noir
-   en drop-shadow pour rester lisible quel que soit le contenu de l'image
-   au-dessous (qui peut etre clair ou sombre selon le film). */
-html.light .hero-title h1 {
-  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 12px rgba(0, 0, 0, 0.4));
-}
-html.light .hero-title p {
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.5));
-}
+/* Light mode hero title : la couleur blanche est forcee en inline-style sur
+   les elements (cf. Hero.tsx) pour bypasser l'override .text-white qui les
+   rendrait sombres. On garde le meme drop-shadow noir dans les deux modes
+   car le titre est toujours sur le degrade sombre du backdrop. */
 
 /* Hero backdrop legacy (gardes pour compat si jamais) : carrement masque en light mode */
 html.light .hero-backdrop {

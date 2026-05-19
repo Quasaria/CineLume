@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +42,7 @@ export default function App() {
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
     queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, lang],
-    queryFn: async ({ pageParam = 1 }) => {
+    queryFn: async ({ pageParam = 1, signal }) => {
       const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion);
       const idx = Math.min(Math.max(selWeek - 1, 0), weeks.length - 1);
       const w = weeks[idx];
@@ -58,7 +58,7 @@ export default function App() {
         releaseMode: selReleaseMode,
         provider: selProvider,
         personId: selectedPerson?.id ?? null,
-      });
+      }, signal);
 
       // Filmographie : pas de filtre date, on garde la carriere complete.
       if (selectedPerson) return res;
@@ -92,11 +92,12 @@ export default function App() {
 
       const enriched = await Promise.all(
         res.results.map(async (movie) => {
+          if (signal?.aborted) return null;
           if (!movie.poster_path) return null;
           if (movie.release_date && movie.release_date < recencyCutoff) return null;
           if (shouldFilterByLang && movie.original_language && NICHE_LANGS.includes(movie.original_language)) return null;
           try {
-            const rd = await getMovieReleaseDates(movie.id);
+            const rd = await getMovieReleaseDates(movie.id, signal);
             // Strict region-only : on prend la PLUS ANCIENNE entree de la
             // region selectionnee qui matche le type, puis on regarde si elle
             // tombe dans la fenetre semaine. Resultat : chaque film n'apparait
@@ -129,7 +130,10 @@ export default function App() {
       return {
         ...res,
         results: filtered,
-        total_results: filtered.length,
+        // On garde total_results du discover original pour que le compteur
+        // affiche le vrai total TMDB (pas seulement les pages chargees).
+        // Le filtre client n'a aucun moyen de connaitre les films des pages
+        // non encore fetched, donc le compteur reste une borne haute.
       };
     },
     initialPageParam: 1,
@@ -142,8 +146,8 @@ export default function App() {
 
   const searchQueryHook = useInfiniteQuery<DiscoverResponse, Error>({
     queryKey: ['search', debouncedSearch, lang],
-    queryFn: async ({ pageParam = 1 }) => {
-      const res = await searchMovies(debouncedSearch, pageParam as number);
+    queryFn: async ({ pageParam = 1, signal }) => {
+      const res = await searchMovies(debouncedSearch, pageParam as number, signal);
       return res;
     },
     initialPageParam: 1,
@@ -156,7 +160,7 @@ export default function App() {
 
   const personsQuery = useQuery({
     queryKey: ['searchPersons', debouncedSearch, lang],
-    queryFn: () => searchPersons(debouncedSearch),
+    queryFn: ({ signal }) => searchPersons(debouncedSearch, signal),
     enabled: !!debouncedSearch && !selectedPerson && debouncedSearch.length >= 2,
   });
 
@@ -165,10 +169,15 @@ export default function App() {
 
   // En mode discover, le queryFn fait deja le filtrage strict via /release_dates.
   // En mode recherche/filmographie, on garde tout sauf les films sans affiche.
-  const movies: Movie[] = (activeQuery.data?.pages.flatMap((p) => p.results) || [])
-    .filter((m) => !!m.poster_path);
-  const totalResults = activeQuery.data?.pages.reduce((sum, p) => sum + p.results.length, 0) || 0;
-  const persons = (personsQuery.data?.results || []).filter((p) => p.profile_path).slice(0, 12);
+  const movies: Movie[] = useMemo(
+    () => (activeQuery.data?.pages.flatMap((p) => p.results) || []).filter((m) => !!m.poster_path),
+    [activeQuery.data],
+  );
+  const totalResults = movies.length;
+  const persons = useMemo(
+    () => (personsQuery.data?.results || []).filter((p) => p.profile_path).slice(0, 12),
+    [personsQuery.data],
+  );
 
   const loadMore = useCallback(() => {
     if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
@@ -190,11 +199,14 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const heroBackdrops = movies
-    .slice(0, 6)
-    .map((m) => m.backdrop_path)
-    .filter((p): p is string => !!p)
-    .map((p) => `${BACK}${p}`);
+  const heroBackdrops = useMemo(
+    () => movies
+      .slice(0, 6)
+      .map((m) => m.backdrop_path)
+      .filter((p): p is string => !!p)
+      .map((p) => `${BACK}${p}`),
+    [movies],
+  );
 
   return (
     <MotionConfig reducedMotion="user">

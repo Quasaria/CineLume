@@ -8,6 +8,7 @@ import { fmtDateLocalized } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
+import { useFocusRestore } from '@/hooks/useFocusRestore';
 import type { FavoriteMovie } from '@/types/movie';
 
 function parseLocalDate(s: string | null | undefined): Date | null {
@@ -76,6 +77,7 @@ export function FavoritesModal() {
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeFavorites, contentRef });
   useBodyScrollLock(isFavOpen);
+  useFocusRestore(isFavOpen);
 
   return (
     <AnimatePresence>
@@ -98,12 +100,15 @@ export function FavoritesModal() {
             animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
             exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="favorites-modal-title"
+            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-lg w-full max-h-[90dvh] sm:max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
             {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-xl flex items-center gap-2">
+              <h3 id="favorites-modal-title" className="font-bold text-xl flex items-center gap-2">
                 <Heart className="w-5 h-5 text-red-500 fill-red-500" aria-hidden="true" />
                 {t('favorites.title')}
                 {favorites.length > 0 && (
@@ -176,7 +181,7 @@ export function FavoritesModal() {
                                 e.stopPropagation();
                                 removeFav(f.id);
                               }}
-                              className="p-2 rounded-lg hover:bg-red-500/20 text-white/50 hover:text-red-400 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all"
+                              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors shrink-0"
                             >
                               <Trash2 className="w-4 h-4" aria-hidden="true" />
                             </button>

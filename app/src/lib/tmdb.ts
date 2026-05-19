@@ -10,6 +10,10 @@ export const ORIG = 'https://image.tmdb.org/t/p/original';
 
 const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p';
 
+// Cache la cle API en memoire pour eviter un acces localStorage par appel
+// (le filtrage en cascade fait 20 getMovieReleaseDates par page change).
+let _cachedKey: string | null = null;
+
 export function posterSrcSet(path: string | null | undefined): string | undefined {
   if (!path) return undefined;
   return [185, 342, 500].map((w) => `${TMDB_IMG_BASE}/w${w}${path} ${w}w`).join(', ');
@@ -27,7 +31,41 @@ export function profileSrcSet(path: string | null | undefined): string | undefin
 export const TMDB_SITE = 'https://www.themoviedb.org/movie';
 
 function getApiKey(): string {
-  return localStorage.getItem('tmdb_key') || ENV_KEY || '';
+  if (_cachedKey !== null) return _cachedKey;
+  const stored = localStorage.getItem('tmdb_key');
+  _cachedKey = stored || ENV_KEY || '';
+  return _cachedKey;
+}
+
+// A appeler depuis SettingsModal quand l'utilisateur change/efface sa cle.
+export function invalidateApiKeyCache() {
+  _cachedKey = null;
+}
+
+// Type d'erreur enrichi pour distinguer cle invalide, rate limit et autres
+// erreurs reseau (utile pour les messages user-facing et le retry policy).
+export class TMDBError extends Error {
+  status: number;
+  retryable: boolean;
+  constructor(status: number, message: string, retryable: boolean) {
+    super(message);
+    this.name = 'TMDBError';
+    this.status = status;
+    this.retryable = retryable;
+  }
+}
+
+function handleResponseError(res: Response): TMDBError {
+  if (res.status === 401 || res.status === 403) {
+    return new TMDBError(res.status, 'Clé API TMDB invalide ou expirée', false);
+  }
+  if (res.status === 429) {
+    return new TMDBError(res.status, 'Trop de requêtes TMDB, ralentis un peu', true);
+  }
+  if (res.status >= 500) {
+    return new TMDBError(res.status, 'TMDB indisponible, réessaie plus tard', true);
+  }
+  return new TMDBError(res.status, 'Erreur de connexion TMDB', false);
 }
 
 export interface DiscoverParams {
@@ -65,7 +103,7 @@ export const PROVIDERS: Provider[] = [
   { id: '381', name: 'Canal+', color: '#000000' },
 ];
 
-export async function discoverMovies(params: DiscoverParams): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
+export async function discoverMovies(params: DiscoverParams, signal?: AbortSignal): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
   const apiKey = getApiKey();
   const region = params.region || 'FR';
   const mode = params.releaseMode || 'theater';
@@ -95,51 +133,54 @@ export async function discoverMovies(params: DiscoverParams): Promise<{ results:
   const sortQ = params.personId ? 'primary_release_date.desc' : 'popularity.desc';
   const url = `${BASE}/discover/movie?api_key=${apiKey}&language=${tmdbLang()}&region=${region}${genreQ}${releaseTypeQ}${providerQ}${personQ}${dateQ}&sort_by=${sortQ}&page=${params.page}`;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erreur de connexion TMDB');
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
   return res.json();
 }
 
-export async function searchMovies(query: string, page: number): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
+export async function searchMovies(query: string, page: number, signal?: AbortSignal): Promise<{ results: Movie[]; total_pages: number; total_results: number }> {
   const apiKey = getApiKey();
   const url = `${BASE}/search/movie?api_key=${apiKey}&language=${tmdbLang()}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`;
 
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erreur de recherche TMDB');
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
   return res.json();
 }
 
-export async function searchPersons(query: string): Promise<{ results: PersonSearchResult[]; total_results: number }> {
+export async function searchPersons(query: string, signal?: AbortSignal): Promise<{ results: PersonSearchResult[]; total_results: number }> {
   const apiKey = getApiKey();
   const url = `${BASE}/search/person?api_key=${apiKey}&language=${tmdbLang()}&query=${encodeURIComponent(query)}&page=1&include_adult=false`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erreur de recherche personne');
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
   return res.json();
 }
 
-export async function getPersonDetails(id: number): Promise<{ id: number; name: string; profile_path: string | null; known_for_department: string; biography?: string }> {
+export async function getPersonDetails(id: number, signal?: AbortSignal): Promise<{ id: number; name: string; profile_path: string | null; known_for_department: string; biography?: string }> {
   const apiKey = getApiKey();
   const url = `${BASE}/person/${id}?api_key=${apiKey}&language=${tmdbLang()}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erreur de chargement de la personne');
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
   return res.json();
 }
 
-export async function getMovieDetails(id: number): Promise<MovieDetails> {
+export async function getMovieDetails(id: number, signal?: AbortSignal): Promise<MovieDetails> {
   const apiKey = getApiKey();
   const cacheKey = `md_${id}_${tmdbLang()}`;
   const cached = localStorage.getItem(cacheKey);
-  
+
   if (cached) {
     try {
       const parsed = JSON.parse(cached);
       if (parsed.exp > Date.now()) return parsed.data;
-    } catch {}
+    } catch {
+      // entree corrompue, on la jette
+      localStorage.removeItem(cacheKey);
+    }
   }
 
   const url = `${BASE}/movie/${id}?api_key=${apiKey}&language=${tmdbLang()}&append_to_response=credits,videos,release_dates`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erreur de chargement des détails');
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
   const data = await res.json();
 
   try {
@@ -164,7 +205,7 @@ export interface MovieReleaseDates {
   }>;
 }
 
-export async function getMovieReleaseDates(id: number): Promise<MovieReleaseDates> {
+export async function getMovieReleaseDates(id: number, signal?: AbortSignal): Promise<MovieReleaseDates> {
   const apiKey = getApiKey();
   const cacheKey = `rd_v2_${id}`;
   const cached = localStorage.getItem(cacheKey);
@@ -174,38 +215,69 @@ export async function getMovieReleaseDates(id: number): Promise<MovieReleaseDate
       const parsed = JSON.parse(cached);
       if (parsed.exp > Date.now()) return parsed.data as MovieReleaseDates;
     } catch {
-      // ignore
+      localStorage.removeItem(cacheKey);
     }
   }
 
   const url = `${BASE}/movie/${id}/release_dates?api_key=${apiKey}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erreur de chargement des dates de sortie');
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
   const data = (await res.json()) as MovieReleaseDates;
 
   try {
     localStorage.setItem(cacheKey, JSON.stringify({ data, exp: Date.now() + 86400000 }));
   } catch {
-    // ignore
+    // localStorage probablement plein, on tente une eviction LRU des plus
+    // anciennes entrees rd_v2_ pour faire de la place et on retente une fois.
+    evictOldCacheEntries('rd_v2_', 50);
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ data, exp: Date.now() + 86400000 }));
+    } catch {
+      // tant pis
+    }
   }
   return data;
 }
 
-export async function getGenres(): Promise<Genre[]> {
+// Suppression best-effort des plus anciennes entrees d'un prefixe pour
+// liberer du localStorage quand il est plein. Trie par exp croissant et
+// retire les n plus vieilles.
+function evictOldCacheEntries(prefix: string, count: number) {
+  const entries: Array<{ key: string; exp: number }> = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith(prefix)) continue;
+    try {
+      const v = localStorage.getItem(key);
+      if (!v) continue;
+      const parsed = JSON.parse(v);
+      entries.push({ key, exp: parsed.exp ?? 0 });
+    } catch {
+      // entree corrompue, on la jette d'office
+      localStorage.removeItem(key);
+    }
+  }
+  entries.sort((a, b) => a.exp - b.exp);
+  entries.slice(0, count).forEach((e) => localStorage.removeItem(e.key));
+}
+
+export async function getGenres(signal?: AbortSignal): Promise<Genre[]> {
   const apiKey = getApiKey();
   const cacheKey = `genres_cache_${tmdbLang()}`;
   const cached = localStorage.getItem(cacheKey);
-  
+
   if (cached) {
     try {
       const parsed = JSON.parse(cached);
       if (parsed.exp > Date.now()) return parsed.data;
-    } catch {}
+    } catch {
+      localStorage.removeItem(cacheKey);
+    }
   }
 
   const url = `${BASE}/genre/movie/list?api_key=${apiKey}&language=${tmdbLang()}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Erreur de chargement des genres');
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw handleResponseError(res);
   const data = await res.json();
 
   try {

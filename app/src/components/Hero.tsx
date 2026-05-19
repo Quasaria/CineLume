@@ -37,10 +37,21 @@ export function Hero() {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="hero-title relative mb-4 sm:mb-10 pt-40 sm:pt-72 z-10"
     >
-      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-1 sm:mb-2 [filter:drop-shadow(0_3px_12px_rgba(0,0,0,0.9))_drop-shadow(0_0_28px_rgba(0,0,0,0.6))]">
+      {/* Le titre est toujours pose sur le degrade sombre de la backdrop, donc
+          on force le blanc en inline pour court-circuiter l'override .text-white
+          qui le rendrait sombre en light mode. */}
+      <h1
+        style={{ color: '#ffffff' }}
+        className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-1 sm:mb-2 [filter:drop-shadow(0_3px_12px_rgba(0,0,0,0.9))_drop-shadow(0_0_28px_rgba(0,0,0,0.6))]"
+      >
         {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
       </h1>
-      <p className="text-white/95 text-sm sm:text-lg font-light [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.9))_drop-shadow(0_0_16px_rgba(0,0,0,0.5))]">{label}</p>
+      <p
+        style={{ color: 'rgba(255, 255, 255, 0.95)' }}
+        className="text-sm sm:text-lg font-light [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.9))_drop-shadow(0_0_16px_rgba(0,0,0,0.5))]"
+      >
+        {label}
+      </p>
     </motion.div>
   );
 }
