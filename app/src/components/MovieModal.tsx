@@ -375,14 +375,23 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                         </div>
                       </div>
 
-                      {movie.credits?.crew?.find((c) => c.job === 'Director') && (
-                        <p className="text-cyan-400/80 text-sm font-medium mb-4">
-                          {t('modal.directedBy')}{' '}
-                          <span className="text-white">
-                            {movie.credits.crew.find((c) => c.job === 'Director')?.name}
-                          </span>
-                        </p>
-                      )}
+                      {(() => {
+                        const director = movie.credits?.crew?.find((c) => c.job === 'Director');
+                        if (!director) return null;
+                        return (
+                          <p className="text-cyan-400/80 text-sm font-medium mb-4">
+                            {t('modal.directedBy')}{' '}
+                            <button
+                              type="button"
+                              onClick={() => openPersonFilmography(director.id, director.name)}
+                              aria-label={t('modal.viewActorFilmography', { name: director.name })}
+                              className="text-white font-semibold hover:text-violet-300 underline-offset-2 hover:underline transition-colors"
+                            >
+                              {director.name}
+                            </button>
+                          </p>
+                        );
+                      })()}
 
                       {(() => {
                         // On filtre les entrees sans date valide (TMDB en met
