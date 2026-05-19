@@ -62,16 +62,11 @@ export function HeroBackdrop({ backdrops = [] }: HeroBackdropProps) {
       <div className="hero-stage-grain hero-mask absolute inset-0 mix-blend-overlay opacity-25 pointer-events-none" />
 
       {/* Darkening interne au blob : sur la portion basse (40% -> 100%) on
-          ajoute un linear-gradient sombre, MASQUE par le meme mask radial.
-          Resultat : la zone darkening epouse la forme du blob, jamais de bord
-          rectangulaire visible. Sert a poser le titre sur du sombre tout en
-          gardant l'effet blob. */}
-      <div
-        className="hero-mask absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(0,0,0,0.45) 70%, rgba(0,0,0,0.7) 100%)',
-        }}
-      />
+          ajoute un linear-gradient, MASQUE par le meme mask radial.
+          Resultat : la zone d'overlay epouse la forme du blob, jamais de
+          bord rectangulaire visible. La couleur du gradient s'adapte au
+          theme (sombre en dark, lavende en light) via .hero-darkening. */}
+      <div className="hero-mask hero-darkening absolute inset-0 pointer-events-none" />
     </div>
   );
 }
