@@ -127,7 +127,11 @@
     "stripCount_one": "1 movie you follow releases this week",
     "stripCount_other": "{{count}} movies you follow release this week",
     "viewFavorite": "Open {{title}}",
-    "openDetails": "View details"
+    "openDetails": "View details",
+    "countdownToday": "Releases today",
+    "countdownTomorrow": "Releases tomorrow",
+    "countdownDays_one": "Releases in {{count}} day",
+    "countdownDays_other": "Releases in {{count}} days"
   },
   "filters": {
     "title": "Filters",

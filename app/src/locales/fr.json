@@ -127,7 +127,11 @@
     "stripCount_one": "1 film que tu suis sort cette semaine",
     "stripCount_other": "{{count}} films que tu suis sortent cette semaine",
     "viewFavorite": "Voir la fiche de {{title}}",
-    "openDetails": "Voir la fiche"
+    "openDetails": "Voir la fiche",
+    "countdownToday": "Sort aujourd'hui",
+    "countdownTomorrow": "Sort demain",
+    "countdownDays_one": "Sort dans {{count}} jour",
+    "countdownDays_other": "Sort dans {{count}} jours"
   },
   "filters": {
     "title": "Filtres",
