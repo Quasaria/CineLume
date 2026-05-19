@@ -207,11 +207,14 @@ export function FilterDrawer() {
                       <button
                         key={code}
                         type="button"
-                        onClick={() => setTempRegion(active ? '' : code)}
+                        // Une region est toujours requise (l'API fallback FR
+                        // sinon, incoherent avec l'UI). Click sur la region
+                        // active = no-op. Pour changer, click une autre.
+                        onClick={() => { if (!active) setTempRegion(code); }}
                         aria-pressed={active}
                         className={`flex items-center gap-2 p-3 rounded-xl transition-all text-left border ${
                           active
-                            ? 'border-violet-500/60 bg-violet-500/15 shadow-lg shadow-violet-500/15'
+                            ? 'border-violet-500/60 bg-violet-500/15 shadow-lg shadow-violet-500/15 cursor-default'
                             : 'border-white/10 bg-white/[0.03] hover:bg-white/5'
                         }`}
                       >

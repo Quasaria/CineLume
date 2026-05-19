@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
+import { formatDateISO } from '@/lib/cinema-week';
 import i18n from '@/i18n';
 
 function parseLocalDate(s: string | null | undefined): Date | null {
@@ -25,10 +26,17 @@ function parseLocalDate(s: string | null | undefined): Date | null {
  * statique GitHub Pages.
  */
 export function useReleaseNotifications() {
-  const favorites = useAppStore((s) => s.favorites);
-  const openFavorites = useAppStore((s) => s.openFavorites);
+  // On lit imperativement le store dans l'effet pour ne pas re-declencher
+  // a chaque toggleFav (qui muterait l'array favorites). Sans ca, le
+  // setTimeout 2500ms se voyait clear/replace en permanence -> notif jamais
+  // affichee si l'user manipulait ses favoris au moment du load.
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+
+    const { favorites, openFavorites } = useAppStore.getState();
     if (favorites.length === 0) return;
 
     const today = new Date();
@@ -36,7 +44,10 @@ export function useReleaseNotifications() {
     const weekEnd = new Date(today);
     weekEnd.setDate(today.getDate() + 7);
 
-    const todayKey = today.toISOString().split('T')[0];
+    // formatDateISO compose YYYY-MM-DD depuis les composants locaux (vs
+    // toISOString qui rend UTC). En soiree FR > 22h on tombait sur le
+    // lendemain UTC, donc anti-spam casse.
+    const todayKey = formatDateISO(today);
     const lastNotifiedDay = localStorage.getItem('cinelume_notified_day');
     if (lastNotifiedDay === todayKey) return;
 
@@ -81,9 +92,13 @@ export function useReleaseNotifications() {
         }
       }
 
-      localStorage.setItem('cinelume_notified_day', todayKey);
+      try {
+        localStorage.setItem('cinelume_notified_day', todayKey);
+      } catch {
+        // quota plein, tant pis on renotifiera demain
+      }
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [favorites, openFavorites]);
+  }, []);
 }

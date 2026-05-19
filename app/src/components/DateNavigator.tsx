@@ -22,6 +22,10 @@ export function DateNavigator() {
 
   const activeMonthRef = useRef<HTMLButtonElement>(null);
   const activeWeekRef = useRef<HTMLButtonElement>(null);
+  // Skip le scrollIntoView au premier mount : sinon on declenche un scroll
+  // smooth de la page entiere des le load alors que l'user n'a rien fait.
+  const monthFirstMountRef = useRef(true);
+  const weekFirstMountRef = useRef(true);
 
   useEffect(() => {
     if (weeks > 0 && selWeek > weeks) {
@@ -30,10 +34,18 @@ export function DateNavigator() {
   }, [weeks, selWeek, selYear, selMonth, setDate]);
 
   useEffect(() => {
+    if (monthFirstMountRef.current) {
+      monthFirstMountRef.current = false;
+      return;
+    }
     activeMonthRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [selMonth, selYear]);
 
   useEffect(() => {
+    if (weekFirstMountRef.current) {
+      weekFirstMountRef.current = false;
+      return;
+    }
     activeWeekRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [selWeek]);
 

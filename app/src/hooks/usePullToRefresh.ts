@@ -24,6 +24,15 @@ export function usePullToRefresh({ onRefresh, threshold = 80, enabled = true }: 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const pullRef = useRef(0);
   const isRefreshingRef = useRef(false);
+  const cleanupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Stocke onRefresh dans une ref pour decoupler de la dep useEffect : sans
+  // ca, l'inline arrow function du caller change a chaque render et on
+  // re-attachait 4 listeners touch a chaque update (perf + race conditions).
+  const onRefreshRef = useRef(onRefresh);
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -72,15 +81,17 @@ export function usePullToRefresh({ onRefresh, threshold = 80, enabled = true }: 
         setIsRefreshing(true);
         isRefreshingRef.current = true;
         try {
-          await onRefresh();
+          await onRefreshRef.current();
         } finally {
           // Petit delay pour que l'indicateur reste visible 300ms apres la
-          // fin du refresh : l'user voit que ca s'est bien passe.
-          setTimeout(() => {
+          // fin du refresh : l'user voit que ca s'est bien passe. On stocke
+          // l'id pour le clear si le composant unmount entre temps.
+          cleanupTimerRef.current = setTimeout(() => {
             setIsRefreshing(false);
             isRefreshingRef.current = false;
             setPullDistance(0);
             pullRef.current = 0;
+            cleanupTimerRef.current = null;
           }, 300);
         }
       } else {
@@ -99,8 +110,12 @@ export function usePullToRefresh({ onRefresh, threshold = 80, enabled = true }: 
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('touchcancel', handleTouchEnd);
+      if (cleanupTimerRef.current !== null) {
+        clearTimeout(cleanupTimerRef.current);
+        cleanupTimerRef.current = null;
+      }
     };
-  }, [onRefresh, threshold, enabled]);
+  }, [threshold, enabled]);
 
   return { pullDistance, isRefreshing };
 }

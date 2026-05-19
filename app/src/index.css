@@ -521,3 +521,19 @@ html.light .bg-violet-500\/20 {
 html.light .border-violet-500\/20 {
   border-color: rgba(124, 58, 237, 0.3);
 }
+
+/* Filter chips couleurs : les /300 sont concus pour fonds sombres, en light
+   mode on bascule vers les /700 plus fonces pour rester lisibles sur fond
+   clair. */
+html.light .text-fuchsia-300 { color: #86198f; }
+html.light .text-emerald-300 { color: #047857; }
+html.light .text-cyan-300 { color: #0e7490; }
+html.light .text-amber-300\/80 { color: #b45309; }
+
+html.light .bg-fuchsia-500\/10 { background-color: rgba(217, 70, 239, 0.08); }
+html.light .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.08); }
+html.light .bg-cyan-500\/10 { background-color: rgba(6, 182, 212, 0.08); }
+
+html.light .border-fuchsia-500\/20 { border-color: rgba(217, 70, 239, 0.3); }
+html.light .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.3); }
+html.light .border-cyan-500\/20 { border-color: rgba(6, 182, 212, 0.3); }
