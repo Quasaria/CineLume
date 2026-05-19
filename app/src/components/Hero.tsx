@@ -14,9 +14,11 @@ export function Hero() {
   const wIdx = Math.min(Math.max(selWeek - 1, 0), Math.max(weeks.length - 1, 0));
   const w = weeks[wIdx];
 
-  let label: string;
+  // En mode personne, on n'affiche pas le label semaine (le PersonHeader
+  // prend le relais avec photo/bio plus bas).
+  let label: string | null;
   if (selectedPerson) {
-    label = t('hero.filmography', { name: selectedPerson.name });
+    label = null;
   } else if (searchQuery) {
     label = t('hero.searchResults', { query: searchQuery });
   } else if (!w) {
@@ -46,12 +48,14 @@ export function Hero() {
       >
         {t('hero.title')} <span className="text-gradient">{t('hero.titleAccent')}</span>
       </h1>
-      <p
-        style={{ color: 'rgba(255, 255, 255, 0.95)' }}
-        className="text-sm sm:text-lg font-light [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.9))_drop-shadow(0_0_16px_rgba(0,0,0,0.5))]"
-      >
-        {label}
-      </p>
+      {label && (
+        <p
+          style={{ color: 'rgba(255, 255, 255, 0.95)' }}
+          className="text-sm sm:text-lg font-light [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.9))_drop-shadow(0_0_16px_rgba(0,0,0,0.5))]"
+        >
+          {label}
+        </p>
+      )}
     </motion.div>
   );
 }

@@ -291,6 +291,16 @@
       "Crew": "Crew"
     }
   },
+  "person": {
+    "back": "Back",
+    "backToFilm": "Back to film",
+    "filmography": "Filmography",
+    "biography": "Biography",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "noBio": "No biography available.",
+    "loading": "Loading…"
+  },
   "share": {
     "linkCopied": "Link copied",
     "copyError": "Couldn't copy link",
