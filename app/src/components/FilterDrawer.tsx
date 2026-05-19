@@ -98,10 +98,10 @@ export function FilterDrawer() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="filter-modal-title"
-            className="absolute left-0 right-0 bottom-0 sm:left-auto sm:top-0 sm:bottom-0 w-full sm:max-w-sm sm:h-full max-h-[90dvh] sm:max-h-none bg-[#0f0f15] border-t sm:border-t-0 sm:border-l border-white/10 shadow-2xl flex flex-col rounded-t-3xl sm:rounded-none"
+            className="absolute left-0 right-0 bottom-0 md:left-auto md:top-0 md:bottom-0 w-full md:max-w-sm md:h-full max-h-[90dvh] md:max-h-none bg-[#0f0f15] border-t md:border-t-0 md:border-l border-white/10 shadow-2xl flex flex-col rounded-t-3xl md:rounded-none"
             {...dragHandlers}
           >
-            <div className="w-12 h-1.5 rounded-full bg-white/30 mt-3 mx-auto sm:hidden" aria-hidden="true" />
+            <div className="w-12 h-1.5 rounded-full bg-white/30 mt-3 mx-auto md:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between p-5 pb-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
                 <h2 id="filter-modal-title" className="font-bold text-2xl tracking-tight">{t('filters.title')}</h2>

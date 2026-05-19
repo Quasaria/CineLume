@@ -148,7 +148,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -166,14 +166,18 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="movie-modal-title"
-            className="relative w-full max-w-4xl max-h-[92dvh] sm:max-h-[85vh] bg-[#0f0f15] sm:rounded-3xl rounded-t-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col"
+            className="relative w-full max-w-4xl max-h-[92dvh] md:max-h-[85vh] bg-[#0f0f15] md:rounded-3xl rounded-t-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col"
             {...dragHandlers}
           >
             <button
               type="button"
               onClick={closeModal}
               aria-label={t('modal.close')}
-              className="absolute top-5 right-5 sm:top-5 sm:right-5 z-50 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30"
+              style={{
+                top: 'max(1.25rem, env(safe-area-inset-top))',
+                right: 'max(1.25rem, env(safe-area-inset-right))',
+              }}
+              className="absolute z-50 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30"
             >
               <X className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
@@ -182,7 +186,13 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                 liste actuelle (sinon on ne sait pas dans quoi naviguer).
                 Position top-left, en miroir du bouton X a top-right. */}
             {currentIndex >= 0 && (
-              <div className="absolute top-5 left-5 z-50 flex items-center gap-1">
+              <div
+                style={{
+                  top: 'max(1.25rem, env(safe-area-inset-top))',
+                  left: 'max(1.25rem, env(safe-area-inset-left))',
+                }}
+                className="absolute z-50 flex items-center gap-1"
+              >
                 <button
                   type="button"
                   onClick={goPrev}
@@ -204,7 +214,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
               </div>
             )}
 
-            <div className="w-12 h-1.5 rounded-full bg-white/40 absolute top-2.5 left-1/2 -translate-x-1/2 sm:hidden z-50" aria-hidden="true" />
+            <div className="w-12 h-1.5 rounded-full bg-white/40 absolute top-2.5 left-1/2 -translate-x-1/2 md:hidden z-50" aria-hidden="true" />
 
             <div ref={contentRef} className="overflow-y-auto flex-1 custom-scroll overscroll-contain">
               {isLoading ? (
@@ -540,7 +550,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
 
             {/* Sticky action bar mobile : Bande-annonce + Favori + Partager */}
             {movie && (
-              <div className="sm:hidden border-t border-white/10 bg-[#0f0f15]/95 backdrop-blur-md px-4 py-3 flex items-center gap-2 safe-pb shrink-0">
+              <div className="md:hidden border-t border-white/10 bg-[#0f0f15]/95 backdrop-blur-md px-4 py-3 flex items-center gap-2 safe-pb shrink-0">
                 {(() => {
                   const yt = movie.videos?.results ?? [];
                   const video =

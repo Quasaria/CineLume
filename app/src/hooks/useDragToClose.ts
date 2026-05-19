@@ -11,7 +11,7 @@ export function useDragToClose({
   onClose,
   contentRef,
   threshold = 100,
-  disabledWidth = 640,
+  disabledWidth = 768,
 }: UseDragToCloseOptions) {
   const [touchY, setTouchY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);

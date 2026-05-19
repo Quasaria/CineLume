@@ -81,7 +81,7 @@ export function ListsModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -98,10 +98,10 @@ export function ListsModal() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="lists-modal-title"
-            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl px-5 pt-3 pb-6 sm:p-6 max-w-lg w-full max-h-[90dvh] sm:max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
+            className="relative bg-[#0f0f15] rounded-t-3xl md:rounded-3xl px-5 pt-3 pb-6 md:p-6 max-w-lg w-full max-h-[90dvh] md:max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
             {...dragHandlers}
           >
-            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 sm:hidden" aria-hidden="true" />
+            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 md:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between mb-4">
               <h3 id="lists-modal-title" className="font-bold text-2xl tracking-tight flex items-center gap-2.5">
                 <Folder className="w-6 h-6 text-violet-400" aria-hidden="true" />
@@ -144,7 +144,7 @@ export function ListsModal() {
                     type="submit"
                     disabled={!newName.trim()}
                     aria-label={t('lists.create')}
-                    className="min-w-9 min-h-9 flex items-center justify-center rounded-lg bg-violet-500 hover:bg-violet-600 active:bg-violet-700 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg bg-violet-500 hover:bg-violet-600 active:bg-violet-700 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
                     <Check className="w-4 h-4" aria-hidden="true" />
                   </button>
@@ -152,7 +152,7 @@ export function ListsModal() {
                     type="button"
                     onClick={() => { setCreating(false); setNewName(''); }}
                     aria-label={t('common.cancel')}
-                    className="min-w-9 min-h-9 flex items-center justify-center rounded-lg text-white/60 hover:bg-white/5 transition-colors"
+                    className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/60 hover:bg-white/5 transition-colors"
                   >
                     <X className="w-4 h-4" aria-hidden="true" />
                   </button>
@@ -246,7 +246,7 @@ function ListCard({
               type="submit"
               disabled={!editingName.trim()}
               aria-label={t('lists.saveName')}
-              className="min-w-8 min-h-8 flex items-center justify-center rounded-lg bg-violet-500 hover:bg-violet-600 text-white disabled:opacity-30 transition-colors"
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg bg-violet-500 hover:bg-violet-600 text-white disabled:opacity-30 transition-colors"
             >
               <Check className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
@@ -254,7 +254,7 @@ function ListCard({
               type="button"
               onClick={onCancelEdit}
               aria-label={t('common.cancel')}
-              className="min-w-8 min-h-8 flex items-center justify-center rounded-lg text-white/60 hover:bg-white/5 transition-colors"
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/60 hover:bg-white/5 transition-colors"
             >
               <X className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
@@ -281,7 +281,7 @@ function ListCard({
               type="button"
               onClick={onStartEdit}
               aria-label={t('lists.renameAria', { name: list.name })}
-              className="min-w-9 min-h-9 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors"
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors"
             >
               <Edit3 className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
@@ -289,7 +289,7 @@ function ListCard({
               type="button"
               onClick={onDelete}
               aria-label={t('lists.deleteAria', { name: list.name })}
-              className="min-w-9 min-h-9 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
@@ -363,9 +363,9 @@ function ListFilmCard({ film, onOpen, onRemove, removeLabel }: ListFilmCardProps
         type="button"
         onClick={onRemove}
         aria-label={removeLabel}
-        className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center rounded-full bg-black/70 text-white/80 hover:bg-red-500/80 hover:text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all"
+        className="absolute top-0.5 right-0.5 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full bg-black/75 text-white hover:bg-red-500/90 active:bg-red-500 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-all"
       >
-        <X className="w-3 h-3" aria-hidden="true" />
+        <X className="w-3.5 h-3.5" aria-hidden="true" />
       </button>
       <p className="text-[10px] text-white/60 truncate mt-1 w-[80px]">{film.title}</p>
     </div>
