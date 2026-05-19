@@ -101,6 +101,7 @@
     "calendarTitle": "Sortie cinéma : {{title}}",
     "calendarDesc": "Sortie en salles{{region}}",
     "calendarDownloaded": "Événement calendrier téléchargé",
+    "viewOnLetterboxd": "Voir sur Letterboxd",
     "status": {
       "Released": "Sorti",
       "Upcoming": "À venir",
@@ -185,7 +186,21 @@
     "installApp": "Installer l'application",
     "installAppDesc": "Accès rapide depuis l'écran d'accueil",
     "install": "Installer",
-    "installed": "Application installée"
+    "installed": "Application installée",
+    "lbDesc": "Importer/exporter ta watchlist au format CSV",
+    "lbImport": "Importer",
+    "lbExport": "Exporter",
+    "lbImporting": "Import en cours...",
+    "lbImportProgress": "Import Letterboxd {{current}}/{{total}}",
+    "lbImportDone_one": "{{added}} film importé · {{skipped}} ignoré",
+    "lbImportDone_other": "{{added}} films importés · {{skipped}} ignorés",
+    "lbImportEmpty": "Fichier CSV vide ou non reconnu",
+    "lbImportReadError": "Impossible de lire le fichier",
+    "lbImportError": "L'import a échoué",
+    "lbExportDone_one": "{{count}} film exporté",
+    "lbExportDone_other": "{{count}} films exportés",
+    "lbExportEmpty": "Aucun film à exporter",
+    "lbHint": "Récupère ton fichier CSV depuis Letterboxd : Settings → Import & Export. L'import matche les titres avec TMDB et les ajoute à ta watchlist."
   },
   "notifications": {
     "singleTitle": "{{title}} sort cette semaine",

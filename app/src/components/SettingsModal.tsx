@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Trash2, Globe, Bell, Download } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Save, Trash2, Globe, Bell, Download, Upload, FileDown } from 'lucide-react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -13,6 +13,7 @@ import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { invalidateApiKeyCache } from '@/lib/tmdb';
+import { parseLetterboxdCSV, importFromLetterboxd, exportToLetterboxdCSV } from '@/lib/letterboxd';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -28,8 +29,10 @@ export function SettingsModal() {
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported',
   );
+  const [importing, setImporting] = useState(false);
   const queryClient = useQueryClient();
   const contentRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeSettings, contentRef });
   const { canInstall, isInstalled, install } = useInstallPrompt();
   useBodyScrollLock(isSettingsOpen);
@@ -88,6 +91,85 @@ export function SettingsModal() {
       toast.success(t('settings.installed'));
       closeSettings();
     }
+  }
+
+  async function handleLetterboxdImport(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // reset l'input pour permettre de re-uploader le meme fichier
+    if (!file) return;
+
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      toast.error(t('settings.lbImportReadError'));
+      return;
+    }
+
+    const rows = parseLetterboxdCSV(text);
+    if (rows.length === 0) {
+      toast.error(t('settings.lbImportEmpty'));
+      return;
+    }
+
+    setImporting(true);
+    const toastId = 'letterboxd-import';
+    toast.loading(t('settings.lbImportProgress', { current: 0, total: rows.length }), { id: toastId });
+
+    try {
+      const result = await importFromLetterboxd(rows, {
+        onProgress: (current, total) => {
+          toast.loading(t('settings.lbImportProgress', { current, total }), { id: toastId });
+        },
+      });
+
+      // Merge dans la watchlist en evitant les doublons par tmdb id
+      const existing = useAppStore.getState().watchlist;
+      const existingIds = new Set(existing.map((f) => f.id));
+      const newOnes = result.imported.filter((m) => !existingIds.has(m.id));
+      const merged = [...existing, ...newOnes];
+      try {
+        localStorage.setItem('cinelume_watchlist', JSON.stringify(merged));
+      } catch {
+        // ignore quota
+      }
+      useAppStore.setState({ watchlist: merged });
+
+      toast.success(
+        t('settings.lbImportDone', { added: newOnes.length, skipped: result.skipped.length }),
+        { id: toastId, duration: 6000 },
+      );
+    } catch {
+      toast.error(t('settings.lbImportError'), { id: toastId });
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  function handleLetterboxdExport() {
+    const watchlist = useAppStore.getState().watchlist;
+    const favorites = useAppStore.getState().favorites;
+    const seen = new Set<number>();
+    const merged = [...watchlist, ...favorites].filter((f) => {
+      if (seen.has(f.id)) return false;
+      seen.add(f.id);
+      return true;
+    });
+    if (merged.length === 0) {
+      toast.error(t('settings.lbExportEmpty'));
+      return;
+    }
+    const csv = exportToLetterboxdCSV(merged);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cinelume-letterboxd-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 200);
+    toast.success(t('settings.lbExportDone', { count: merged.length }));
   }
 
   function save() {
@@ -259,6 +341,48 @@ export function SettingsModal() {
                   </button>
                 </div>
               )}
+
+              <div className="py-3 border-t border-white/5">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="flex items-center gap-0.5 shrink-0" aria-hidden="true">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">Letterboxd</p>
+                    <p className="text-xs text-white/50">{t('settings.lbDesc')}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-wrap mt-3">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={handleLetterboxdImport}
+                    className="hidden"
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    disabled={importing}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs font-semibold transition-colors border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <Upload className="w-3.5 h-3.5" aria-hidden="true" />
+                    {importing ? t('settings.lbImporting') : t('settings.lbImport')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLetterboxdExport}
+                    className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs font-semibold transition-colors border border-white/10"
+                  >
+                    <FileDown className="w-3.5 h-3.5" aria-hidden="true" />
+                    {t('settings.lbExport')}
+                  </button>
+                </div>
+                <p className="text-[11px] text-white/40 mt-2 leading-snug">{t('settings.lbHint')}</p>
+              </div>
 
               <div className="flex items-center justify-between py-3 border-t border-white/5">
                 <div>
