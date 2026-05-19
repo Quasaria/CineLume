@@ -82,9 +82,11 @@ export function DateNavigator() {
         WebkitBackdropFilter: 'blur(24px)',
       }}
     >
-      {/* MOBILE : option B simple. Ligne 1 = chevrons + Mois Annee + actions.
-          Ligne 2 = semaines toujours visibles, distribuees sur toute la largeur. */}
-      <div className="sm:hidden">
+      {/* MOBILE + TABLETTE PORTRAIT (< md:768) : option B compacte.
+          Ligne 1 = chevrons + Mois Annee + actions. Ligne 2 = semaines
+          toujours visibles. Le layout inline desktop (annee+mois+semaines
+          tous cote-a-cote) ne tient pas confortablement sous 1024px. */}
+      <div className="md:hidden">
         <div className="flex items-center gap-1 mb-2">
           <motion.button
             type="button"
@@ -92,7 +94,7 @@ export function DateNavigator() {
             whileTap={{ scale: 0.9 }}
             onClick={goPrevMonth}
             disabled={!canPrevMonth}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors min-w-10 min-h-10 flex items-center justify-center disabled:opacity-25"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors min-w-11 min-h-11 flex items-center justify-center disabled:opacity-25"
           >
             <ChevronLeft className="w-4 h-4 text-white/80" aria-hidden="true" />
           </motion.button>
@@ -107,7 +109,7 @@ export function DateNavigator() {
             whileTap={{ scale: 0.9 }}
             onClick={goNextMonth}
             disabled={!canNextMonth}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors min-w-10 min-h-10 flex items-center justify-center disabled:opacity-25"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors min-w-11 min-h-11 flex items-center justify-center disabled:opacity-25"
           >
             <ChevronRight className="w-4 h-4 text-white/80" aria-hidden="true" />
           </motion.button>
@@ -118,7 +120,7 @@ export function DateNavigator() {
               whileTap={{ scale: 0.95 }}
               onClick={openFilters}
               aria-label={t('grid.filters')}
-              className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white transition-colors border border-white/10 flex items-center min-w-10 min-h-10 justify-center"
+              className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white transition-colors border border-white/10 flex items-center min-w-11 min-h-11 justify-center"
             >
               <Filter className="w-4 h-4" aria-hidden="true" />
               {hasActiveFilter && (
@@ -131,7 +133,7 @@ export function DateNavigator() {
               whileTap={{ scale: 0.95 }}
               onClick={jumpToToday}
               aria-label={t('common.today')}
-              className="p-2 rounded-lg bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 active:bg-violet-500/25 transition-colors border border-violet-500/30 flex items-center min-w-10 min-h-10 justify-center"
+              className="p-2 rounded-lg bg-violet-500/10 text-violet-300 hover:bg-violet-500/20 active:bg-violet-500/25 transition-colors border border-violet-500/30 flex items-center min-w-11 min-h-11 justify-center"
             >
               <Calendar className="w-4 h-4" aria-hidden="true" />
             </motion.button>
@@ -145,7 +147,7 @@ export function DateNavigator() {
                 key={w}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setDate(selYear, selMonth, w)}
-                className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold transition-all min-h-10 ${
+                className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold transition-all min-h-11 ${
                   w === selWeek
                     ? 'bg-violet-500/25 text-white border border-violet-500/50 shadow-md shadow-violet-500/20'
                     : 'bg-white/[0.04] text-white/70 border border-white/[0.08] hover:text-white hover:bg-white/[0.07] active:bg-white/10'
@@ -158,9 +160,9 @@ export function DateNavigator() {
         )}
       </div>
 
-      {/* DESKTOP : layout inline complet avec annee nav, mois scrollables,
-          semaines scrollables, actions a droite. */}
-      <div className="hidden sm:flex items-center gap-3">
+      {/* DESKTOP (md:768+) : layout inline complet avec annee nav, mois
+          scrollables, semaines visibles a droite, actions tout a droite. */}
+      <div className="hidden md:flex items-center gap-3">
         <div className="flex items-center gap-3 shrink-0">
           <motion.button
             type="button"

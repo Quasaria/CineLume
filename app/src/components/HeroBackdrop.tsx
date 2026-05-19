@@ -35,7 +35,7 @@ export function HeroBackdrop({ backdrops = [] }: HeroBackdropProps) {
   return (
     <div
       aria-hidden="true"
-      className="absolute top-0 left-0 right-0 h-[340px] sm:h-[600px] overflow-hidden pointer-events-none"
+      className="absolute top-0 left-0 right-0 h-[340px] md:h-[480px] lg:h-[600px] overflow-hidden pointer-events-none"
       style={{ zIndex: 1 }}
     >
       <AnimatePresence mode="popLayout">

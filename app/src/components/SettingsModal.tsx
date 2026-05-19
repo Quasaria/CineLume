@@ -211,7 +211,7 @@ export function SettingsModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -228,14 +228,14 @@ export function SettingsModal() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="settings-modal-title"
-            className="relative bg-[#0f0f15] rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[90dvh] sm:max-h-none overflow-hidden border border-white/10 shadow-2xl flex flex-col"
+            className="relative bg-[#0f0f15] rounded-t-3xl md:rounded-3xl max-w-md w-full max-h-[90dvh] md:max-h-none overflow-hidden border border-white/10 shadow-2xl flex flex-col"
             {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mt-3 sm:hidden shrink-0" aria-hidden="true" />
             {/* Inner scrollable : separe le drag target (panel exterieur) du
                 scroll target (ce div). Sinon le drag-to-close bloque des que
                 l'utilisateur scrolle dans la modale. */}
-            <div ref={contentRef} className="overflow-y-auto overscroll-contain px-5 pt-3 pb-6 sm:p-6 flex-1">
+            <div ref={contentRef} className="overflow-y-auto overscroll-contain px-5 pt-3 pb-6 md:p-6 flex-1">
               <h3 id="settings-modal-title" className="font-bold text-2xl tracking-tight mb-6">{t('settings.title')}</h3>
 
               <div className="space-y-5">

@@ -35,7 +35,7 @@ export function Hero() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="hero-title relative mb-4 sm:mb-10 pt-40 sm:pt-72 z-10"
+      className="hero-title relative mb-4 sm:mb-10 pt-40 md:pt-56 lg:pt-72 z-10"
     >
       {/* Le titre est toujours pose sur le degrade sombre de la backdrop, donc
           on force le blanc en inline pour court-circuiter l'override .text-white
