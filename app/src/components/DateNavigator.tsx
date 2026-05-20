@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Calendar, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Filter, ChevronDown } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 
@@ -16,6 +16,8 @@ export function DateNavigator() {
   const now = new Date();
   const MIN_YEAR = now.getFullYear() - 1;
   const MAX_YEAR = now.getFullYear() + 2;
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
 
   const weeks = getCinemaWeeksOfMonth(selYear, selMonth, selRegion).length;
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
@@ -26,6 +28,13 @@ export function DateNavigator() {
   // smooth de la page entiere des le load alors que l'user n'a rien fait.
   const monthFirstMountRef = useRef(true);
   const weekFirstMountRef = useRef(true);
+
+  // Popover mois/annee sur mobile : tap sur le nom du mois ouvre une grille
+  // de 12 mois + chevrons d'annee. Permet d'aller a n'importe quel mois en
+  // 1-2 taps au lieu d'enchainer les chevrons.
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerYear, setPickerYear] = useState(selYear);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (weeks > 0 && selWeek > weeks) {
@@ -48,6 +57,33 @@ export function DateNavigator() {
     }
     activeWeekRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }, [selWeek]);
+
+  // Synchronise l'annee du picker avec la selection courante quand on
+  // l'ouvre (pas pendant qu'on navigue dans le picker, sinon impossible
+  // de changer d'annee).
+  useEffect(() => {
+    if (pickerOpen) setPickerYear(selYear);
+  }, [pickerOpen, selYear]);
+
+  useEffect(() => {
+    if (!pickerOpen) return;
+    function onDown(e: MouseEvent | TouchEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setPickerOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setPickerOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('touchstart', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('touchstart', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [pickerOpen]);
 
   const canPrevMonth = !(selYear === MIN_YEAR && selMonth === 0);
   const canNextMonth = !(selYear === MAX_YEAR && selMonth === 11);
@@ -83,9 +119,10 @@ export function DateNavigator() {
       }}
     >
       {/* MOBILE + TABLETTE PORTRAIT (< md:768) : option B compacte.
-          Ligne 1 = chevrons + Mois Annee + actions. Ligne 2 = semaines
-          toujours visibles. Le layout inline desktop (annee+mois+semaines
-          tous cote-a-cote) ne tient pas confortablement sous 1024px. */}
+          Ligne 1 = chevrons + Mois Annee tappable + actions. Ligne 2 =
+          semaines. Tap sur le nom du mois ouvre un picker grille 12 mois
+          avec navigation d'annee, pour aller a n'importe quel mois en
+          1-2 taps. */}
       <div className="md:hidden">
         <div className="flex items-center gap-1 mb-2">
           <motion.button
@@ -99,9 +136,100 @@ export function DateNavigator() {
             <ChevronLeft className="w-4 h-4 text-white/80" aria-hidden="true" />
           </motion.button>
 
-          <span className="px-2 font-bold text-base tabular-nums select-none flex-1 text-center" aria-live="polite">
-            {MONTHS_FULL[selMonth]} {selYear}
-          </span>
+          {/* Trigger du picker : occupe le flex-1, ressemble a un bouton
+              chip pour signaler qu'il est interactif. */}
+          <div ref={pickerRef} className="relative flex-1 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setPickerOpen((v) => !v)}
+              aria-haspopup="dialog"
+              aria-expanded={pickerOpen}
+              aria-label={`${MONTHS_FULL[selMonth]} ${selYear}`}
+              className={`min-h-11 px-3 inline-flex items-center gap-1.5 rounded-xl font-bold text-base tabular-nums transition-colors ${
+                pickerOpen
+                  ? 'bg-white/10 text-white'
+                  : 'text-white hover:bg-white/5 active:bg-white/10'
+              }`}
+            >
+              <span>{MONTHS_FULL[selMonth]} {selYear}</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-white/55 transition-transform ${pickerOpen ? 'rotate-180' : ''}`}
+                aria-hidden="true"
+              />
+            </button>
+
+            <AnimatePresence>
+              {pickerOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  role="dialog"
+                  aria-label={t('common.today')}
+                  className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-40 rounded-2xl border border-white/10 shadow-2xl shadow-black/40 p-3"
+                  style={{
+                    // Sur les screens <320px, clamp pour ne pas overflow.
+                    width: 'min(280px, calc(100vw - 32px))',
+                    backgroundColor: 'color-mix(in srgb, var(--surface) 98%, transparent)',
+                    backdropFilter: 'blur(20px) saturate(140%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+                  }}
+                >
+                  {/* Nav annee */}
+                  <div className="flex items-center justify-between mb-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setPickerYear((y) => Math.max(MIN_YEAR, y - 1))}
+                      disabled={pickerYear <= MIN_YEAR}
+                      aria-label={t('dateNav.prevYear')}
+                      className="min-w-9 min-h-9 flex items-center justify-center rounded-lg hover:bg-white/5 active:bg-white/10 text-white/75 disabled:opacity-25"
+                    >
+                      <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                    <span className="font-bold text-base tabular-nums text-white" aria-live="polite">{pickerYear}</span>
+                    <button
+                      type="button"
+                      onClick={() => setPickerYear((y) => Math.min(MAX_YEAR, y + 1))}
+                      disabled={pickerYear >= MAX_YEAR}
+                      aria-label={t('dateNav.nextYear')}
+                      className="min-w-9 min-h-9 flex items-center justify-center rounded-lg hover:bg-white/5 active:bg-white/10 text-white/75 disabled:opacity-25"
+                    >
+                      <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  {/* Grille des 12 mois */}
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {MONTHS.map((m, i) => {
+                      const isSelected = i === selMonth && pickerYear === selYear;
+                      const isToday = i === currentMonth && pickerYear === currentYear;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            setDate(pickerYear, i, 1);
+                            setPickerOpen(false);
+                          }}
+                          className={`min-h-11 rounded-lg text-sm font-semibold transition-colors relative ${
+                            isSelected
+                              ? 'bg-violet-500/25 text-white border border-violet-500/50'
+                              : 'bg-white/[0.04] text-white/80 hover:bg-white/[0.08] active:bg-white/10 border border-transparent'
+                          }`}
+                        >
+                          {m}
+                          {isToday && !isSelected && (
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-violet-400" aria-hidden="true" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <motion.button
             type="button"
@@ -141,13 +269,14 @@ export function DateNavigator() {
         </div>
 
         {weeks > 0 && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center gap-1.5">
             {Array.from({ length: weeks }, (_, i) => i + 1).map((w) => (
               <motion.button
                 key={w}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setDate(selYear, selMonth, w)}
-                className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold transition-all min-h-11 ${
+                aria-pressed={w === selWeek}
+                className={`min-w-[52px] px-3 py-2 rounded-lg text-sm font-semibold transition-all min-h-11 ${
                   w === selWeek
                     ? 'bg-violet-500/25 text-white border border-violet-500/50 shadow-md shadow-violet-500/20'
                     : 'bg-white/[0.04] text-white/70 border border-white/[0.08] hover:text-white hover:bg-white/[0.07] active:bg-white/10'
