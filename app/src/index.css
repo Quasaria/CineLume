@@ -747,8 +747,23 @@ html.light .text-amber-300\/80 { color: #b45309; }
 
 html.light .bg-fuchsia-500\/10 { background-color: rgba(217, 70, 239, 0.08); }
 html.light .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.08); }
-html.light .bg-cyan-500\/10 { background-color: rgba(6, 182, 212, 0.08); }
+/* bg-cyan-500/10 deja defini ligne ~428 (rgba 8/145/178), pas redefini ici */
 
 html.light .border-fuchsia-500\/20 { border-color: rgba(217, 70, 239, 0.3); }
 html.light .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.3); }
 html.light .border-cyan-500\/20 { border-color: rgba(6, 182, 212, 0.3); }
+
+/* Rouge en light mode : tabs Favoris dans CollectionsModal + boutons
+   delete + remove. Sans override, le rouge sur fond clair tire vers le
+   blanc et devient invisible. */
+html.light .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.1); }
+html.light .bg-red-500\/15 { background-color: rgba(220, 38, 38, 0.13); }
+html.light .bg-red-500\/20 { background-color: rgba(220, 38, 38, 0.16); }
+html.light .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.4); }
+html.light .text-red-300 { color: #b91c1c; }
+html.light .text-red-400 { color: #b91c1c; }
+
+/* Highlight mark sur les titres en recherche : violet/30 + texte
+   blanc invisible sur fond clair. Override en violet plus saturé +
+   texte sombre. */
+html.light mark { background-color: rgba(124, 58, 237, 0.2); color: #1e1b4b; }

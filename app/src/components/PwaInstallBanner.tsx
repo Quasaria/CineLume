@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Download, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import { useAppStore } from '@/store/appStore';
 
 const VISITS_KEY = 'cinelume_visits';
 const DISMISSED_KEY = 'cinelume_pwa_banner_dismissed_at';
@@ -33,6 +34,12 @@ function getStoredNumber(key: string, fallback: number): number {
 export function PwaInstallBanner() {
   const { t } = useTranslation();
   const { canInstall, isInstalled, install } = useInstallPrompt();
+  // Cache la banner quand une modale est ouverte : sinon elle se voit
+  // pour ne servir a rien (les modales sont z-[60], banner z-40).
+  const anyModalOpen = useAppStore((s) =>
+    s.currentModalMovieId !== null || s.isFilterOpen || s.isFavOpen || s.isListsOpen ||
+    s.isSettingsOpen || s.isPickerOpen || s.isSwipeOpen
+  );
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -81,7 +88,7 @@ export function PwaInstallBanner() {
 
   return (
     <AnimatePresence>
-      {visible && canInstall && !isInstalled && (
+      {visible && canInstall && !isInstalled && !anyModalOpen && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

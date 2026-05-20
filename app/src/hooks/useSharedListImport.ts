@@ -19,7 +19,8 @@ export function useSharedListImport() {
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (!hash.startsWith('#share/')) return;
+    // Accepte les 2 formats (#share/ pre-fix et #/share/ post-fix HashRouter).
+    if (!hash.startsWith('#share/') && !hash.startsWith('#/share/')) return;
     if (processedRef.current === hash) return;
     processedRef.current = hash;
 

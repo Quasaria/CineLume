@@ -43,14 +43,16 @@ export function encodeSharedList(list: CustomList): string {
   };
   const encoded = base64UrlEncode(JSON.stringify(payload));
   // origin + pathname pour conserver le base url de l'app (gh pages).
+  // Format avec slash apres # pour rester compatible HashRouter.
   const base = `${window.location.origin}${window.location.pathname}`;
-  return `${base}#share/${encoded}`;
+  return `${base}#/share/${encoded}`;
 }
 
 export function decodeSharedList(hash: string): SharedList | null {
-  // Accepte aussi un prefixe '#' ou '#share/' devant.
+  // Accepte les anciens (#share/) et nouveaux (#/share/) formats.
   let raw = hash;
   if (raw.startsWith('#')) raw = raw.slice(1);
+  if (raw.startsWith('/')) raw = raw.slice(1);
   if (raw.startsWith('share/')) raw = raw.slice('share/'.length);
   if (!raw) return null;
   try {

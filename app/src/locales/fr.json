@@ -68,6 +68,7 @@
     "swipeRight": "J'aime",
     "swipeLeft": "Passer",
     "undo": "Annuler le dernier swipe",
+    "undoAlreadyIn": "Ce film était déjà dans ta liste",
     "details": "Défile pour les détails ↓",
     "end": "C'est tout !",
     "endHint": "Tu as parcouru tous les films. Choisis une autre source pour continuer.",

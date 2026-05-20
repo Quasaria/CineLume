@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Heart, Calendar, Bookmark, Star, Info, ChevronDown, RotateCcw, Undo2, X as XIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { discoverMovies, getMovieDetails, IMG, posterSrcSet } from '@/lib/tmdb';
@@ -164,11 +165,18 @@ export function SwipeMode() {
   function undoLastSwipe() {
     if (history.length === 0) return;
     const last = history[history.length - 1];
-    if (last.direction === 'right' && last.wasAdded) {
-      // Retire silencieusement (pas de toast) le film qu'on avait ajoute
-      // au swipe precedent. removeFromWatchlist ne notifie pas, contrairement
-      // a toggleWatchlist.
-      if (isInWatchlist(last.id)) removeFromWatchlist(last.id);
+    if (last.direction === 'right') {
+      if (last.wasAdded && isInWatchlist(last.id)) {
+        // Retire silencieusement (pas de toast) le film qu'on avait ajoute
+        // au swipe precedent.
+        removeFromWatchlist(last.id);
+      } else {
+        // Le film etait deja dans la watchlist avant le swipe : on ne le
+        // retire pas (sinon on toucherait a un ajout user explicite anterieur).
+        // On affiche un hint pour ne pas laisser l'user penser que rien n'a
+        // bouge.
+        toast.info(t('swipe.undoAlreadyIn'), { duration: 2500 });
+      }
     } else if (last.direction === 'left') {
       setSkipped((prev) => {
         const next = new Set(prev);
