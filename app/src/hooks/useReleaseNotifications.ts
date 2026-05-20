@@ -36,8 +36,20 @@ export function useReleaseNotifications() {
     if (hasRunRef.current) return;
     hasRunRef.current = true;
 
-    const { favorites, openFavorites } = useAppStore.getState();
+    const { favorites, openFavorites, notifQuietFrom, notifQuietTo } = useAppStore.getState();
     if (favorites.length === 0) return;
+
+    // Heures de calme : si l'heure actuelle est dans la plage [from..to[,
+    // on ne notifie pas. Supporte les plages qui chevauchent minuit
+    // (ex: 22h-8h => from=1320, to=480).
+    if (notifQuietFrom !== null && notifQuietTo !== null && notifQuietFrom !== notifQuietTo) {
+      const now = new Date();
+      const minute = now.getHours() * 60 + now.getMinutes();
+      const inQuiet = notifQuietFrom < notifQuietTo
+        ? minute >= notifQuietFrom && minute < notifQuietTo
+        : minute >= notifQuietFrom || minute < notifQuietTo;
+      if (inQuiet) return;
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);

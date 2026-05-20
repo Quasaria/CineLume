@@ -13,6 +13,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useReleaseNotifications } from '@/hooks/useReleaseNotifications';
+import { useSharedListImport } from '@/hooks/useSharedListImport';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { HeroBackdrop } from '@/components/HeroBackdrop';
@@ -22,6 +23,7 @@ import { PersonStrip } from '@/components/PersonStrip';
 import { PersonHeader } from '@/components/PersonHeader';
 import { FavoritesStrip } from '@/components/FavoritesStrip';
 import { Footer } from '@/components/Footer';
+import { PwaInstallBanner } from '@/components/PwaInstallBanner';
 import { Toaster } from '@/components/ui/sonner';
 import type { Movie } from '@/types/movie';
 
@@ -82,6 +84,7 @@ export default function App() {
 
   useModalUrlSync();
   useReleaseNotifications();
+  useSharedListImport();
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
     queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, sortBy, runtimeMax, lang],
@@ -373,6 +376,8 @@ export default function App() {
         </main>
 
         <Footer />
+
+        <PwaInstallBanner />
 
         <Suspense fallback={null}>
           <FilterDrawer />

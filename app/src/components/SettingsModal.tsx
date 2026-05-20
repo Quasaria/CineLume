@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Trash2, Globe, Bell, Download, Upload, FileDown, Palette, Database, BarChart3, Sparkles, ChevronDown } from 'lucide-react';
+import { Save, Trash2, Globe, Bell, Download, Upload, FileDown, Palette, Database, BarChart3, Sparkles, ChevronDown, X } from 'lucide-react';
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,7 @@ import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { invalidateApiKeyCache } from '@/lib/tmdb';
 import { parseLetterboxdCSV, importFromLetterboxd, exportToLetterboxdCSV } from '@/lib/letterboxd';
 import { computeUserStats } from '@/lib/userStats';
+import { computeCacheStats, formatBytes } from '@/lib/cacheStats';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -79,6 +80,9 @@ export function SettingsModal() {
   const favorites = useAppStore((s) => s.favorites);
   const watchlist = useAppStore((s) => s.watchlist);
   const customLists = useAppStore((s) => s.customLists);
+  const notifQuietFrom = useAppStore((s) => s.notifQuietFrom);
+  const notifQuietTo = useAppStore((s) => s.notifQuietTo);
+  const setNotifQuiet = useAppStore((s) => s.setNotifQuiet);
 
   const [apiKey, setApiKey] = useState('');
   const [apiKeyExpanded, setApiKeyExpanded] = useState(false);
@@ -86,6 +90,7 @@ export function SettingsModal() {
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported',
   );
   const [importing, setImporting] = useState(false);
+  const [importReport, setImportReport] = useState<Array<{ name: string; reason: 'no-match' | 'error' }>>([]);
   const queryClient = useQueryClient();
   const contentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +102,7 @@ export function SettingsModal() {
 
   const currentLang = (i18n.language || 'fr').split('-')[0] as SupportedLang;
   const stats = computeUserStats(favorites, watchlist, customLists);
+  const [cacheStatsState, setCacheStatsState] = useState({ bytes: 0, entries: 0 });
 
   useEffect(() => {
     if (isSettingsOpen) {
@@ -104,6 +110,7 @@ export function SettingsModal() {
       if (typeof Notification !== 'undefined') {
         setNotifPermission(Notification.permission);
       }
+      setCacheStatsState(computeCacheStats());
     } else {
       setApiKeyExpanded(false);
     }
@@ -171,12 +178,12 @@ export function SettingsModal() {
 
     setImporting(true);
     const toastId = 'letterboxd-import';
-    toast.loading(t('settings.lbImportProgress', { current: 0, total: rows.length }), { id: toastId });
+    toast.loading(t('settings.lbImportProgress', { current: 0, total: rows.length, title: rows[0]?.name || '' }), { id: toastId });
 
     try {
       const result = await importFromLetterboxd(rows, {
-        onProgress: (current, total) => {
-          toast.loading(t('settings.lbImportProgress', { current, total }), { id: toastId });
+        onProgress: (current, total, currentTitle) => {
+          toast.loading(t('settings.lbImportProgress', { current, total, title: currentTitle }), { id: toastId });
         },
       });
 
@@ -191,6 +198,10 @@ export function SettingsModal() {
       }
       useAppStore.setState({ watchlist: merged });
 
+      // Affiche un report detaille avec les skipped si la liste est petite,
+      // sinon juste un compteur. L'user peut consulter le report en
+      // memoire (state) tant que la modale est ouverte.
+      setImportReport(result.skipped);
       toast.success(
         t('settings.lbImportDone', { added: newOnes.length, skipped: result.skipped.length }),
         { id: toastId, duration: 6000 },
@@ -250,6 +261,7 @@ export function SettingsModal() {
       }
     });
     queryClient.invalidateQueries();
+    setCacheStatsState({ bytes: 0, entries: 0 });
     toast.success(removed > 0 ? t('settings.cacheCleared', { count: removed }) : t('settings.cacheEmpty'));
   }
 
@@ -364,6 +376,14 @@ export function SettingsModal() {
                       </button>
                     }
                   />
+                  {notifPermission === 'granted' && (
+                    <QuietHoursRow
+                      from={notifQuietFrom}
+                      to={notifQuietTo}
+                      onChange={setNotifQuiet}
+                      t={t}
+                    />
+                  )}
                 </SectionCard>
 
                 {/* Mes statistiques */}
@@ -414,9 +434,43 @@ export function SettingsModal() {
                       {t('settings.lbExport')}
                     </button>
                   </div>
+
+                  {/* Rapport detaille : films skippes apres un import. Liste
+                      scrollable, max 200px. Marquage de la raison (no-match
+                      vs erreur) pour aider l'user a comprendre. */}
+                  {importReport.length > 0 && (
+                    <div className="mt-2 rounded-lg bg-amber-500/[0.06] border border-amber-500/20 p-2.5">
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <p className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                          {t('settings.lbReportSkipped', { count: importReport.length })}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setImportReport([])}
+                          aria-label={t('common.close')}
+                          className="text-amber-300/70 hover:text-amber-300 text-xs"
+                        >
+                          <X className="w-3 h-3" aria-hidden="true" />
+                        </button>
+                      </div>
+                      <ul className="max-h-[200px] overflow-y-auto space-y-0.5 -mr-1 pr-1">
+                        {importReport.map((s, i) => (
+                          <li key={i} className="flex items-start gap-1.5 text-[11px] leading-tight">
+                            <span className={`shrink-0 text-[9px] uppercase tracking-wider font-bold mt-0.5 ${s.reason === 'no-match' ? 'text-amber-400/80' : 'text-red-400/80'}`}>
+                              {s.reason === 'no-match' ? t('settings.lbReportNoMatch') : t('settings.lbReportError')}
+                            </span>
+                            <span className="text-white/75 truncate">{s.name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   <SettingRow
                     label={t('settings.clearCache')}
-                    description={t('settings.clearCacheDesc')}
+                    description={cacheStatsState.entries > 0
+                      ? t('settings.cacheSize', { size: formatBytes(cacheStatsState.bytes) })
+                      : t('settings.clearCacheDesc')}
                     right={
                       <button
                         type="button"
@@ -492,5 +546,83 @@ export function SettingsModal() {
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+
+function pad2(n: number) { return n.toString().padStart(2, "0"); }
+function minToTimeStr(m: number) { return `${pad2(Math.floor(m / 60))}:${pad2(m % 60)}`; }
+function timeStrToMin(s: string): number | null {
+  const m = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  const h = parseInt(m[1], 10);
+  const min = parseInt(m[2], 10);
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return h * 60 + min;
+}
+
+interface QuietHoursRowProps {
+  from: number | null;
+  to: number | null;
+  onChange: (from: number | null, to: number | null) => void;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}
+
+function QuietHoursRow({ from, to, onChange, t }: QuietHoursRowProps) {
+  const active = from !== null && to !== null && from !== to;
+  const fromStr = from !== null ? minToTimeStr(from) : "22:00";
+  const toStr = to !== null ? minToTimeStr(to) : "08:00";
+  return (
+    <div className="border-t border-white/[0.06] mt-1 pt-2 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-white">{t("settings.notifQuiet")}</p>
+          <p className="text-xs text-white/50 leading-tight">{t("settings.notifQuietDesc")}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (active) onChange(null, null);
+            else onChange(22 * 60, 8 * 60);
+          }}
+          aria-pressed={active}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+            active
+              ? "bg-violet-500/15 text-violet-300 border border-violet-500/30"
+              : "bg-white/5 text-white/55 border border-white/10 hover:bg-white/10"
+          }`}
+        >
+          {active ? t("settings.notificationsOn") : t("settings.notifQuietOff")}
+        </button>
+      </div>
+      {active && (
+        <div className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-1.5 text-white/70">
+            <span className="text-xs text-white/45">{t("settings.notifQuietFrom")}</span>
+            <input
+              type="time"
+              value={fromStr}
+              onChange={(e) => {
+                const m = timeStrToMin(e.target.value);
+                if (m !== null) onChange(m, to);
+              }}
+              className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            />
+          </label>
+          <label className="flex items-center gap-1.5 text-white/70">
+            <span className="text-xs text-white/45">{t("settings.notifQuietTo")}</span>
+            <input
+              type="time"
+              value={toStr}
+              onChange={(e) => {
+                const m = timeStrToMin(e.target.value);
+                if (m !== null) onChange(from, m);
+              }}
+              className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            />
+          </label>
+        </div>
+      )}
+    </div>
   );
 }
