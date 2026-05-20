@@ -94,4 +94,7 @@ export interface CustomList {
   name: string;
   films: FavoriteMovie[];
   createdAt: number;
+  // Emoji optionnel pour identifier visuellement la liste. Si absent, on
+  // affiche l'icone Folder par defaut.
+  emoji?: string;
 }

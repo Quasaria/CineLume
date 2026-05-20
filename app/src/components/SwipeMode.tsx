@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Heart, Calendar, Bookmark, Star, Info, ChevronDown, RotateCcw, X as XIcon } from 'lucide-react';
+import { ArrowLeft, Heart, Calendar, Bookmark, Star, Info, ChevronDown, RotateCcw, Undo2, X as XIcon } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { discoverMovies, getMovieDetails, IMG, posterSrcSet } from '@/lib/tmdb';
@@ -59,6 +59,7 @@ export function SwipeMode() {
   const watchlist = useAppStore((s) => s.watchlist);
   const favorites = useAppStore((s) => s.favorites);
   const toggleWatchlist = useAppStore((s) => s.toggleWatchlist);
+  const removeFromWatchlist = useAppStore((s) => s.removeFromWatchlist);
   const isInWatchlist = useAppStore((s) => s.isInWatchlist);
   const selYear = useAppStore((s) => s.selYear);
   const selMonth = useAppStore((s) => s.selMonth);
@@ -68,6 +69,10 @@ export function SwipeMode() {
   const [source, setSource] = useState<Source | null>(null);
   const [index, setIndex] = useState(0);
   const [skipped, setSkipped] = useState<Set<number>>(new Set());
+  // Historique des swipes pour le bouton 'annuler'. On stocke l'id et
+  // la direction pour pouvoir revert correctement (retirer de la watchlist
+  // si swipe droite, ou retirer du Set skipped si swipe gauche).
+  const [history, setHistory] = useState<Array<{ id: number; direction: 'left' | 'right'; wasAdded: boolean }>>([]);
 
   useBodyScrollLock(isSwipeOpen);
   useFocusRestore(isSwipeOpen);
@@ -78,6 +83,7 @@ export function SwipeMode() {
     if (isSwipeOpen) {
       setIndex(0);
       setSkipped(new Set());
+      setHistory([]);
     }
   }, [isSwipeOpen, source]);
 
@@ -126,6 +132,7 @@ export function SwipeMode() {
 
   function handleSwipe(direction: 'left' | 'right') {
     if (!current) return;
+    let wasAdded = false;
     if (direction === 'right') {
       if (!isInWatchlist(current.id)) {
         toggleWatchlist({
@@ -137,6 +144,7 @@ export function SwipeMode() {
           overview: current.overview,
           genre_ids: current.genre_ids,
         });
+        wasAdded = true;
       }
     } else {
       setSkipped((prev) => {
@@ -145,7 +153,31 @@ export function SwipeMode() {
         return next;
       });
     }
+    setHistory((h) => [...h, { id: current.id, direction, wasAdded }]);
     setIndex((i) => i + 1);
+  }
+
+  // Annule la derniere action : si l'user a swipe a droite et qu'on avait
+  // ajoute le film a la watchlist, on le retire. S'il a swipe a gauche, on
+  // l'enleve du Set skipped (il revient dans la pile). Decremente l'index
+  // pour repositionner sur cette carte.
+  function undoLastSwipe() {
+    if (history.length === 0) return;
+    const last = history[history.length - 1];
+    if (last.direction === 'right' && last.wasAdded) {
+      // Retire silencieusement (pas de toast) le film qu'on avait ajoute
+      // au swipe precedent. removeFromWatchlist ne notifie pas, contrairement
+      // a toggleWatchlist.
+      if (isInWatchlist(last.id)) removeFromWatchlist(last.id);
+    } else if (last.direction === 'left') {
+      setSkipped((prev) => {
+        const next = new Set(prev);
+        next.delete(last.id);
+        return next;
+      });
+    }
+    setHistory((h) => h.slice(0, -1));
+    setIndex((i) => Math.max(0, i - 1));
   }
 
   // Equivalent clavier du swipe : FlecheGauche = skip, FlecheDroite = like.
@@ -337,14 +369,23 @@ export function SwipeMode() {
 
           {/* Action buttons */}
           {source && current && (
-            <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-[max(env(safe-area-inset-bottom),24px)] pt-3 flex items-center justify-center gap-5 bg-gradient-to-t from-[#0a0a10] to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-[max(env(safe-area-inset-bottom),24px)] pt-3 flex items-center justify-center gap-4 bg-gradient-to-t from-[#0a0a10] to-transparent">
+              <button
+                type="button"
+                onClick={undoLastSwipe}
+                disabled={history.length === 0}
+                aria-label={t('swipe.undo')}
+                className="w-12 h-12 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/15 active:scale-95 transition-all flex items-center justify-center text-white/70 hover:text-amber-300 disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Undo2 className="w-5 h-5" aria-hidden="true" />
+              </button>
               <button
                 type="button"
                 onClick={() => handleSwipe('left')}
                 aria-label={t('swipe.swipeLeft')}
                 className="w-16 h-16 rounded-full bg-white/10 hover:bg-rose-500/30 border border-white/15 active:scale-95 transition-all flex items-center justify-center text-white"
               >
-                <XIcon className="w-7 h-7" />
+                <XIcon className="w-7 h-7" aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -352,7 +393,7 @@ export function SwipeMode() {
                 aria-label={t('swipe.swipeRight')}
                 className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 active:scale-95 transition-all flex items-center justify-center text-white shadow-xl shadow-violet-500/40"
               >
-                <Heart className="w-7 h-7 fill-current" />
+                <Heart className="w-7 h-7 fill-current" aria-hidden="true" />
               </button>
             </div>
           )}

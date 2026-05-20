@@ -7,6 +7,7 @@ import { useAppStore } from '@/store/appStore';
 import { discoverMovies, searchMovies, searchPersons, getMovieReleaseDates, BACK } from '@/lib/tmdb';
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice';
@@ -29,8 +30,7 @@ import type { Movie } from '@/types/movie';
 // plus rapide surtout sur mobile.
 const FilterDrawer = lazy(() => import('@/components/FilterDrawer').then((m) => ({ default: m.FilterDrawer })));
 const MovieModal = lazy(() => import('@/components/MovieModal').then((m) => ({ default: m.MovieModal })));
-const FavoritesModal = lazy(() => import('@/components/FavoritesModal').then((m) => ({ default: m.FavoritesModal })));
-const WatchlistModal = lazy(() => import('@/components/WatchlistModal').then((m) => ({ default: m.WatchlistModal })));
+const CollectionsModal = lazy(() => import('@/components/CollectionsModal').then((m) => ({ default: m.CollectionsModal })));
 const ListsModal = lazy(() => import('@/components/ListsModal').then((m) => ({ default: m.ListsModal })));
 const SettingsModal = lazy(() => import('@/components/SettingsModal').then((m) => ({ default: m.SettingsModal })));
 const PickerModal = lazy(() => import('@/components/PickerModal').then((m) => ({ default: m.PickerModal })));
@@ -66,13 +66,19 @@ export default function App() {
   const currentModalMovieId = useAppStore((s) => s.currentModalMovieId);
   const isFilterOpen = useAppStore((s) => s.isFilterOpen);
   const isFavOpen = useAppStore((s) => s.isFavOpen);
-  const isWatchlistOpen = useAppStore((s) => s.isWatchlistOpen);
   const isListsOpen = useAppStore((s) => s.isListsOpen);
   const isSettingsOpen = useAppStore((s) => s.isSettingsOpen);
   const isPickerOpen = useAppStore((s) => s.isPickerOpen);
   const isSwipeOpen = useAppStore((s) => s.isSwipeOpen);
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
-  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isWatchlistOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen;
+  const { push: pushSearchHistory } = useSearchHistory();
+
+  // Pousse une query dans l'historique des qu'elle se stabilise (debounce
+  // ecoule). Filtre les queries trop courtes via le hook lui-meme.
+  useEffect(() => {
+    if (debouncedSearch && !selectedPerson) pushSearchHistory(debouncedSearch);
+  }, [debouncedSearch, selectedPerson, pushSearchHistory]);
+  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen;
 
   useModalUrlSync();
   useReleaseNotifications();
@@ -238,8 +244,7 @@ export default function App() {
     idle(() => {
       import('@/components/MovieModal');
       import('@/components/FilterDrawer');
-      import('@/components/FavoritesModal');
-      import('@/components/WatchlistModal');
+      import('@/components/CollectionsModal');
       import('@/components/ListsModal');
       import('@/components/SettingsModal');
       import('@/components/PickerModal');
@@ -254,6 +259,7 @@ export default function App() {
         if (store.currentModalMovieId !== null) store.closeModal();
         if (store.isFilterOpen) store.closeFilters();
         if (store.isFavOpen) store.closeFavorites();
+        if (store.isListsOpen) store.closeLists();
         if (store.isSettingsOpen) store.closeSettings();
         if (store.isPickerOpen) store.closePicker();
         if (store.isSwipeOpen) store.closeSwipe();
@@ -371,8 +377,7 @@ export default function App() {
         <Suspense fallback={null}>
           <FilterDrawer />
           <MovieModal movies={movies} />
-          <FavoritesModal />
-          <WatchlistModal />
+          <CollectionsModal />
           <ListsModal />
           <SettingsModal />
           <PickerModal />

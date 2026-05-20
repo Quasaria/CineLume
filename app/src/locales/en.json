@@ -67,6 +67,7 @@
     "start": "Start swiping",
     "swipeRight": "Like",
     "swipeLeft": "Skip",
+    "undo": "Undo last swipe",
     "details": "Scroll for details ↓",
     "end": "That's all!",
     "endHint": "You went through all the movies. Pick another source to keep going.",
@@ -178,6 +179,16 @@
       "5": "Physical release",
       "6": "TV release"
     }
+  },
+  "collections": {
+    "title": "My movies",
+    "tabFavorites": "Favorites",
+    "tabWatchlist": "Watchlist"
+  },
+  "search": {
+    "recent": "Recent",
+    "clearAll": "Clear all",
+    "removeRecent": "Remove \"{{query}}\""
   },
   "favorites": {
     "title": "My favorites",

@@ -33,7 +33,7 @@ interface AppState {
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
   isFavOpen: boolean;
-  isWatchlistOpen: boolean;
+  collectionsTab: 'favorites' | 'watchlist';
   isListsOpen: boolean;
   isSettingsOpen: boolean;
   isPickerOpen: boolean;
@@ -59,6 +59,8 @@ interface AppState {
   isInWatchlist: (id: number) => boolean;
   createList: (name: string) => string;
   renameList: (id: string, name: string) => void;
+  setListEmoji: (id: string, emoji: string | undefined) => void;
+  reorderFilmInList: (listId: string, filmId: number, newIndex: number) => void;
   deleteList: (id: string) => void;
   addFilmToList: (listId: string, film: FavoriteMovie) => void;
   removeFilmFromList: (listId: string, filmId: number) => void;
@@ -71,6 +73,7 @@ interface AppState {
   closeFavorites: () => void;
   openWatchlist: () => void;
   closeWatchlist: () => void;
+  setCollectionsTab: (tab: 'favorites' | 'watchlist') => void;
   openLists: () => void;
   closeLists: () => void;
   openSettings: () => void;
@@ -231,7 +234,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentModalMovieId: null,
   isFilterOpen: false,
   isFavOpen: false,
-  isWatchlistOpen: false,
+  collectionsTab: 'favorites',
   isListsOpen: false,
   isSettingsOpen: false,
   isPickerOpen: false,
@@ -406,6 +409,27 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ customLists: next });
   },
 
+  setListEmoji: (id, emoji) => {
+    const next = get().customLists.map(l => l.id === id ? { ...l, emoji } : l);
+    persistCustomLists(next);
+    set({ customLists: next });
+  },
+
+  reorderFilmInList: (listId, filmId, newIndex) => {
+    const next = get().customLists.map(l => {
+      if (l.id !== listId) return l;
+      const films = [...l.films];
+      const idx = films.findIndex(f => f.id === filmId);
+      if (idx < 0) return l;
+      const [item] = films.splice(idx, 1);
+      const insertAt = Math.max(0, Math.min(newIndex, films.length));
+      films.splice(insertAt, 0, item);
+      return { ...l, films };
+    });
+    persistCustomLists(next);
+    set({ customLists: next });
+  },
+
   deleteList: (id) => {
     const next = get().customLists.filter(l => l.id !== id);
     persistCustomLists(next);
@@ -440,10 +464,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   closeModal: () => set({ currentModalMovieId: null }),
   openFilters: () => set({ isFilterOpen: true }),
   closeFilters: () => set({ isFilterOpen: false }),
-  openFavorites: () => set({ isFavOpen: true }),
+  // Favoris + Watchlist sont maintenant deux onglets d'une meme modale
+  // 'Collections'. On garde 4 actions distinctes pour rester compatible
+  // avec les call sites existants, mais elles ouvrent toutes la meme modale
+  // en choisissant le bon onglet.
+  openFavorites: () => set({ isFavOpen: true, collectionsTab: 'favorites' }),
   closeFavorites: () => set({ isFavOpen: false }),
-  openWatchlist: () => set({ isWatchlistOpen: true }),
-  closeWatchlist: () => set({ isWatchlistOpen: false }),
+  openWatchlist: () => set({ isFavOpen: true, collectionsTab: 'watchlist' }),
+  closeWatchlist: () => set({ isFavOpen: false }),
+  setCollectionsTab: (tab) => set({ collectionsTab: tab }),
   openLists: () => set({ isListsOpen: true }),
   closeLists: () => set({ isListsOpen: false }),
   openSettings: () => set({ isSettingsOpen: true }),
