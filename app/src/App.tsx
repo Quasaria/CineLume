@@ -9,6 +9,7 @@ import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useModalUrlSync } from '@/hooks/useModalUrlSync';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsTouchDevice } from '@/hooks/useIsTouchDevice';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useReleaseNotifications } from '@/hooks/useReleaseNotifications';
 import { Navbar } from '@/components/Navbar';
@@ -45,6 +46,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const isMobile = useIsMobile();
+  const isTouch = useIsTouchDevice();
   const queryClient = useQueryClient();
   // Selecteurs granulaires : `useAppStore()` complet souscrit a TOUT le
   // store, donc n'importe quel toggleFav / openModal / mouvement de scroll
@@ -280,9 +282,13 @@ export default function App() {
     await queryClient.invalidateQueries();
   }, [queryClient]);
 
+  // Pull-to-refresh : tous les appareils tactiles (phones + tablettes,
+  // y compris iPad portrait 768px et iPad Pro paysage 1366px qui sortent
+  // de useIsMobile). Desactive quand une modale est ouverte pour ne pas
+  // interferer avec leurs gestures (drag-to-close, scroll interne...).
   const { pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: handlePullRefresh,
-    enabled: isMobile && !anyModalOpen,
+    enabled: isTouch && !anyModalOpen,
   });
 
   return (
