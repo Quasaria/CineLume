@@ -390,6 +390,9 @@ export default function App() {
         </Suspense>
         <Toaster
           position={isMobile ? 'bottom-center' : 'bottom-right'}
+          // offset force le toast au-dessus de la safe-area inset bottom
+          // (home indicator iPhone notche), sinon il etait colle au bord.
+          offset={isMobile ? 'max(env(safe-area-inset-bottom), 8px)' : 16}
           toastOptions={{
             style: {
               background: '#18181f',

@@ -216,7 +216,7 @@ export function Navbar() {
                   onKeyDown={(e) => {
                     if (e.key === 'Escape') setSearchVisible(false);
                   }}
-                  className="w-full bg-white/5 border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0"
+                  className="w-full bg-white/5 border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-base md:text-sm text-white placeholder:text-white/50 focus:border-violet-500/50 focus:ring-0"
                   autoFocus
                 />
               </div>

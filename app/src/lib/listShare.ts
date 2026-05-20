@@ -59,9 +59,20 @@ export function decodeSharedList(hash: string): SharedList | null {
     const json = base64UrlDecode(raw);
     const parsed = JSON.parse(json);
     if (typeof parsed !== 'object' || !parsed) return null;
-    const name = typeof parsed.name === 'string' ? parsed.name : '';
-    const emoji = typeof parsed.emoji === 'string' ? parsed.emoji : undefined;
-    const ids = Array.isArray(parsed.ids) ? parsed.ids.filter((x: unknown) => typeof x === 'number') : [];
+    // Defense in depth : on borne le nom a 100 chars (UX + anti-DoS du
+    // toast), l'emoji a 8 chars (max emoji compose), et on filtre les ids
+    // a des entiers positifs avec cap 100 (anti-DoS via fetch en masse :
+    // un attaquant pourrait sinon partager un lien #/share/ avec 1M d'ids
+    // qui declencherait autant de fetch TMDB).
+    const rawName = typeof parsed.name === 'string' ? parsed.name : '';
+    const name = rawName.slice(0, 100);
+    const rawEmoji = typeof parsed.emoji === 'string' ? parsed.emoji : undefined;
+    const emoji = rawEmoji && rawEmoji.length <= 8 ? rawEmoji : undefined;
+    const ids = Array.isArray(parsed.ids)
+      ? parsed.ids
+          .filter((x: unknown): x is number => typeof x === 'number' && Number.isInteger(x) && x > 0 && x < 1e9)
+          .slice(0, 100)
+      : [];
     if (!name || ids.length === 0) return null;
     return { name, emoji, ids };
   } catch {

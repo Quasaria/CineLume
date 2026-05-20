@@ -181,9 +181,13 @@ export async function importFromLetterboxd(
  * pas dans FavoriteMovie sauf vote_average qui n'a rien a voir).
  */
 export function exportToLetterboxdCSV(films: FavoriteMovie[]): string {
+  // CSV formula injection : si un titre commence par = + - @, Excel/Sheets
+  // l'interprete comme une formule (potentiellement DDE/cmd). On prefixe
+  // avec ' qui est l'echappement textuel CSV/Excel standard.
   const escape = (s: string) => {
-    if (/[,"\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-    return s;
+    let safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+    if (/[,"\n\r]/.test(safe)) return `"${safe.replace(/"/g, '""')}"`;
+    return safe;
   };
   const header = ['tmdbID', 'Title', 'Year'];
   const lines = [header.join(',')];
