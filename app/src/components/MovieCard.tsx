@@ -4,6 +4,7 @@ import { Heart, Star } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
+import { highlightMatch } from '@/hooks/useSearchHistory';
 import type { Movie } from '@/types/movie';
 
 interface MovieCardProps {
@@ -21,6 +22,21 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
   const toggleFav = useAppStore((s) => s.toggleFav);
   const openModal = useAppStore((s) => s.openModal);
   const fav = useAppStore((s) => s.favorites.some((f) => f.id === movie.id));
+  // Pour surligner la portion du titre qui matche la recherche courante.
+  // Lecture du searchQuery via selecteur granulaire (re-render uniquement
+  // si la query change, pas a chaque mutation du store).
+  const searchQuery = useAppStore((s) => s.searchQuery);
+  const titleParts = highlightMatch(movie.title, searchQuery.trim());
+  const renderTitle = () =>
+    titleParts.length === 1 && !titleParts[0].match
+      ? movie.title
+      : titleParts.map((p, i) =>
+          p.match ? (
+            <mark key={i} className="bg-violet-500/30 text-white rounded px-0.5">{p.text}</mark>
+          ) : (
+            <span key={i}>{p.text}</span>
+          )
+        );
   const fmtDate = (d?: string) => fmtDateLocalized(d);
 
   if (viewMode === 'list') {
@@ -53,7 +69,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
         </div>
         <div className="flex-1 min-w-0 py-1">
           <h3 className="text-white font-bold text-base mb-1 truncate group-hover:text-violet-300 transition-colors">
-            {movie.title}
+            {renderTitle()}
           </h3>
           <p className="text-white/70 text-xs font-medium mb-2">{fmtDate(movie.release_date)}</p>
           <div className="flex items-center gap-2">
@@ -160,7 +176,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
             on revele aussi un extrait du synopsis qui slide-up depuis le bas. */}
         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
           <h3 className="text-white font-bold text-base sm:text-[15px] leading-tight mb-1 line-clamp-2 group-hover:text-violet-300 transition-colors">
-            {movie.title}
+            {renderTitle()}
           </h3>
           <p className="text-white/70 text-xs font-medium">{fmtDate(movie.release_date)}</p>
           {movie.overview && (

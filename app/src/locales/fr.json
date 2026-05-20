@@ -67,6 +67,7 @@
     "start": "Commencer",
     "swipeRight": "J'aime",
     "swipeLeft": "Passer",
+    "undo": "Annuler le dernier swipe",
     "details": "Défile pour les détails ↓",
     "end": "C'est tout !",
     "endHint": "Tu as parcouru tous les films. Choisis une autre source pour continuer.",
@@ -178,6 +179,16 @@
       "5": "Sortie physique",
       "6": "Sortie TV"
     }
+  },
+  "collections": {
+    "title": "Mes films",
+    "tabFavorites": "Favoris",
+    "tabWatchlist": "À voir"
+  },
+  "search": {
+    "recent": "Récent",
+    "clearAll": "Tout effacer",
+    "removeRecent": "Retirer « {{query}} »"
   },
   "favorites": {
     "title": "Mes favoris",

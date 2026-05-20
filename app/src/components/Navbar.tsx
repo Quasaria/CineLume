@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Search, Heart, Sun, Moon, X, Bookmark } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
+import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { Input } from '@/components/ui/input';
 import { BurgerMenu } from '@/components/BurgerMenu';
 
@@ -18,6 +19,7 @@ function LogoMark({ className = '' }: { className?: string }) {
 export function Navbar() {
   const { t } = useTranslation();
   const { isDark, toggleTheme, openFavorites, openWatchlist, favorites, watchlist, searchQuery, setSearchQuery } = useAppStore();
+  const { history: searchHistory, remove: removeFromHistory, clear: clearHistory } = useSearchHistory();
   const [scrolled, setScrolled] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
   const desktopSearchRef = useRef<HTMLInputElement>(null);
@@ -40,7 +42,6 @@ export function Navbar() {
           state.currentModalMovieId !== null ||
           state.isFilterOpen ||
           state.isFavOpen ||
-          state.isWatchlistOpen ||
           state.isSettingsOpen
         ) {
           return;
@@ -231,6 +232,43 @@ export function Navbar() {
                 <X className="w-5 h-5 text-white/70" aria-hidden="true" />
               </button>
             </div>
+
+            {/* Historique recent : visible quand l'input est vide et qu'on
+                a deja cherche au moins une fois. Click sur un chip ressaisit
+                la query, X dessus l'enleve de l'historique. */}
+            {!searchQuery.trim() && searchHistory.length > 0 && (
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/45 mr-1">
+                  {t('search.recent')}
+                </span>
+                {searchHistory.map((q) => (
+                  <div key={q} className="group inline-flex items-center gap-0.5 rounded-full bg-white/[0.05] border border-white/10 text-xs text-white/80 hover:bg-white/[0.08]">
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery(q)}
+                      className="pl-2.5 pr-1.5 py-1.5 min-h-9"
+                    >
+                      {q}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeFromHistory(q)}
+                      aria-label={t('search.removeRecent', { query: q })}
+                      className="pr-2 pl-0.5 py-1.5 min-h-9 text-white/40 hover:text-white/80"
+                    >
+                      <X className="w-3 h-3" aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={clearHistory}
+                  className="text-[11px] text-white/45 hover:text-white/70 font-medium underline-offset-2 hover:underline ml-1"
+                >
+                  {t('search.clearAll')}
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
