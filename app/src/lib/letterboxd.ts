@@ -80,10 +80,18 @@ export function parseLetterboxdCSV(text: string): LetterboxdRow[] {
   if (nameIdx === -1) return [];
 
   return rows.slice(1)
-    .map((r) => ({
-      name: (r[nameIdx] || '').trim(),
-      year: yearIdx >= 0 && r[yearIdx] ? parseInt(r[yearIdx], 10) : null,
-    }))
+    .map((r) => {
+      const rawYear = yearIdx >= 0 && r[yearIdx] ? parseInt(r[yearIdx], 10) : NaN;
+      // Borne sanity sur l'annee : Lumiere 1895 -> cinema actuel + qq annees.
+      // Si la CSV a un champ malforme ('99999', '-2024', 'N/A') on tombe sur
+      // NaN/hors-borne et on traite comme 'pas d'annee' pour eviter de
+      // faussement filtrer la recherche TMDB.
+      const year = Number.isFinite(rawYear) && rawYear >= 1880 && rawYear <= 2100 ? rawYear : null;
+      return {
+        name: (r[nameIdx] || '').trim(),
+        year,
+      };
+    })
     .filter((r) => !!r.name);
 }
 

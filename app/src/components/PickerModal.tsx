@@ -51,7 +51,6 @@ export function PickerModal() {
   const defaultSource: Source = sources.find((s) => s.items.length > 0)?.id ?? 'watchlist';
   const [source, setSource] = useState<Source>(defaultSource);
   const [genreFilter, setGenreFilter] = useState<string>('');
-  const [runtimeMax] = useState<number | null>(null);
   const [pick, setPick] = useState<FavoriteMovie | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closePicker, contentRef });
@@ -79,35 +78,29 @@ export function PickerModal() {
   function rollPick() {
     let pool = currentItems;
     if (genreFilter) {
-      // Les FavoriteMovie n'ont pas forcement les genres en cache. On garde
-      // un filtre permissif : si on connait pas les genres, on inclut.
-      // (En realite TMDB renvoie pas genres dans search/discover de base.)
+      // FavoriteMovie a genre_ids depuis la migration de stockage. Les
+      // entrees legacy (ajoutees avant) n'en ont pas : on les inclut quand
+      // meme pour ne pas les rendre invisibles d'un coup quand l'user pose
+      // un filtre. Au fil du temps elles seront re-ajoutees avec le champ.
       const gid = parseInt(genreFilter, 10);
-      pool = pool.filter((m) => {
-        const movieAny = m as FavoriteMovie & { genre_ids?: number[] };
-        if (!movieAny.genre_ids) return true;
-        return movieAny.genre_ids.includes(gid);
-      });
-    }
-    if (runtimeMax !== null) {
-      // Idem : runtime pas toujours present dans FavoriteMovie.
-      pool = pool.filter((m) => {
-        const movieAny = m as FavoriteMovie & { runtime?: number };
-        return movieAny.runtime ? movieAny.runtime <= runtimeMax : true;
-      });
+      pool = pool.filter((m) => !m.genre_ids || m.genre_ids.includes(gid));
     }
     if (pool.length === 0) {
       setPick(null);
       return;
     }
-    // Evite de piocher le meme deux fois de suite
-    let next: FavoriteMovie;
+    // Evite de piocher le meme deux fois de suite. Safety cap a 20 tirages
+    // pour ne pas boucler a l'infini si le pool a un doublon par id (cas
+    // pathologique improbable mais defensif).
+    let next: FavoriteMovie = pool[0];
     if (pool.length === 1) {
       next = pool[0];
     } else {
+      let attempts = 0;
       do {
         next = pool[Math.floor(Math.random() * pool.length)];
-      } while (pick && next.id === pick.id);
+        attempts++;
+      } while (pick && next.id === pick.id && attempts < 20);
     }
     setPick(next);
   }

@@ -23,6 +23,7 @@ interface SwipeableMovie {
   release_date?: string;
   overview?: string;
   vote_average?: number;
+  genre_ids?: number[];
 }
 
 function favToSwipe(m: FavoriteMovie): SwipeableMovie {
@@ -33,6 +34,7 @@ function favToSwipe(m: FavoriteMovie): SwipeableMovie {
     release_date: m.release_date,
     overview: m.overview,
     vote_average: m.vote_average,
+    genre_ids: m.genre_ids,
   };
 }
 
@@ -44,6 +46,7 @@ function movieToSwipe(m: Movie): SwipeableMovie {
     release_date: m.release_date,
     overview: m.overview,
     vote_average: m.vote_average,
+    genre_ids: m.genre_ids,
   };
 }
 
@@ -130,6 +133,7 @@ export function SwipeMode() {
           release_date: current.release_date || '',
           vote_average: current.vote_average || 0,
           overview: current.overview,
+          genre_ids: current.genre_ids,
         });
       }
     } else {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,12 @@ export function PersonHeader() {
   const setSelectedPerson = useAppStore((s) => s.setSelectedPerson);
   const goBackToFilm = useAppStore((s) => s.goBackToFilm);
   const [bioExpanded, setBioExpanded] = useState(false);
+
+  // Reset l'etat 'voir plus' quand on change de personne (sinon l'expansion
+  // persistait et la bio d'une autre personne s'affichait deja deroulee).
+  useEffect(() => {
+    setBioExpanded(false);
+  }, [selectedPerson?.id]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['personDetails', selectedPerson?.id, i18n.language],
