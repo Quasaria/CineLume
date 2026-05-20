@@ -281,7 +281,10 @@ export function SwipeMode() {
 
           {/* Card stack */}
           {source && current && (
-            <div className="absolute inset-0 pt-16 pb-24 flex items-center justify-center px-3">
+            <div
+              className="absolute inset-0 pt-16 flex items-center justify-center px-3"
+              style={{ paddingBottom: 'calc(112px + env(safe-area-inset-bottom))' }}
+            >
               <div className="relative w-full max-w-md h-full max-h-[680px]">
                 {next2 && (
                   <div
@@ -309,7 +312,7 @@ export function SwipeMode() {
 
           {/* Action buttons */}
           {source && current && (
-            <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-[max(env(safe-area-inset-bottom),16px)] pt-3 flex items-center justify-center gap-5 bg-gradient-to-t from-[#0a0a10] to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-[max(env(safe-area-inset-bottom),24px)] pt-3 flex items-center justify-center gap-5 bg-gradient-to-t from-[#0a0a10] to-transparent">
               <button
                 type="button"
                 onClick={() => handleSwipe('left')}
