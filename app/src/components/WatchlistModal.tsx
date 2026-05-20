@@ -1,14 +1,16 @@
 import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { X, Bookmark, Trash2, Calendar, Sparkles, Archive } from 'lucide-react';
+import { Bookmark, Trash2, Calendar, Sparkles, Archive } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
+import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import type { FavoriteMovie } from '@/types/movie';
 
 function parseLocalDate(s: string | null | undefined): Date | null {
@@ -73,6 +75,7 @@ export function WatchlistModal() {
   const dragHandlers = useDragToClose({ onClose: closeWatchlist, contentRef });
   useBodyScrollLock(isWatchlistOpen);
   useFocusRestore(isWatchlistOpen);
+  useSwipeBack({ onBack: closeWatchlist, enabled: isWatchlistOpen });
 
   return (
     <AnimatePresence>
@@ -102,23 +105,20 @@ export function WatchlistModal() {
             {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 md:hidden" aria-hidden="true" />
-            <div className="flex items-center justify-between mb-4">
-              <h3 id="watchlist-modal-title" className="font-bold text-2xl tracking-tight flex items-center gap-2.5">
-                <Bookmark className="w-6 h-6 text-cyan-400 fill-cyan-400" aria-hidden="true" />
-                {t('watchlist.title')}
-                {watchlist.length > 0 && (
-                  <span className="text-white/55 text-sm font-medium">({watchlist.length})</span>
-                )}
-              </h3>
-              <button
-                type="button"
-                onClick={closeWatchlist}
-                aria-label={t('watchlist.close')}
-                className="p-2 rounded-xl hover:bg-white/5 transition-colors"
-              >
-                <X className="w-5 h-5 text-white/70" aria-hidden="true" />
-              </button>
-            </div>
+            <ModalHeader
+              titleId="watchlist-modal-title"
+              onBack={closeWatchlist}
+              backLabel={t('watchlist.close')}
+              title={
+                <span className="flex items-center gap-2.5">
+                  <Bookmark className="w-6 h-6 text-cyan-400 fill-cyan-400" aria-hidden="true" />
+                  {t('watchlist.title')}
+                  {watchlist.length > 0 && (
+                    <span className="text-white/55 text-sm font-medium">({watchlist.length})</span>
+                  )}
+                </span>
+              }
+            />
 
             {watchlist.length === 0 ? (
               <div className="text-center py-10">

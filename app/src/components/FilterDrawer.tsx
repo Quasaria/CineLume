@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Film, Tv, Sparkles } from 'lucide-react';
+import { Check, Film, Tv, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/store/appStore';
@@ -7,7 +7,9 @@ import type { ReleaseMode } from '@/store/appStore';
 import { getGenres, PROVIDERS } from '@/lib/tmdb';
 import { useQuery } from '@tanstack/react-query';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
 import { ProviderBadge } from '@/components/ProviderBadge';
@@ -43,6 +45,7 @@ export function FilterDrawer() {
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeFilters, contentRef });
   useBodyScrollLock(isFilterOpen);
+  useSwipeBack({ onBack: closeFilters, enabled: isFilterOpen });
   useFocusRestore(isFilterOpen);
 
   const { data: genres } = useQuery({
@@ -107,23 +110,22 @@ export function FilterDrawer() {
             {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mt-3 mx-auto md:hidden" aria-hidden="true" />
-            <div className="flex items-center justify-between p-5 pb-4 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <h2 id="filter-modal-title" className="font-bold text-2xl tracking-tight">{t('filters.title')}</h2>
-                {activeCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs font-bold border border-violet-500/30">
-                    {t('filters.active', { count: activeCount })}
+            <div className="p-5 pb-4 border-b border-white/10">
+              <ModalHeader
+                titleId="filter-modal-title"
+                onBack={closeFilters}
+                backLabel={t('filters.close')}
+                title={
+                  <span className="flex items-center gap-2.5">
+                    {t('filters.title')}
+                    {activeCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-xs font-bold border border-violet-500/30">
+                        {t('filters.active', { count: activeCount })}
+                      </span>
+                    )}
                   </span>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={closeFilters}
-                aria-label={t('filters.close')}
-                className="p-2 rounded-xl hover:bg-white/5 transition-colors"
-              >
-                <X className="w-5 h-5 text-white/70" aria-hidden="true" />
-              </button>
+                }
+              />
             </div>
 
             <div ref={contentRef} className="flex-1 overflow-y-auto p-5 space-y-8 custom-scroll overscroll-contain">

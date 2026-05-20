@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight, CalendarPlus, Bookmark, MapPin } from 'lucide-react';
+import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight, CalendarPlus, Bookmark, MapPin, ArrowLeft } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -14,6 +14,7 @@ import { SimilarFilms } from '@/components/SimilarFilms';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
 import type { Movie } from '@/types/movie';
@@ -101,6 +102,10 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
   const movie = details;
   useBodyScrollLock(currentModalMovieId !== null);
   useFocusRestore(currentModalMovieId !== null);
+  // Swipe depuis le bord gauche : ferme la modale (et revient au film
+  // d'origine si on est sur une page personne via goBackToFilm). On
+  // desactive quand la lightbox est ouverte (priorite a la lightbox).
+  useSwipeBack({ onBack: closeModal, enabled: currentModalMovieId !== null && !lightbox });
 
   // Click sur un acteur/realisateur dans la modale : ouvre la page personne
   // dediee. On memorise le film d'origine pour le bouton 'retour au film'.
@@ -183,11 +188,11 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
               aria-label={t('modal.close')}
               style={{
                 top: 'max(1.25rem, env(safe-area-inset-top))',
-                right: 'max(1.25rem, env(safe-area-inset-right))',
+                left: 'max(1.25rem, env(safe-area-inset-left))',
               }}
               className="absolute z-50 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/60 hover:bg-white/20 active:bg-white/30 backdrop-blur-md transition-colors shadow-lg shadow-black/30"
             >
-              <X className="w-5 h-5 text-white" aria-hidden="true" />
+              <ArrowLeft className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
 
             {/* Prev/Next : visibles uniquement si le film courant est dans la

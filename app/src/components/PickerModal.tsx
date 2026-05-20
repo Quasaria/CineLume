@@ -2,14 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Shuffle, X, Sparkles, Star, Bookmark, Folder, Calendar, Info } from 'lucide-react';
+import { Shuffle, Sparkles, Star, Bookmark, Folder, Calendar, Info } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { getGenres, IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
+import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import type { FavoriteMovie } from '@/types/movie';
 
 type Source = 'watchlist' | 'favorites' | 'lists';
@@ -56,6 +58,7 @@ export function PickerModal() {
   const dragHandlers = useDragToClose({ onClose: closePicker, contentRef });
   useBodyScrollLock(isPickerOpen);
   useFocusRestore(isPickerOpen);
+  useSwipeBack({ onBack: closePicker, enabled: isPickerOpen });
 
   // Reset le source quand on ouvre la modale a un truc qui contient des films
   useEffect(() => {
@@ -141,20 +144,17 @@ export function PickerModal() {
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 md:hidden" aria-hidden="true" />
 
-            <div className="flex items-center justify-between mb-1">
-              <h3 id="picker-modal-title" className="font-bold text-2xl tracking-tight flex items-center gap-2.5">
-                <Shuffle className="w-6 h-6 text-violet-400" aria-hidden="true" />
-                {t('picker.title')}
-              </h3>
-              <button
-                type="button"
-                onClick={closePicker}
-                aria-label={t('picker.close')}
-                className="min-w-11 min-h-11 -mr-1 flex items-center justify-center rounded-xl hover:bg-white/5 text-white/70 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            <ModalHeader
+              titleId="picker-modal-title"
+              onBack={closePicker}
+              backLabel={t('picker.close')}
+              title={
+                <span className="flex items-center gap-2.5">
+                  <Shuffle className="w-6 h-6 text-violet-400" aria-hidden="true" />
+                  {t('picker.title')}
+                </span>
+              }
+            />
             <p className="text-sm text-white/55 mb-4 flex items-start gap-1.5">
               <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" aria-hidden="true" />
               {t('picker.subtitle')}
