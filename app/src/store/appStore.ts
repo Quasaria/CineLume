@@ -176,6 +176,12 @@ function safeParseWatchlist(): FavoriteMovie[] {
   return safeParseList('cinelume_watchlist');
 }
 
+function isValidFilm(f: unknown): f is FavoriteMovie {
+  return typeof f === 'object' && f !== null
+    && typeof (f as FavoriteMovie).id === 'number'
+    && typeof (f as FavoriteMovie).title === 'string';
+}
+
 function safeParseCustomLists(): CustomList[] {
   try {
     const raw = localStorage.getItem('cinelume_custom_lists');
@@ -188,7 +194,10 @@ function safeParseCustomLists(): CustomList[] {
       typeof l.id === 'string' &&
       typeof l.name === 'string' &&
       Array.isArray(l.films) &&
-      typeof l.createdAt === 'number',
+      l.films.every(isValidFilm) &&
+      typeof l.createdAt === 'number' &&
+      // emoji optionnel mais si present doit etre une string courte
+      (l.emoji === undefined || (typeof l.emoji === 'string' && l.emoji.length <= 8)),
     );
   } catch {
     return [];

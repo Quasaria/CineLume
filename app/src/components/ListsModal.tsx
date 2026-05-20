@@ -156,7 +156,7 @@ export function ListsModal() {
                     placeholder={t('lists.namePlaceholder')}
                     autoFocus
                     maxLength={60}
-                    className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-white placeholder:text-white/40 px-1 py-1"
+                    className="flex-1 min-w-0 bg-transparent border-0 outline-none text-base md:text-sm text-white placeholder:text-white/40 px-1 py-1"
                   />
                   <button
                     type="submit"
@@ -296,7 +296,7 @@ function ListCard({
               onKeyDown={(e) => { if (e.key === 'Escape') onCancelEdit(); }}
               autoFocus
               maxLength={60}
-              className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm font-semibold text-white px-1"
+              className="flex-1 min-w-0 bg-transparent border-0 outline-none text-base md:text-sm font-semibold text-white px-1"
             />
             <button
               type="submit"

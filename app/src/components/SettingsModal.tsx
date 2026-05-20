@@ -609,7 +609,7 @@ function QuietHoursRow({ from, to, onChange, t }: QuietHoursRowProps) {
                 // notifQuietFrom !== notifQuietTo desactive le calme).
                 if (m !== null) onChange(m, m === to ? (m + 1) % 1440 : to);
               }}
-              className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-base md:text-sm text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
             />
           </label>
           <label className="flex items-center gap-1.5 text-white/70">
@@ -621,7 +621,7 @@ function QuietHoursRow({ from, to, onChange, t }: QuietHoursRowProps) {
                 const m = timeStrToMin(e.target.value);
                 if (m !== null) onChange(m === from ? (from + 1439) % 1440 : from, m);
               }}
-              className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+              className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-base md:text-sm text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
             />
           </label>
         </div>

@@ -20,6 +20,14 @@ export function useDragToClose({
     onTouchStart: (e: TouchEvent<HTMLElement>) => {
       if (window.innerWidth >= disabledWidth) return;
       if (e.touches.length !== 1) return;
+      // Si un input/textarea est focus, on n'enclenche pas le drag : l'user
+      // est en train de taper et un slide accidentel le ferait close la
+      // modale en perdant son texte.
+      const active = document.activeElement as HTMLElement | null;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
+        setIsDragging(false);
+        return;
+      }
       // Drag uniquement si le contenu interne est tout en haut (sinon l'utilisateur scroll)
       if (contentRef?.current && contentRef.current.scrollTop > 0) {
         setIsDragging(false);
