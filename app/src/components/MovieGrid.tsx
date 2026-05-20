@@ -52,14 +52,28 @@ interface MovieGridProps {
 
 export function MovieGrid({ movies, isLoading, isFetching, hasNextPage, onLoadMore, totalResults, isError, errorMessage, onRetry }: MovieGridProps) {
   const { t } = useTranslation();
-  const {
-    viewMode, setViewMode,
-    selRegion, selGenre, selReleaseMode, selProvider, selectedPerson,
-    setSelectedPerson, setRegion, setGenre, setReleaseMode, setProvider,
-    setSearchQuery, jumpToToday, openFilters,
-    searchQuery,
-    sortBy, setSortBy,
-  } = useAppStore();
+  // Selecteurs granulaires : la grille consomme 13 fields. Avec destructuring
+  // d'objet, n'importe quel changement de store re-render la grille entiere
+  // (et donc N MovieCards). Avec selectors, on ne re-render que sur les
+  // fields lus.
+  const viewMode = useAppStore((s) => s.viewMode);
+  const setViewMode = useAppStore((s) => s.setViewMode);
+  const selRegion = useAppStore((s) => s.selRegion);
+  const selGenre = useAppStore((s) => s.selGenre);
+  const selReleaseMode = useAppStore((s) => s.selReleaseMode);
+  const selProvider = useAppStore((s) => s.selProvider);
+  const selectedPerson = useAppStore((s) => s.selectedPerson);
+  const setSelectedPerson = useAppStore((s) => s.setSelectedPerson);
+  const setRegion = useAppStore((s) => s.setRegion);
+  const setGenre = useAppStore((s) => s.setGenre);
+  const setReleaseMode = useAppStore((s) => s.setReleaseMode);
+  const setProvider = useAppStore((s) => s.setProvider);
+  const setSearchQuery = useAppStore((s) => s.setSearchQuery);
+  const jumpToToday = useAppStore((s) => s.jumpToToday);
+  const openFilters = useAppStore((s) => s.openFilters);
+  const searchQuery = useAppStore((s) => s.searchQuery);
+  const sortBy = useAppStore((s) => s.sortBy);
+  const setSortBy = useAppStore((s) => s.setSortBy);
   const provider = selProvider ? PROVIDERS.find((p) => p.id === selProvider) : undefined;
   const hasActiveFilter = selRegion !== 'FR' || !!selGenre || selReleaseMode !== 'theater' || !!selProvider || !!selectedPerson;
   const isSearching = !!searchQuery;

@@ -14,8 +14,13 @@ interface MovieCardProps {
 
 export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
   const { t } = useTranslation();
-  const { isFav, toggleFav, openModal } = useAppStore();
-  const fav = isFav(movie.id);
+  // Selecteurs granulaires : sans ca, chaque MovieCard se re-render a chaque
+  // mutation du store (un toggleFav re-render TOUTES les cards, pas juste
+  // celles dont l'etat fav change). Avec selectors granulaires, seules les
+  // cards dont fav change re-rendent.
+  const toggleFav = useAppStore((s) => s.toggleFav);
+  const openModal = useAppStore((s) => s.openModal);
+  const fav = useAppStore((s) => s.favorites.some((f) => f.id === movie.id));
   const fmtDate = (d?: string) => fmtDateLocalized(d);
 
   if (viewMode === 'list') {

@@ -46,12 +46,29 @@ export default function App() {
   const lang = i18n.language;
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
-  const {
-    selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider,
-    selectedPerson, searchQuery,
-    sortBy, runtimeMax,
-    currentModalMovieId, isFilterOpen, isFavOpen, isWatchlistOpen, isListsOpen, isSettingsOpen, isPickerOpen, isSwipeOpen,
-  } = useAppStore();
+  // Selecteurs granulaires : `useAppStore()` complet souscrit a TOUT le
+  // store, donc n'importe quel toggleFav / openModal / mouvement de scroll
+  // re-render App au complet (et tout le reste avec). Avec des selecteurs
+  // par field, on ne re-render App que sur ce qui change vraiment ici.
+  const selYear = useAppStore((s) => s.selYear);
+  const selMonth = useAppStore((s) => s.selMonth);
+  const selWeek = useAppStore((s) => s.selWeek);
+  const selRegion = useAppStore((s) => s.selRegion);
+  const selGenre = useAppStore((s) => s.selGenre);
+  const selReleaseMode = useAppStore((s) => s.selReleaseMode);
+  const selProvider = useAppStore((s) => s.selProvider);
+  const selectedPerson = useAppStore((s) => s.selectedPerson);
+  const searchQuery = useAppStore((s) => s.searchQuery);
+  const sortBy = useAppStore((s) => s.sortBy);
+  const runtimeMax = useAppStore((s) => s.runtimeMax);
+  const currentModalMovieId = useAppStore((s) => s.currentModalMovieId);
+  const isFilterOpen = useAppStore((s) => s.isFilterOpen);
+  const isFavOpen = useAppStore((s) => s.isFavOpen);
+  const isWatchlistOpen = useAppStore((s) => s.isWatchlistOpen);
+  const isListsOpen = useAppStore((s) => s.isListsOpen);
+  const isSettingsOpen = useAppStore((s) => s.isSettingsOpen);
+  const isPickerOpen = useAppStore((s) => s.isPickerOpen);
+  const isSwipeOpen = useAppStore((s) => s.isSwipeOpen);
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
   const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isWatchlistOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen;
 

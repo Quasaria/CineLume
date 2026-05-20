@@ -146,6 +146,27 @@ export function SwipeMode() {
     setIndex((i) => i + 1);
   }
 
+  // Equivalent clavier du swipe : FlecheGauche = skip, FlecheDroite = like.
+  // Sans ca, le mode selecteur est inutilisable pour un user clavier ou un
+  // user desktop qui n'a pas envie de drag a la souris.
+  useEffect(() => {
+    if (!isSwipeOpen || !current) return;
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleSwipe('left');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleSwipe('right');
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSwipeOpen, current?.id]);
+
   function reset() {
     setIndex(0);
     setSkipped(new Set());

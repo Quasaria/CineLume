@@ -35,6 +35,10 @@ export function DateNavigator() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState(selYear);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const pickerTriggerRef = useRef<HTMLButtonElement>(null);
+  const monthGridRef = useRef<HTMLDivElement>(null);
+  // Index focuse du clavier dans la grille des 12 mois (pour la nav fleches).
+  const [focusedMonth, setFocusedMonth] = useState<number | null>(null);
 
   useEffect(() => {
     if (weeks > 0 && selWeek > weeks) {
@@ -60,10 +64,30 @@ export function DateNavigator() {
 
   // Synchronise l'annee du picker avec la selection courante quand on
   // l'ouvre (pas pendant qu'on navigue dans le picker, sinon impossible
-  // de changer d'annee).
+  // de changer d'annee). Pose aussi le focus clavier sur le mois courant
+  // pour que les touches fleche prennent le relais immediatement.
+  // Quand on ferme, on restore le focus sur le trigger.
+  const wasPickerOpen = useRef(false);
   useEffect(() => {
-    if (pickerOpen) setPickerYear(selYear);
-  }, [pickerOpen, selYear]);
+    if (pickerOpen) {
+      setPickerYear(selYear);
+      setFocusedMonth(selMonth);
+    } else {
+      setFocusedMonth(null);
+      if (wasPickerOpen.current) {
+        pickerTriggerRef.current?.focus();
+      }
+    }
+    wasPickerOpen.current = pickerOpen;
+  }, [pickerOpen, selYear, selMonth]);
+
+  // Quand focusedMonth change, on focus reellement le bouton correspondant
+  // pour les screen readers et pour que Enter active le bon mois.
+  useEffect(() => {
+    if (focusedMonth === null || !monthGridRef.current) return;
+    const btn = monthGridRef.current.querySelector<HTMLButtonElement>(`button[data-month="${focusedMonth}"]`);
+    btn?.focus();
+  }, [focusedMonth]);
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -140,6 +164,7 @@ export function DateNavigator() {
               chip pour signaler qu'il est interactif. */}
           <div ref={pickerRef} className="relative flex-1 flex justify-center">
             <button
+              ref={pickerTriggerRef}
               type="button"
               onClick={() => setPickerOpen((v) => !v)}
               aria-haspopup="dialog"
@@ -199,8 +224,29 @@ export function DateNavigator() {
                     </button>
                   </div>
 
-                  {/* Grille des 12 mois */}
-                  <div className="grid grid-cols-4 gap-1.5">
+                  {/* Grille des 12 mois. Nav clavier : fleches deplacent
+                      le focus dans la grille (gauche/droite/haut/bas par
+                      pas de 1/4), Home/End = debut/fin de ligne, Enter
+                      via le onClick standard. */}
+                  <div
+                    ref={monthGridRef}
+                    role="grid"
+                    aria-label={t('common.today')}
+                    className="grid grid-cols-4 gap-1.5"
+                    onKeyDown={(e) => {
+                      if (focusedMonth === null) return;
+                      let next = focusedMonth;
+                      if (e.key === 'ArrowRight') next = Math.min(11, focusedMonth + 1);
+                      else if (e.key === 'ArrowLeft') next = Math.max(0, focusedMonth - 1);
+                      else if (e.key === 'ArrowDown') next = Math.min(11, focusedMonth + 4);
+                      else if (e.key === 'ArrowUp') next = Math.max(0, focusedMonth - 4);
+                      else if (e.key === 'Home') next = focusedMonth - (focusedMonth % 4);
+                      else if (e.key === 'End') next = focusedMonth - (focusedMonth % 4) + 3;
+                      else return;
+                      e.preventDefault();
+                      setFocusedMonth(next);
+                    }}
+                  >
                     {MONTHS.map((m, i) => {
                       const isSelected = i === selMonth && pickerYear === selYear;
                       const isToday = i === currentMonth && pickerYear === currentYear;
@@ -208,11 +254,15 @@ export function DateNavigator() {
                         <button
                           key={i}
                           type="button"
+                          data-month={i}
+                          role="gridcell"
+                          tabIndex={focusedMonth === i ? 0 : -1}
+                          aria-current={isSelected ? 'date' : undefined}
                           onClick={() => {
                             setDate(pickerYear, i, 1);
                             setPickerOpen(false);
                           }}
-                          className={`min-h-11 rounded-lg text-sm font-semibold transition-colors relative ${
+                          className={`min-h-11 rounded-lg text-sm font-semibold transition-colors relative focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 ${
                             isSelected
                               ? 'bg-violet-500/25 text-white border border-violet-500/50'
                               : 'bg-white/[0.04] text-white/80 hover:bg-white/[0.08] active:bg-white/10 border border-transparent'
