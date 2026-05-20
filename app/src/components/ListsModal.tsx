@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { X, FolderPlus, Trash2, Edit3, Check, Folder, ChevronRight, Smile, Share2 } from 'lucide-react';
+import { X, FolderPlus, Trash2, Edit3, Check, Folder, ChevronRight, Smile, Share2, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
@@ -421,19 +421,14 @@ function ListCard({
                     className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 list-none"
                   >
                     {list.films.map((f) => (
-                      <Reorder.Item
+                      <ReorderableFilmCard
                         key={f.id}
-                        value={f}
-                        className="shrink-0"
-                        whileDrag={{ scale: 1.05, zIndex: 10 }}
-                      >
-                        <ListFilmCard
-                          film={f}
-                          onOpen={() => onOpenFilm(f.id)}
-                          onRemove={() => onRemoveFilm(f.id)}
-                          removeLabel={t('lists.removeFilm', { title: f.title })}
-                        />
-                      </Reorder.Item>
+                        film={f}
+                        onOpen={() => onOpenFilm(f.id)}
+                        onRemove={() => onRemoveFilm(f.id)}
+                        removeLabel={t('lists.removeFilm', { title: f.title })}
+                        dragHandleLabel={t('lists.dragHandle', { title: f.title })}
+                      />
                     ))}
                   </Reorder.Group>
                 </>
@@ -446,16 +441,52 @@ function ListCard({
   );
 }
 
+interface ReorderableFilmCardProps {
+  film: FavoriteMovie;
+  onOpen: () => void;
+  onRemove: () => void;
+  removeLabel: string;
+  dragHandleLabel: string;
+}
+
+// Carte film dans une liste : tap pour ouvrir, drag-handle (icone grip)
+// pour reordonner. On utilise useDragControls + dragListener={false} pour
+// que SEULE la poignee declenche le drag, pas le poster (sinon impossible
+// de scroller horizontalement le container ni de cliquer pour ouvrir).
+function ReorderableFilmCard({ film, onOpen, onRemove, removeLabel, dragHandleLabel }: ReorderableFilmCardProps) {
+  const controls = useDragControls();
+  return (
+    <Reorder.Item
+      value={film}
+      dragListener={false}
+      dragControls={controls}
+      whileDrag={{ scale: 1.05, zIndex: 10 }}
+      className="shrink-0"
+    >
+      <ListFilmCard
+        film={film}
+        onOpen={onOpen}
+        onRemove={onRemove}
+        removeLabel={removeLabel}
+        dragHandleLabel={dragHandleLabel}
+        onDragHandlePointerDown={(e) => controls.start(e)}
+      />
+    </Reorder.Item>
+  );
+}
+
 interface ListFilmCardProps {
   film: FavoriteMovie;
   onOpen: () => void;
   onRemove: () => void;
   removeLabel: string;
+  dragHandleLabel: string;
+  onDragHandlePointerDown: (e: React.PointerEvent) => void;
 }
 
-function ListFilmCard({ film, onOpen, onRemove, removeLabel }: ListFilmCardProps) {
+function ListFilmCard({ film, onOpen, onRemove, removeLabel, dragHandleLabel, onDragHandlePointerDown }: ListFilmCardProps) {
   return (
-    <div className="relative w-[80px] group cursor-grab active:cursor-grabbing">
+    <div className="relative w-[80px] group">
       <button
         type="button"
         onClick={onOpen}
@@ -483,6 +514,16 @@ function ListFilmCard({ film, onOpen, onRemove, removeLabel }: ListFilmCardProps
         className="absolute top-0.5 right-0.5 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full bg-black/75 text-white hover:bg-red-500/90 active:bg-red-500 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-all"
       >
         <X className="w-3.5 h-3.5" aria-hidden="true" />
+      </button>
+      {/* Drag handle : seul element qui declenche le drag de reorder.
+          touch-none empeche le browser de capturer le touch en scroll. */}
+      <button
+        type="button"
+        onPointerDown={onDragHandlePointerDown}
+        aria-label={dragHandleLabel}
+        className="absolute bottom-0.5 left-0.5 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full bg-black/75 text-white/90 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 touch-none cursor-grab active:cursor-grabbing transition-all"
+      >
+        <GripVertical className="w-3.5 h-3.5" aria-hidden="true" />
       </button>
       <p className="text-[10px] text-white/60 truncate mt-1 w-[80px]">{film.title}</p>
     </div>

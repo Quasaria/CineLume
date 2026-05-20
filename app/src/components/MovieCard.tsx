@@ -27,12 +27,18 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
   // si la query change, pas a chaque mutation du store).
   const searchQuery = useAppStore((s) => s.searchQuery);
   const titleParts = highlightMatch(movie.title, searchQuery.trim());
+  // En mode grid (line-clamp-2), le mark avec background+padding peut etre
+  // visuellement coupe a la cesure de ligne. On utilise un underline plus
+  // discret dans ce mode et le mark complet en list.
+  const markClass = viewMode === 'grid'
+    ? 'bg-transparent text-violet-300 underline decoration-violet-400/70 decoration-2 underline-offset-2'
+    : 'bg-violet-500/30 text-white rounded px-0.5';
   const renderTitle = () =>
     titleParts.length === 1 && !titleParts[0].match
       ? movie.title
       : titleParts.map((p, i) =>
           p.match ? (
-            <mark key={i} className="bg-violet-500/30 text-white rounded px-0.5">{p.text}</mark>
+            <mark key={i} className={markClass}>{p.text}</mark>
           ) : (
             <span key={i}>{p.text}</span>
           )
