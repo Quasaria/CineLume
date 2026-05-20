@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Download, X } from 'lucide-react';
@@ -41,8 +41,14 @@ export function PwaInstallBanner() {
     s.isSettingsOpen || s.isPickerOpen || s.isSwipeOpen
   );
   const [visible, setVisible] = useState(false);
+  // Garde anti-double-increment pour React StrictMode (qui mount-unmount-
+  // remount les composants en dev). En prod ca ne change rien, mais en
+  // dev sans cette garde le compteur de visites incrementait par 2.
+  const incrementedRef = useRef(false);
 
   useEffect(() => {
+    if (incrementedRef.current) return;
+    incrementedRef.current = true;
     // Increment du compteur de visites au 1er mount.
     const visits = getStoredNumber(VISITS_KEY, 0) + 1;
     try {

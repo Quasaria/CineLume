@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
@@ -15,6 +16,7 @@ import type { FavoriteMovie } from '@/types/movie';
  */
 export function useSharedListImport() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const processedRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export function useSharedListImport() {
     if (!decoded) {
       toast.error(t('lists.importedError'));
       // Nettoie le hash invalide pour ne pas le re-tenter
-      history.replaceState(null, '', window.location.pathname + window.location.search);
+      navigate('/', { replace: true });
       return;
     }
 
@@ -70,7 +72,7 @@ export function useSharedListImport() {
 
       if (films.length === 0) {
         toast.error(t('lists.importedError'), { id: toastId });
-        history.replaceState(null, '', window.location.pathname + window.location.search);
+        navigate('/', { replace: true });
         return;
       }
 
@@ -90,7 +92,7 @@ export function useSharedListImport() {
         },
       });
 
-      history.replaceState(null, '', window.location.pathname + window.location.search);
+      navigate('/', { replace: true });
     })();
-  }, [t]);
+  }, [t, navigate]);
 }

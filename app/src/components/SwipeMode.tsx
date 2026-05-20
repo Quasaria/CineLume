@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Heart, Calendar, Bookmark, Star, Info, ChevronDown, RotateCcw, Undo2, X as XIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
-import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { discoverMovies, getMovieDetails, IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
@@ -77,7 +76,9 @@ export function SwipeMode() {
 
   useBodyScrollLock(isSwipeOpen);
   useFocusRestore(isSwipeOpen);
-  useSwipeBack({ onBack: closeSwipe, enabled: isSwipeOpen });
+  // useSwipeBack volontairement absent ici : le geste swipe-bord-gauche
+  // entrerait en conflit avec le drag horizontal des cartes (framer-motion
+  // drag="x"). L'user a un bouton retour visible et Escape ferme aussi.
 
   // Reset l'index quand on change de source ou qu'on rouvre la modale
   useEffect(() => {
