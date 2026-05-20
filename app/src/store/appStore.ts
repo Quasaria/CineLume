@@ -287,8 +287,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ selProvider: provider });
   },
 
+  // setSelectedPerson est le 'reset' explicite : pas de previousFilmId, le
+  // bouton retour de PersonHeader retombe juste sur la grille. Seule
+  // openPersonFromFilm initialise previousFilmId, ce qui garantit l'invariant
+  // 'previousFilmId != null implique qu'on est venu d'une modale film'.
   setSelectedPerson: (person) => {
-    set({ selectedPerson: person, searchQuery: '', previousFilmId: person ? get().previousFilmId : null });
+    set({ selectedPerson: person, searchQuery: '', previousFilmId: null });
   },
 
   // Appele depuis la modale film quand l'user clique sur un acteur du cast :
@@ -312,8 +316,10 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   jumpToToday: () => {
     // "Aujourd'hui" : on retombe sur les vraies sorties du jour. Reset aussi
-    // la recherche et le mode filmographie sinon le bouton ne fait rien de
-    // visible quand l'utilisateur etait dans un de ces modes.
+    // la recherche, le mode filmographie ET le previousFilmId sinon le bouton
+    // ne fait rien de visible quand l'utilisateur etait dans un de ces modes,
+    // et un previousFilmId stale ferait reapparaitre une vieille modale plus
+    // tard via goBackToFilm.
     const ctx = getCurrentCinemaContext(get().selRegion);
     set({
       selYear: ctx.year,
@@ -321,6 +327,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       selWeek: ctx.week,
       searchQuery: '',
       selectedPerson: null,
+      previousFilmId: null,
     });
   },
 

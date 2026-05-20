@@ -342,6 +342,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                                 release_date: movie.release_date,
                                 vote_average: movie.vote_average,
                                 overview: movie.overview,
+                                genre_ids: movie.genre_ids,
                               })
                             }
                             aria-label={isInWatchlist(movie.id) ? t('watchlist.remove', { title: movie.title }) : t('watchlist.add', { title: movie.title })}
@@ -362,6 +363,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                                 release_date: movie.release_date,
                                 vote_average: movie.vote_average,
                                 overview: movie.overview,
+                                genre_ids: movie.genre_ids,
                               })
                             }
                             aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}
@@ -633,6 +635,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                       release_date: movie.release_date,
                       vote_average: movie.vote_average,
                       overview: movie.overview,
+                      genre_ids: movie.genre_ids,
                     })
                   }
                   aria-label={isInWatchlist(movie.id) ? t('watchlist.remove', { title: movie.title }) : t('watchlist.add', { title: movie.title })}
@@ -653,6 +656,7 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                       release_date: movie.release_date,
                       vote_average: movie.vote_average,
                       overview: movie.overview,
+                      genre_ids: movie.genre_ids,
                     })
                   }
                   aria-label={isFav(movie.id) ? t('favorites.remove', { title: movie.title }) : t('favorites.addToFav', { title: movie.title })}

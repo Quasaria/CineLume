@@ -84,6 +84,7 @@ export interface FavoriteMovie {
   // strip (synopsis, genres) sans re-fetcher TMDB. Les favoris existants
   // crees avant cette migration n'ont pas ces champs, l'UI s'adapte.
   overview?: string;
+  genre_ids?: number[];
 }
 
 export type ViewMode = 'grid' | 'list';

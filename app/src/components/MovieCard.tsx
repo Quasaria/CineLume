@@ -73,6 +73,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
               release_date: movie.release_date,
               vote_average: movie.vote_average,
               overview: movie.overview,
+              genre_ids: movie.genre_ids,
             });
           }}
           className={`min-w-11 min-h-11 flex items-center justify-center rounded-full hover:bg-white/10 active:bg-white/15 transition-all self-center shrink-0 ${
@@ -121,6 +122,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
               release_date: movie.release_date,
               vote_average: movie.vote_average,
               overview: movie.overview,
+              genre_ids: movie.genre_ids,
             });
           }}
           className={`absolute top-2 left-2 z-20 min-w-11 min-h-11 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/65 active:bg-black/80 transition-all ${
