@@ -9,7 +9,8 @@
     "apply": "Apply",
     "clear": "Clear",
     "na": "N/A",
-    "unknownDate": "Unknown date"
+    "unknownDate": "Unknown date",
+    "back": "Back"
   },
   "nav": {
     "search": "Search",

@@ -1,21 +1,22 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Trash2, Globe, Bell, Download, Upload, FileDown } from 'lucide-react';
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { Save, Trash2, Globe, Bell, Download, Upload, FileDown, Palette, Database, BarChart3, Sparkles, ChevronDown } from 'lucide-react';
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { invalidateApiKeyCache } from '@/lib/tmdb';
 import { parseLetterboxdCSV, importFromLetterboxd, exportToLetterboxdCSV } from '@/lib/letterboxd';
 import { computeUserStats } from '@/lib/userStats';
-import type { FavoriteMovie, CustomList } from '@/types/movie';
 import type { SupportedLang } from '@/i18n';
 
 const LANG_LABEL: Record<SupportedLang, string> = {
@@ -23,34 +24,31 @@ const LANG_LABEL: Record<SupportedLang, string> = {
   en: 'English',
 };
 
-interface StatsSectionProps {
-  favorites: FavoriteMovie[];
-  watchlist: FavoriteMovie[];
-  customLists: CustomList[];
-  t: (key: string, opts?: Record<string, unknown>) => string;
+// Card de section : titre + icone + contenu. Donne une vraie hierarchie
+// visuelle au lieu d'une longue liste plate de toggles separes par des
+// border-t. L'icone aide a scanner rapidement la section recherchee.
+function SectionCard({ icon: Icon, title, children }: { icon: typeof Bell; title: string; children: ReactNode }) {
+  return (
+    <section className="rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden">
+      <h3 className="flex items-center gap-2 px-4 pt-3.5 pb-2 text-[11px] font-bold text-white/55 uppercase tracking-wider">
+        <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+        {title}
+      </h3>
+      <div className="px-4 pb-3 space-y-2.5">{children}</div>
+    </section>
+  );
 }
 
-function StatsSection({ favorites, watchlist, customLists, t }: StatsSectionProps) {
-  const stats = computeUserStats(favorites, watchlist, customLists);
-  if (stats.totalTracked === 0) return null;
+// Ligne dans une section : label + description optionnelle + slot droit.
+function SettingRow({ label, description, right }: { label: ReactNode; description?: ReactNode; right: ReactNode }) {
   return (
-    <section className="py-3 border-t border-white/5">
-      <h3 className="text-xs text-white/50 uppercase tracking-wider font-bold mb-3">
-        {t('settings.statsTitle')}
-      </h3>
-      <div className="grid grid-cols-2 gap-2">
-        <StatCard label={t('settings.statsTracked')} value={String(stats.totalTracked)} accent="violet" />
-        <StatCard label={t('settings.statsThisWeek')} value={String(stats.thisWeek)} accent="cyan" />
-        <StatCard label={t('settings.statsUpcomingMonth')} value={String(stats.upcomingThisMonth)} accent="fuchsia" />
-        <StatCard label={t('settings.statsLists')} value={String(stats.customListsCount)} accent="emerald" />
+    <div className="flex items-center justify-between gap-3 py-1.5">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-white">{label}</p>
+        {description && <p className="text-xs text-white/50 leading-tight mt-0.5">{description}</p>}
       </div>
-      {stats.nextUpcoming && (
-        <p className="mt-3 text-xs text-white/60">
-          <span className="text-white/45">{t('settings.statsNext')}</span>{' '}
-          <span className="text-white font-semibold">{stats.nextUpcoming.title}</span>
-        </p>
-      )}
-    </section>
+      <div className="shrink-0">{right}</div>
+    </div>
   );
 }
 
@@ -72,8 +70,18 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
 export function SettingsModal() {
   const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
-  const { isSettingsOpen, closeSettings, isDark, toggleTheme, blindMode, toggleBlindMode, favorites, watchlist, customLists } = useAppStore();
+  const isSettingsOpen = useAppStore((s) => s.isSettingsOpen);
+  const closeSettings = useAppStore((s) => s.closeSettings);
+  const isDark = useAppStore((s) => s.isDark);
+  const toggleTheme = useAppStore((s) => s.toggleTheme);
+  const blindMode = useAppStore((s) => s.blindMode);
+  const toggleBlindMode = useAppStore((s) => s.toggleBlindMode);
+  const favorites = useAppStore((s) => s.favorites);
+  const watchlist = useAppStore((s) => s.watchlist);
+  const customLists = useAppStore((s) => s.customLists);
+
   const [apiKey, setApiKey] = useState('');
+  const [apiKeyExpanded, setApiKeyExpanded] = useState(false);
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>(
     typeof Notification !== 'undefined' ? Notification.permission : 'unsupported',
   );
@@ -85,17 +93,19 @@ export function SettingsModal() {
   const { canInstall, isInstalled, install } = useInstallPrompt();
   useBodyScrollLock(isSettingsOpen);
   useFocusRestore(isSettingsOpen);
+  useSwipeBack({ onBack: closeSettings, enabled: isSettingsOpen });
 
   const currentLang = (i18n.language || 'fr').split('-')[0] as SupportedLang;
+  const stats = computeUserStats(favorites, watchlist, customLists);
 
   useEffect(() => {
     if (isSettingsOpen) {
       setApiKey(localStorage.getItem('tmdb_key') || '');
-      // Refresh la permission notif a chaque ouverture, l'user peut l'avoir
-      // changee dans les settings navigateur entre temps.
       if (typeof Notification !== 'undefined') {
         setNotifPermission(Notification.permission);
       }
+    } else {
+      setApiKeyExpanded(false);
     }
   }, [isSettingsOpen]);
 
@@ -117,7 +127,6 @@ export function SettingsModal() {
       setNotifPermission(result);
       if (result === 'granted') {
         toast.success(t('settings.notificationsEnabled'));
-        // Petit ping immediat pour confirmer que ca marche
         try {
           new Notification(t('settings.notificationsTestTitle'), {
             body: t('settings.notificationsTestBody'),
@@ -143,7 +152,7 @@ export function SettingsModal() {
 
   async function handleLetterboxdImport(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    e.target.value = ''; // reset l'input pour permettre de re-uploader le meme fichier
+    e.target.value = '';
     if (!file) return;
 
     let text: string;
@@ -171,7 +180,6 @@ export function SettingsModal() {
         },
       });
 
-      // Merge dans la watchlist en evitant les doublons par tmdb id
       const existing = useAppStore.getState().watchlist;
       const existingIds = new Set(existing.map((f) => f.id));
       const newOnes = result.imported.filter((m) => !existingIds.has(m.id));
@@ -220,7 +228,7 @@ export function SettingsModal() {
     toast.success(t('settings.lbExportDone', { count: merged.length }));
   }
 
-  function save() {
+  function saveApiKey() {
     const key = apiKey.trim();
     if (key) {
       localStorage.setItem('tmdb_key', key);
@@ -231,7 +239,6 @@ export function SettingsModal() {
     }
     invalidateApiKeyCache();
     queryClient.invalidateQueries();
-    closeSettings();
   }
 
   function clearCache() {
@@ -244,7 +251,6 @@ export function SettingsModal() {
     });
     queryClient.invalidateQueries();
     toast.success(removed > 0 ? t('settings.cacheCleared', { count: removed }) : t('settings.cacheEmpty'));
-    closeSettings();
   }
 
   function changeLang(lng: SupportedLang) {
@@ -276,204 +282,210 @@ export function SettingsModal() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="settings-modal-title"
-            className="relative bg-[#0f0f15] rounded-t-3xl md:rounded-3xl max-w-md w-full max-h-[90dvh] md:max-h-none overflow-hidden border border-white/10 shadow-2xl flex flex-col"
+            className="relative bg-[#0f0f15] rounded-t-3xl md:rounded-3xl max-w-lg w-full max-h-[92dvh] md:max-h-[88vh] overflow-hidden border border-white/10 shadow-2xl flex flex-col"
             {...dragHandlers}
           >
-            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mt-3 sm:hidden shrink-0" aria-hidden="true" />
-            {/* Inner scrollable : separe le drag target (panel exterieur) du
-                scroll target (ce div). Sinon le drag-to-close bloque des que
-                l'utilisateur scrolle dans la modale. */}
+            <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mt-3 md:hidden shrink-0" aria-hidden="true" />
+
             <div ref={contentRef} className="overflow-y-auto overscroll-contain px-5 pt-3 pb-6 md:p-6 flex-1">
-              <h3 id="settings-modal-title" className="font-bold text-2xl tracking-tight mb-6">{t('settings.title')}</h3>
+              <ModalHeader
+                title={t('settings.title')}
+                onBack={closeSettings}
+                titleId="settings-modal-title"
+              />
 
-              <div className="space-y-5">
-              <div>
-                <label htmlFor="settings-apikey" className="text-xs text-white/50 uppercase tracking-wider font-bold mb-2 block">
-                  {t('settings.apiKey')}
-                </label>
-                <Input
-                  id="settings-apikey"
-                  type="password"
-                  autoComplete="off"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder={t('settings.apiKeyPlaceholder')}
-                  className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-sm focus:border-violet-500/50 focus:ring-0"
-                />
-              </div>
+              <div className="space-y-3">
+                {/* Preferences */}
+                <SectionCard icon={Palette} title={t('settings.title')}>
+                  <SettingRow
+                    label={t('settings.language')}
+                    description={t('settings.languageDesc')}
+                    right={
+                      <div className="flex gap-1 bg-white/5 rounded-lg p-1 border border-white/10" role="group" aria-label={t('settings.language')}>
+                        {(['fr', 'en'] as const).map((lng) => (
+                          <button
+                            key={lng}
+                            type="button"
+                            onClick={() => changeLang(lng)}
+                            aria-pressed={currentLang === lng}
+                            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                              currentLang === lng ? 'bg-white text-black' : 'text-white/60 hover:text-white'
+                            }`}
+                          >
+                            {LANG_LABEL[lng]}
+                          </button>
+                        ))}
+                      </div>
+                    }
+                  />
+                  <SettingRow
+                    label={isDark ? t('settings.themeDark') : t('settings.themeLight')}
+                    description={t('settings.themeToggleDesc')}
+                    right={<Switch checked={!isDark} onCheckedChange={toggleTheme} aria-label={t('settings.themeToggleDesc')} />}
+                  />
+                  <SettingRow
+                    label={t('settings.blindMode')}
+                    description={t('settings.blindModeDesc')}
+                    right={<Switch checked={blindMode} onCheckedChange={toggleBlindMode} aria-label={t('settings.blindMode')} />}
+                  />
+                </SectionCard>
 
-              <div className="flex items-center justify-between py-3 border-t border-white/5">
-                <div className="flex items-center gap-2.5">
-                  <Globe className="w-4 h-4 text-white/60" aria-hidden="true" />
-                  <div>
-                    <p className="text-sm font-medium">{t('settings.language')}</p>
-                    <p className="text-xs text-white/50">{t('settings.languageDesc')}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1 bg-white/5 rounded-lg p-1 border border-white/10" role="group" aria-label={t('settings.language')}>
-                  {(['fr', 'en'] as const).map((lng) => (
-                    <button
-                      key={lng}
-                      type="button"
-                      onClick={() => changeLang(lng)}
-                      aria-pressed={currentLang === lng}
-                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
-                        currentLang === lng ? 'bg-white text-black' : 'text-white/60 hover:text-white'
-                      }`}
-                    >
-                      {LANG_LABEL[lng]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between py-3 border-t border-white/5">
-                <div>
-                  <p className="text-sm font-medium">{isDark ? t('settings.themeDark') : t('settings.themeLight')}</p>
-                  <p className="text-xs text-white/50">{t('settings.themeToggleDesc')}</p>
-                </div>
-                <Switch checked={!isDark} onCheckedChange={toggleTheme} aria-label={t('settings.themeToggleDesc')} />
-              </div>
-
-              <div className="flex items-center justify-between py-3 border-t border-white/5">
-                <div className="min-w-0 pr-3">
-                  <p className="text-sm font-medium">{t('settings.blindMode')}</p>
-                  <p className="text-xs text-white/50">{t('settings.blindModeDesc')}</p>
-                </div>
-                <Switch checked={blindMode} onCheckedChange={toggleBlindMode} aria-label={t('settings.blindMode')} />
-              </div>
-
-              <StatsSection favorites={favorites} watchlist={watchlist} customLists={customLists} t={t} />
-
-              <div className="flex items-center justify-between py-3 border-t border-white/5 gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Bell className={`w-4 h-4 shrink-0 ${notifPermission === 'granted' ? 'text-violet-300' : 'text-white/60'}`} aria-hidden="true" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">{t('settings.notifications')}</p>
-                    <p className="text-xs text-white/50 truncate">
-                      {notifPermission === 'granted'
+                {/* Notifications */}
+                <SectionCard icon={Bell} title={t('settings.notifications')}>
+                  <SettingRow
+                    label={t('settings.notifications')}
+                    description={
+                      notifPermission === 'granted'
                         ? t('settings.notificationsGranted')
                         : notifPermission === 'denied'
                           ? t('settings.notificationsDenied')
                           : notifPermission === 'unsupported'
                             ? t('settings.notificationsUnsupported')
-                            : t('settings.notificationsDesc')}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={toggleNotifications}
-                  disabled={notifPermission === 'unsupported'}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                    notifPermission === 'granted'
-                      ? 'bg-violet-500/15 text-violet-300 border border-violet-500/30'
-                      : notifPermission === 'denied'
-                        ? 'bg-white/5 text-white/40 border border-white/10 cursor-help'
-                        : 'bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 border border-violet-500/30'
-                  } disabled:opacity-40 disabled:cursor-not-allowed`}
-                >
-                  {notifPermission === 'granted'
-                    ? t('settings.notificationsOn')
-                    : notifPermission === 'denied'
-                      ? t('settings.notificationsBlocked')
-                      : t('settings.notificationsEnable')}
-                </button>
-              </div>
-
-              {canInstall && !isInstalled && (
-                <div className="flex items-center justify-between py-3 border-t border-white/5 gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Download className="w-4 h-4 text-cyan-300 shrink-0" aria-hidden="true" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{t('settings.installApp')}</p>
-                      <p className="text-xs text-white/50">{t('settings.installAppDesc')}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleInstall}
-                    className="shrink-0 px-3 py-1.5 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-xs font-bold hover:bg-cyan-500/25 transition-colors"
-                  >
-                    {t('settings.install')}
-                  </button>
-                </div>
-              )}
-
-              <div className="py-3 border-t border-white/5">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <span className="flex items-center gap-0.5 shrink-0" aria-hidden="true">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">Letterboxd</p>
-                    <p className="text-xs text-white/50">{t('settings.lbDesc')}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 flex-wrap mt-3">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".csv,text/csv"
-                    onChange={handleLetterboxdImport}
-                    className="hidden"
-                    aria-hidden="true"
+                            : t('settings.notificationsDesc')
+                    }
+                    right={
+                      <button
+                        type="button"
+                        onClick={toggleNotifications}
+                        disabled={notifPermission === 'unsupported'}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                          notifPermission === 'granted'
+                            ? 'bg-violet-500/15 text-violet-300 border border-violet-500/30'
+                            : notifPermission === 'denied'
+                              ? 'bg-white/5 text-white/40 border border-white/10 cursor-help'
+                              : 'bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 border border-violet-500/30'
+                        } disabled:opacity-40 disabled:cursor-not-allowed`}
+                      >
+                        {notifPermission === 'granted'
+                          ? t('settings.notificationsOn')
+                          : notifPermission === 'denied'
+                            ? t('settings.notificationsBlocked')
+                            : t('settings.notificationsEnable')}
+                      </button>
+                    }
                   />
+                </SectionCard>
+
+                {/* Mes statistiques */}
+                {stats.totalTracked > 0 && (
+                  <SectionCard icon={BarChart3} title={t('settings.statsTitle')}>
+                    <div className="grid grid-cols-2 gap-2 -mt-1">
+                      <StatCard label={t('settings.statsTracked')} value={String(stats.totalTracked)} accent="violet" />
+                      <StatCard label={t('settings.statsThisWeek')} value={String(stats.thisWeek)} accent="cyan" />
+                      <StatCard label={t('settings.statsUpcomingMonth')} value={String(stats.upcomingThisMonth)} accent="fuchsia" />
+                      <StatCard label={t('settings.statsLists')} value={String(stats.customListsCount)} accent="emerald" />
+                    </div>
+                    {stats.nextUpcoming && (
+                      <p className="text-xs text-white/60 pt-2">
+                        <span className="text-white/45">{t('settings.statsNext')}</span>{' '}
+                        <span className="text-white font-semibold">{stats.nextUpcoming.title}</span>
+                      </p>
+                    )}
+                  </SectionCard>
+                )}
+
+                {/* Donnees : import/export Letterboxd + clear cache */}
+                <SectionCard icon={Database} title="Letterboxd">
+                  <p className="text-[11px] text-white/45 leading-snug -mt-1">{t('settings.lbHint')}</p>
+                  <div className="flex gap-2 flex-wrap pt-1">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".csv,text/csv"
+                      onChange={handleLetterboxdImport}
+                      className="hidden"
+                      aria-hidden="true"
+                    />
+                    <button
+                      type="button"
+                      disabled={importing}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-3 py-2 min-h-11 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs font-semibold transition-colors border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Upload className="w-3.5 h-3.5" aria-hidden="true" />
+                      {importing ? t('settings.lbImporting') : t('settings.lbImport')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLetterboxdExport}
+                      className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-3 py-2 min-h-11 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs font-semibold transition-colors border border-white/10"
+                    >
+                      <FileDown className="w-3.5 h-3.5" aria-hidden="true" />
+                      {t('settings.lbExport')}
+                    </button>
+                  </div>
+                  <SettingRow
+                    label={t('settings.clearCache')}
+                    description={t('settings.clearCacheDesc')}
+                    right={
+                      <button
+                        type="button"
+                        onClick={clearCache}
+                        className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" aria-hidden="true" />
+                        {t('common.clear')}
+                      </button>
+                    }
+                  />
+                </SectionCard>
+
+                {/* Application */}
+                {canInstall && !isInstalled && (
+                  <SectionCard icon={Sparkles} title={t('settings.installApp')}>
+                    <SettingRow
+                      label={t('settings.installApp')}
+                      description={t('settings.installAppDesc')}
+                      right={
+                        <button
+                          type="button"
+                          onClick={handleInstall}
+                          className="px-3 py-1.5 rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-xs font-bold hover:bg-cyan-500/25 transition-colors flex items-center gap-1"
+                        >
+                          <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                          {t('settings.install')}
+                        </button>
+                      }
+                    />
+                  </SectionCard>
+                )}
+
+                {/* API TMDB : avance, collapsable pour ne pas encombrer */}
+                <section className="rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden">
                   <button
                     type="button"
-                    disabled={importing}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs font-semibold transition-colors border border-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                    onClick={() => setApiKeyExpanded((v) => !v)}
+                    aria-expanded={apiKeyExpanded}
+                    className="w-full flex items-center justify-between gap-2 px-4 py-3 hover:bg-white/[0.02] transition-colors"
                   >
-                    <Upload className="w-3.5 h-3.5" aria-hidden="true" />
-                    {importing ? t('settings.lbImporting') : t('settings.lbImport')}
+                    <span className="flex items-center gap-2 text-[11px] font-bold text-white/55 uppercase tracking-wider">
+                      <Globe className="w-3.5 h-3.5" aria-hidden="true" />
+                      {t('settings.apiKey')}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-white/50 transition-transform ${apiKeyExpanded ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleLetterboxdExport}
-                    className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs font-semibold transition-colors border border-white/10"
-                  >
-                    <FileDown className="w-3.5 h-3.5" aria-hidden="true" />
-                    {t('settings.lbExport')}
-                  </button>
-                </div>
-                <p className="text-[11px] text-white/40 mt-2 leading-snug">{t('settings.lbHint')}</p>
-              </div>
-
-              <div className="flex items-center justify-between py-3 border-t border-white/5">
-                <div>
-                  <p className="text-sm font-medium">{t('settings.clearCache')}</p>
-                  <p className="text-xs text-white/50">{t('settings.clearCacheDesc')}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={clearCache}
-                  className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-colors"
-                >
-                  <Trash2 className="w-3 h-3 inline mr-1" aria-hidden="true" />
-                  {t('common.clear')}
-                </button>
-              </div>
-            </div>
-
-              <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-white/5">
-                <button
-                  type="button"
-                  onClick={closeSettings}
-                  className="px-4 py-2 rounded-xl text-white/60 hover:text-white text-sm font-medium transition-colors"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="button"
-                  onClick={save}
-                  className="px-4 py-2 rounded-xl btn-primary text-white text-sm font-semibold bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 flex items-center gap-2"
-                >
-                  <Save className="w-4 h-4" aria-hidden="true" />
-                  {t('common.save')}
-                </button>
+                  {apiKeyExpanded && (
+                    <div className="px-4 pb-4 space-y-3">
+                      <Input
+                        id="settings-apikey"
+                        type="password"
+                        autoComplete="off"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                        placeholder={t('settings.apiKeyPlaceholder')}
+                        className="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-sm focus:border-violet-500/50 focus:ring-0"
+                      />
+                      <button
+                        type="button"
+                        onClick={saveApiKey}
+                        className="w-full min-h-11 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                      >
+                        <Save className="w-4 h-4" aria-hidden="true" />
+                        {t('common.save')}
+                      </button>
+                    </div>
+                  )}
+                </section>
               </div>
             </div>
           </motion.div>

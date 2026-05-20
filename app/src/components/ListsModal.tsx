@@ -5,7 +5,9 @@ import { X, FolderPlus, Trash2, Edit3, Check, Folder, ChevronRight } from 'lucid
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
 import type { CustomList, FavoriteMovie } from '@/types/movie';
@@ -34,6 +36,7 @@ export function ListsModal() {
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeLists, contentRef });
   useBodyScrollLock(isListsOpen);
+  useSwipeBack({ onBack: closeLists, enabled: isListsOpen });
   useFocusRestore(isListsOpen);
 
   const sortedLists = useMemo(
@@ -102,23 +105,20 @@ export function ListsModal() {
             {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 md:hidden" aria-hidden="true" />
-            <div className="flex items-center justify-between mb-4">
-              <h3 id="lists-modal-title" className="font-bold text-2xl tracking-tight flex items-center gap-2.5">
-                <Folder className="w-6 h-6 text-violet-400" aria-hidden="true" />
-                {t('lists.title')}
-                {customLists.length > 0 && (
-                  <span className="text-white/55 text-sm font-medium">({customLists.length})</span>
-                )}
-              </h3>
-              <button
-                type="button"
-                onClick={closeLists}
-                aria-label={t('lists.close')}
-                className="p-2 rounded-xl hover:bg-white/5 transition-colors"
-              >
-                <X className="w-5 h-5 text-white/70" aria-hidden="true" />
-              </button>
-            </div>
+            <ModalHeader
+              titleId="lists-modal-title"
+              onBack={closeLists}
+              backLabel={t('lists.close')}
+              title={
+                <span className="flex items-center gap-2.5">
+                  <Folder className="w-6 h-6 text-violet-400" aria-hidden="true" />
+                  {t('lists.title')}
+                  {customLists.length > 0 && (
+                    <span className="text-white/55 text-sm font-medium">({customLists.length})</span>
+                  )}
+                </span>
+              }
+            />
 
             <div ref={contentRef} className="overflow-y-auto custom-scroll overscroll-contain flex-1 -mx-2 px-2 space-y-3">
               {/* Bouton/formulaire creation */}

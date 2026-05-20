@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { X as XIcon, Heart, Calendar, Bookmark, Star, Info, ChevronDown, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Heart, Calendar, Bookmark, Star, Info, ChevronDown, RotateCcw, X as XIcon } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
+import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { discoverMovies, getMovieDetails, IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { getCinemaWeeksOfMonth, formatDateISO } from '@/lib/cinema-week';
@@ -70,6 +71,7 @@ export function SwipeMode() {
 
   useBodyScrollLock(isSwipeOpen);
   useFocusRestore(isSwipeOpen);
+  useSwipeBack({ onBack: closeSwipe, enabled: isSwipeOpen });
 
   // Reset l'index quand on change de source ou qu'on rouvre la modale
   useEffect(() => {
@@ -189,35 +191,33 @@ export function SwipeMode() {
         >
           {/* Header */}
           <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-[env(safe-area-inset-top)]">
-            <div className="flex items-center justify-between py-3">
-              <div>
-                <h2 className="text-lg font-bold text-white tracking-tight">{t('swipe.title')}</h2>
+            <div className="flex items-center gap-2 py-3">
+              <button
+                type="button"
+                onClick={closeSwipe}
+                aria-label={t('swipe.close')}
+                className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/75 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold text-white tracking-tight truncate">{t('swipe.title')}</h2>
                 {source && (
-                  <p className="text-xs text-white/55">
+                  <p className="text-xs text-white/55 truncate">
                     {sourceLabel[source]} · {t('swipe.stack', { remaining: Math.max(visibleItems.length - index, 0) })}
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-1.5">
-                {source && (
-                  <button
-                    type="button"
-                    onClick={() => { setSource(null); setIndex(0); setSkipped(new Set()); }}
-                    aria-label={t('swipe.source')}
-                    className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                )}
+              {source && (
                 <button
                   type="button"
-                  onClick={closeSwipe}
-                  aria-label={t('swipe.close')}
+                  onClick={() => { setSource(null); setIndex(0); setSkipped(new Set()); }}
+                  aria-label={t('swipe.source')}
                   className="min-w-11 min-h-11 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors"
                 >
-                  <XIcon className="w-5 h-5" />
+                  <RotateCcw className="w-4 h-4" aria-hidden="true" />
                 </button>
-              </div>
+              )}
             </div>
           </div>
 
