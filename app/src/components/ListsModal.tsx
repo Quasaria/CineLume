@@ -23,7 +23,7 @@ export function ListsModal() {
   const isMobile = useIsMobile();
   const {
     isListsOpen, closeLists, customLists,
-    createList, renameList, deleteList, setListEmoji, reorderFilmInList,
+    createList, renameList, deleteList, setListEmoji, setListFilms,
     removeFilmFromList, openModal,
   } = useAppStore();
 
@@ -213,15 +213,11 @@ export function ListsModal() {
                   onOpenFilm={openFilm}
                   onRemoveFilm={(filmId) => removeFilmFromList(list.id, filmId)}
                   onReorder={(newOrder) => {
-                    // framer-motion Reorder donne la liste entiere reordonnee.
-                    // On compare avec l'ancien pour identifier le film deplace
-                    // et appeler l'action store avec son nouvel index.
-                    newOrder.forEach((film, idx) => {
-                      const oldIdx = list.films.findIndex(f => f.id === film.id);
-                      if (oldIdx !== idx) {
-                        reorderFilmInList(list.id, film.id, idx);
-                      }
-                    });
+                    // framer-motion Reorder donne le nouvel ordre complet.
+                    // On remplace l'array films d'un coup pour eviter les
+                    // bugs de convergence sur reorder complexe (chaque
+                    // mutation intermediaire decalerait les indices suivants).
+                    setListFilms(list.id, newOrder);
                   }}
                   emojiPickerOpen={emojiPickerListId === list.id}
                   onToggleEmojiPicker={() =>
@@ -367,7 +363,8 @@ function ListCard({
         {/* Picker emoji : popover absolu sous le trigger */}
         {emojiPickerOpen && (
           <div
-            className="absolute top-full left-2 z-20 mt-1 p-2 rounded-2xl bg-[#1a1a22] border border-white/10 shadow-2xl shadow-black/40 w-[260px]"
+            className="absolute top-full left-0 sm:left-2 z-20 mt-1 p-2 rounded-2xl bg-[#1a1a22] border border-white/10 shadow-2xl shadow-black/40"
+            style={{ width: 'min(260px, calc(100vw - 32px))' }}
             role="dialog"
             aria-label={t('lists.pickEmoji')}
           >

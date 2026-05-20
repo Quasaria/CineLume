@@ -604,7 +604,10 @@ function QuietHoursRow({ from, to, onChange, t }: QuietHoursRowProps) {
               value={fromStr}
               onChange={(e) => {
                 const m = timeStrToMin(e.target.value);
-                if (m !== null) onChange(m, to);
+                // Si l'user fixe from = to, on bump to de +1 min pour
+                // garantir une plage non-vide (sinon la verif store
+                // notifQuietFrom !== notifQuietTo desactive le calme).
+                if (m !== null) onChange(m, m === to ? (m + 1) % 1440 : to);
               }}
               className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
             />
@@ -616,7 +619,7 @@ function QuietHoursRow({ from, to, onChange, t }: QuietHoursRowProps) {
               value={toStr}
               onChange={(e) => {
                 const m = timeStrToMin(e.target.value);
-                if (m !== null) onChange(from, m);
+                if (m !== null) onChange(m === from ? (from + 1439) % 1440 : from, m);
               }}
               className="bg-white/5 border border-white/10 rounded-md px-2 py-1 text-white tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
             />

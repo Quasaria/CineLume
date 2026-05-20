@@ -65,6 +65,7 @@ interface AppState {
   renameList: (id: string, name: string) => void;
   setListEmoji: (id: string, emoji: string | undefined) => void;
   reorderFilmInList: (listId: string, filmId: number, newIndex: number) => void;
+  setListFilms: (listId: string, films: FavoriteMovie[]) => void;
   deleteList: (id: string) => void;
   addFilmToList: (listId: string, film: FavoriteMovie) => void;
   removeFilmFromList: (listId: string, filmId: number) => void;
@@ -443,6 +444,17 @@ export const useAppStore = create<AppState>((set, get) => ({
       films.splice(insertAt, 0, item);
       return { ...l, films };
     });
+    persistCustomLists(next);
+    set({ customLists: next });
+  },
+
+  // Remplace l'array films d'une liste en un seul shot. Necessaire pour
+  // les reorders multiples : appeler reorderFilmInList en boucle ne
+  // converge pas pour les reordonnements complexes (ex: inverser l'ordre
+  // de [A,B,C,D,E]), car chaque appel mute l'etat et fausse les indices
+  // pour les iterations suivantes.
+  setListFilms: (listId, films) => {
+    const next = get().customLists.map(l => l.id === listId ? { ...l, films: [...films] } : l);
     persistCustomLists(next);
     set({ customLists: next });
   },

@@ -68,6 +68,7 @@
     "swipeRight": "Like",
     "swipeLeft": "Skip",
     "undo": "Undo last swipe",
+    "undoAlreadyIn": "This movie was already in your list",
     "details": "Scroll for details ↓",
     "end": "That's all!",
     "endHint": "You went through all the movies. Pick another source to keep going.",
