@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { X, FolderPlus, Trash2, Edit3, Check, Folder, ChevronRight } from 'lucide-react';
+import { X, FolderPlus, Trash2, Edit3, Check, Folder, ChevronRight, Smile, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -10,20 +11,19 @@ import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
+import { encodeSharedList } from '@/lib/listShare';
 import type { CustomList, FavoriteMovie } from '@/types/movie';
 
-/**
- * Modale "Mes listes" : permet de creer, renommer, supprimer et naviguer
- * dans les listes personnalisees de l'user. Chaque liste est un panel
- * expandable affichant les films en horizontal scroll, avec retrait par
- * film. Sub-modal pour creer/renommer (input inline).
- */
+// Set d'emojis curates pour identifier visuellement les listes. Couvre les
+// usages courants (cinephile, mood, genre, occasion) sans surcharger.
+const EMOJI_PALETTE = ['🎬', '🍿', '⭐', '❤️', '🔥', '😱', '🤣', '💀', '🎭', '🎲', '🌙', '🌟', '🎯', '🎪', '🎨', '🌈', '⚡', '🌶️', '🍷', '🌹'];
+
 export function ListsModal() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const {
     isListsOpen, closeLists, customLists,
-    createList, renameList, deleteList,
+    createList, renameList, deleteList, setListEmoji, reorderFilmInList,
     removeFilmFromList, openModal,
   } = useAppStore();
 
@@ -32,6 +32,7 @@ export function ListsModal() {
   const [editingName, setEditingName] = useState('');
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
+  const [emojiPickerListId, setEmojiPickerListId] = useState<string | null>(null);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeLists, contentRef });
@@ -75,6 +76,24 @@ export function ListsModal() {
   function openFilm(filmId: number) {
     closeLists();
     openModal(filmId);
+  }
+
+  async function shareList(list: CustomList) {
+    const url = encodeSharedList(list);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: list.name, url });
+        return;
+      }
+    } catch {
+      // user a annule navigator.share, on tombe sur le copy
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t('lists.shareCopied'));
+    } catch {
+      toast.error(t('lists.shareError'));
+    }
   }
 
   return (
@@ -121,7 +140,6 @@ export function ListsModal() {
             />
 
             <div ref={contentRef} className="overflow-y-auto custom-scroll overscroll-contain flex-1 -mx-2 px-2 space-y-3">
-              {/* Bouton/formulaire creation */}
               {creating ? (
                 <form
                   onSubmit={(e) => { e.preventDefault(); submitCreate(); }}
@@ -191,8 +209,28 @@ export function ListsModal() {
                   onSubmitEdit={submitEdit}
                   onCancelEdit={() => { setEditingId(null); setEditingName(''); }}
                   onDelete={() => confirmDelete(list)}
+                  onShare={() => shareList(list)}
                   onOpenFilm={openFilm}
                   onRemoveFilm={(filmId) => removeFilmFromList(list.id, filmId)}
+                  onReorder={(newOrder) => {
+                    // framer-motion Reorder donne la liste entiere reordonnee.
+                    // On compare avec l'ancien pour identifier le film deplace
+                    // et appeler l'action store avec son nouvel index.
+                    newOrder.forEach((film, idx) => {
+                      const oldIdx = list.films.findIndex(f => f.id === film.id);
+                      if (oldIdx !== idx) {
+                        reorderFilmInList(list.id, film.id, idx);
+                      }
+                    });
+                  }}
+                  emojiPickerOpen={emojiPickerListId === list.id}
+                  onToggleEmojiPicker={() =>
+                    setEmojiPickerListId(emojiPickerListId === list.id ? null : list.id)
+                  }
+                  onSelectEmoji={(emoji) => {
+                    setListEmoji(list.id, emoji);
+                    setEmojiPickerListId(null);
+                  }}
                   t={t}
                 />
               ))}
@@ -215,24 +253,46 @@ interface ListCardProps {
   onSubmitEdit: () => void;
   onCancelEdit: () => void;
   onDelete: () => void;
+  onShare: () => void;
   onOpenFilm: (id: number) => void;
   onRemoveFilm: (id: number) => void;
+  onReorder: (films: FavoriteMovie[]) => void;
+  emojiPickerOpen: boolean;
+  onToggleEmojiPicker: () => void;
+  onSelectEmoji: (emoji: string | undefined) => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }
 
 function ListCard({
   list, expanded, onToggle, editing, editingName, setEditingName,
-  onStartEdit, onSubmitEdit, onCancelEdit, onDelete, onOpenFilm, onRemoveFilm, t,
+  onStartEdit, onSubmitEdit, onCancelEdit, onDelete, onShare,
+  onOpenFilm, onRemoveFilm, onReorder,
+  emojiPickerOpen, onToggleEmojiPicker, onSelectEmoji, t,
 }: ListCardProps) {
   return (
     <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] overflow-hidden">
-      <div className="flex items-center gap-2 p-3">
+      <div className="flex items-center gap-2 p-3 relative">
+        {/* Trigger emoji : remplace l'icone Folder si emoji defini, sinon
+            affiche un emoji vide / Smile a l'opacite reduite. Click ouvre
+            le picker. */}
+        <button
+          type="button"
+          onClick={onToggleEmojiPicker}
+          aria-label={t('lists.changeEmoji', { name: list.name })}
+          className="shrink-0 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/5 active:bg-white/10 transition-colors text-xl"
+        >
+          {list.emoji ? (
+            <span aria-hidden="true">{list.emoji}</span>
+          ) : (
+            <Folder className="w-4 h-4 text-violet-300" aria-hidden="true" />
+          )}
+        </button>
+
         {editing ? (
           <form
             onSubmit={(e) => { e.preventDefault(); onSubmitEdit(); }}
             className="flex items-center gap-2 flex-1 min-w-0"
           >
-            <Folder className="w-4 h-4 text-violet-300 shrink-0" aria-hidden="true" />
             <input
               type="text"
               value={editingName}
@@ -267,7 +327,6 @@ function ListCard({
               aria-expanded={expanded}
               className="flex-1 flex items-center gap-2 min-w-0 text-left hover:opacity-80 transition-opacity"
             >
-              <Folder className="w-4 h-4 text-violet-300 shrink-0" aria-hidden="true" />
               <span className="text-sm font-semibold text-white truncate flex-1">{list.name}</span>
               <span className="text-xs text-white/45 font-medium">
                 {t('lists.filmCount', { count: list.films.length })}
@@ -276,6 +335,15 @@ function ListCard({
                 className={`w-4 h-4 text-white/40 shrink-0 transition-transform ${expanded ? 'rotate-90' : ''}`}
                 aria-hidden="true"
               />
+            </button>
+            <button
+              type="button"
+              onClick={onShare}
+              aria-label={t('lists.shareAria', { name: list.name })}
+              disabled={list.films.length === 0}
+              className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/40 hover:text-cyan-300 hover:bg-cyan-500/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <Share2 className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -295,6 +363,41 @@ function ListCard({
             </button>
           </>
         )}
+
+        {/* Picker emoji : popover absolu sous le trigger */}
+        {emojiPickerOpen && (
+          <div
+            className="absolute top-full left-2 z-20 mt-1 p-2 rounded-2xl bg-[#1a1a22] border border-white/10 shadow-2xl shadow-black/40 w-[260px]"
+            role="dialog"
+            aria-label={t('lists.pickEmoji')}
+          >
+            <div className="grid grid-cols-5 gap-1">
+              {EMOJI_PALETTE.map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => onSelectEmoji(emoji)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-lg text-xl hover:bg-white/10 active:bg-white/15 transition-colors ${
+                    list.emoji === emoji ? 'bg-violet-500/20 border border-violet-500/50' : ''
+                  }`}
+                  aria-label={emoji}
+                >
+                  <span aria-hidden="true">{emoji}</span>
+                </button>
+              ))}
+            </div>
+            {list.emoji && (
+              <button
+                type="button"
+                onClick={() => onSelectEmoji(undefined)}
+                className="w-full mt-2 text-[11px] text-white/55 hover:text-white py-1.5 rounded-md hover:bg-white/5 transition-colors flex items-center justify-center gap-1"
+              >
+                <Smile className="w-3 h-3" aria-hidden="true" />
+                {t('lists.removeEmoji')}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
@@ -310,17 +413,33 @@ function ListCard({
               {list.films.length === 0 ? (
                 <p className="text-xs text-white/45 italic py-2">{t('lists.listEmpty')}</p>
               ) : (
-                <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
-                  {list.films.map((f) => (
-                    <ListFilmCard
-                      key={f.id}
-                      film={f}
-                      onOpen={() => onOpenFilm(f.id)}
-                      onRemove={() => onRemoveFilm(f.id)}
-                      removeLabel={t('lists.removeFilm', { title: f.title })}
-                    />
-                  ))}
-                </div>
+                <>
+                  <p className="text-[10px] text-white/40 mb-1.5 uppercase tracking-wider font-bold">
+                    {t('lists.reorderHint')}
+                  </p>
+                  <Reorder.Group
+                    axis="x"
+                    values={list.films}
+                    onReorder={onReorder}
+                    className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 list-none"
+                  >
+                    {list.films.map((f) => (
+                      <Reorder.Item
+                        key={f.id}
+                        value={f}
+                        className="shrink-0"
+                        whileDrag={{ scale: 1.05, zIndex: 10 }}
+                      >
+                        <ListFilmCard
+                          film={f}
+                          onOpen={() => onOpenFilm(f.id)}
+                          onRemove={() => onRemoveFilm(f.id)}
+                          removeLabel={t('lists.removeFilm', { title: f.title })}
+                        />
+                      </Reorder.Item>
+                    ))}
+                  </Reorder.Group>
+                </>
               )}
             </div>
           </motion.div>
@@ -339,7 +458,7 @@ interface ListFilmCardProps {
 
 function ListFilmCard({ film, onOpen, onRemove, removeLabel }: ListFilmCardProps) {
   return (
-    <div className="relative shrink-0 w-[80px] group">
+    <div className="relative w-[80px] group cursor-grab active:cursor-grabbing">
       <button
         type="button"
         onClick={onOpen}
@@ -352,7 +471,8 @@ function ListFilmCard({ film, onOpen, onRemove, removeLabel }: ListFilmCardProps
             srcSet={posterSrcSet(film.poster_path)}
             sizes="80px"
             alt=""
-            className="w-full h-full object-cover"
+            draggable={false}
+            className="w-full h-full object-cover pointer-events-none"
             loading="lazy"
           />
         ) : (

@@ -30,6 +30,10 @@ interface AppState {
   blindMode: boolean;
   sortBy: 'popularity' | 'date' | 'rating';
   runtimeMax: number | null;  // minutes, null = no filter
+  // Heures de calme pour les notifications : pas de notif entre ces heures.
+  // null = pas de plage active. Format minute-of-day (0-1439).
+  notifQuietFrom: number | null;
+  notifQuietTo: number | null;
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
   isFavOpen: boolean;
@@ -85,6 +89,7 @@ interface AppState {
   toggleBlindMode: () => void;
   setSortBy: (s: 'popularity' | 'date' | 'rating') => void;
   setRuntimeMax: (n: number | null) => void;
+  setNotifQuiet: (from: number | null, to: number | null) => void;
 }
 
 // Theme : si l'user a explicitement choisi, on respecte. Sinon on suit
@@ -230,6 +235,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!raw) return null;
     const n = parseInt(raw, 10);
     return Number.isFinite(n) && n > 0 ? n : null;
+  })(),
+  notifQuietFrom: (() => {
+    const raw = localStorage.getItem('cinelume_notif_quiet_from');
+    if (!raw) return null;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n >= 0 && n < 1440 ? n : null;
+  })(),
+  notifQuietTo: (() => {
+    const raw = localStorage.getItem('cinelume_notif_quiet_to');
+    if (!raw) return null;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n >= 0 && n < 1440 ? n : null;
   })(),
   currentModalMovieId: null,
   isFilterOpen: false,
@@ -514,5 +531,17 @@ export const useAppStore = create<AppState>((set, get) => ({
       // ignore
     }
     set({ runtimeMax: n });
+  },
+
+  setNotifQuiet: (from, to) => {
+    try {
+      if (from === null) localStorage.removeItem('cinelume_notif_quiet_from');
+      else localStorage.setItem('cinelume_notif_quiet_from', String(from));
+      if (to === null) localStorage.removeItem('cinelume_notif_quiet_to');
+      else localStorage.setItem('cinelume_notif_quiet_to', String(to));
+    } catch {
+      // ignore
+    }
+    set({ notifQuietFrom: from, notifQuietTo: to });
   },
 }));
