@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar, Filter, ChevronDown } from 'lucide-react';
@@ -36,6 +37,11 @@ export function DateNavigator() {
   const [pickerYear, setPickerYear] = useState(selYear);
   const pickerRef = useRef<HTMLDivElement>(null);
   const pickerTriggerRef = useRef<HTMLButtonElement>(null);
+  // Le popup est portale dans document.body pour echapper au containing
+  // block cree par backdrop-filter sur le DateNavigator sticky (sinon
+  // position: fixed se trompe de reference et le popup atterrit hors zone).
+  // popupRef sert pour le click-outside, le pickerRef ne contient plus le popup.
+  const popupRef = useRef<HTMLDivElement>(null);
   const monthGridRef = useRef<HTMLDivElement>(null);
   // Index focuse du clavier dans la grille des 12 mois (pour la nav fleches).
   const [focusedMonth, setFocusedMonth] = useState<number | null>(null);
@@ -165,7 +171,10 @@ export function DateNavigator() {
   useEffect(() => {
     if (!pickerOpen) return;
     function onDown(e: MouseEvent | TouchEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const insideTrigger = pickerRef.current?.contains(target);
+      const insidePopup = popupRef.current?.contains(target);
+      if (!insideTrigger && !insidePopup) {
         setPickerOpen(false);
       }
     }
@@ -256,20 +265,21 @@ export function DateNavigator() {
               />
             </button>
 
-            <AnimatePresence>
+            {createPortal(
+              <AnimatePresence>
               {pickerOpen && pickerPos && (
                 <motion.div
+                  ref={popupRef}
                   initial={{ opacity: 0, scale: 0.96, y: -4 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96, y: -4 }}
                   transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                   role="dialog"
                   aria-label={t('common.today')}
-                  // Position fixed mais mise a jour dynamique via le useEffect
-                  // ci-dessus (scroll + resize). Le popup suit toujours le
-                  // trigger meme quand l'user scroll apres ouverture, et est
-                  // centre horizontalement sur le trigger avec clamp viewport.
-                  className="fixed z-40 rounded-2xl border border-white/10 shadow-2xl shadow-black/40 p-3"
+                  // Portale dans document.body : position fixed se base
+                  // donc sur le viewport (les coords viennent de
+                  // getBoundingClientRect du trigger qui sont viewport-relative).
+                  className="fixed z-50 rounded-2xl border border-white/10 shadow-2xl shadow-black/40 p-3"
                   style={{
                     top: pickerPos.top,
                     left: pickerPos.left,
@@ -356,7 +366,9 @@ export function DateNavigator() {
                   </div>
                 </motion.div>
               )}
-            </AnimatePresence>
+              </AnimatePresence>,
+              document.body,
+            )}
           </div>
 
           <motion.button
