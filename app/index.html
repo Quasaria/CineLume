@@ -4,26 +4,253 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#050508" />
-    <meta name="description" content="CineLume — suis les dernières sorties cinéma et plateformes de streaming, semaine par semaine. Filtres par pays, genre et plateforme." />
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="color-scheme" content="dark light" />
 
+    <!-- SEO : titre court mais avec les mots-cles principaux. 'gratuit'
+         et 'sans pub' sont positionnes pour reassurer + attirer le clic
+         dans les SERP. Garde sous 65 chars pour ne pas tronquer Google. -->
+    <title>CineLume — Sorties cinéma &amp; streaming, gratuit sans pub</title>
+
+    <!-- Description : 150-160 chars optimum. Insiste sur le positionnement
+         premium-gratuit (sans pub ni abonnement) + les usages cles. -->
+    <meta name="description" content="CineLume : l'agenda des sorties cinéma et streaming, semaine par semaine. 100% gratuit, sans pub, sans abonnement, sans inscription. Favoris, listes, notifications." />
+
+    <meta name="keywords" content="sorties cinéma, sorties cinema, agenda cinéma, sorties streaming, sortie film cinéma, calendrier films, tracker films, watchlist cinéma, films à voir, programme cinéma, sortie semaine cinéma, application cinéma gratuite, sans pub, sans abonnement" />
+    <meta name="author" content="CineLume" />
+    <meta name="application-name" content="CineLume" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="googlebot" content="index, follow" />
+
+    <!-- URL canonique : sans le hash router (Google indexe le path, pas le
+         hash). Sur GH Pages : sous-dossier /CineLume/. -->
+    <link rel="canonical" href="https://quasaria.github.io/CineLume/" />
+
+    <!-- Hreflang : meme URL, on signale juste les 2 langues supportees
+         pour que Google diffuse le bon snippet. x-default = fallback. -->
+    <link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/" />
+    <link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/" />
+    <link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/" />
+
+    <!-- Preconnect aux origines critiques pour gagner sur le LCP. TMDB
+         api + images sont sollicitees des le 1er render. -->
+    <link rel="preconnect" href="https://api.themoviedb.org" crossorigin />
+    <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
+    <link rel="dns-prefetch" href="https://api.themoviedb.org" />
+    <link rel="dns-prefetch" href="https://image.tmdb.org" />
+
+    <!-- Open Graph : pour les previews de partage sur Facebook, LinkedIn,
+         iMessage, Slack, Discord. og:image idealement 1200x630 PNG, on
+         retombe sur l'icone SVG (degrade gracieux). -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="CineLume — Sorties cinéma &amp; streaming" />
-    <meta property="og:description" content="Toutes les sorties cinéma et streaming de la semaine, semaine par semaine." />
+    <meta property="og:site_name" content="CineLume" />
+    <meta property="og:title" content="CineLume — Sorties cinéma &amp; streaming, gratuit sans pub" />
+    <meta property="og:description" content="L'agenda des sorties cinéma et streaming, semaine par semaine. 100% gratuit, sans pub, sans abonnement, sans inscription." />
     <meta property="og:url" content="https://quasaria.github.io/CineLume/" />
     <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:image" content="https://quasaria.github.io/CineLume/icon.svg" />
+    <meta property="og:image:alt" content="Logo CineLume" />
 
+    <!-- Twitter Card : 'summary_large_image' donne la grosse vignette
+         dans le tweet preview. -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CineLume — Sorties cinéma &amp; streaming" />
-    <meta name="twitter:description" content="Toutes les sorties cinéma et streaming de la semaine, semaine par semaine." />
+    <meta name="twitter:title" content="CineLume — Sorties cinéma, gratuit sans pub" />
+    <meta name="twitter:description" content="L'agenda des sorties cinéma et streaming. 100% gratuit, sans pub, sans abonnement, sans inscription." />
+    <meta name="twitter:image" content="https://quasaria.github.io/CineLume/icon.svg" />
+    <meta name="twitter:image:alt" content="Logo CineLume" />
 
+    <!-- iOS / PWA splash et home screen -->
     <link rel="icon" type="image/svg+xml" href="icon.svg" />
     <link rel="apple-touch-icon" href="icon.svg" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CineLume" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
 
-    <title>CineLume — Sorties cinéma &amp; streaming</title>
+    <!-- Structured data JSON-LD : declare CineLume comme une WebApplication
+         gratuite, et fournit une FAQ que Google peut afficher en rich
+         snippet sous les SERP. Insiste sur 'no ads / no subscription'
+         dans la description. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://quasaria.github.io/CineLume/#app",
+          "name": "CineLume",
+          "alternateName": "CineLume — Sorties cinéma & streaming",
+          "url": "https://quasaria.github.io/CineLume/",
+          "description": "Application web gratuite et sans publicité pour suivre les sorties cinéma et streaming, créer des listes personnelles, recevoir des notifications de sortie. Aucune inscription requise, aucun abonnement.",
+          "applicationCategory": "EntertainmentApplication",
+          "applicationSubCategory": "MovieDatabase",
+          "operatingSystem": "Web, iOS, Android",
+          "browserRequirements": "Requires JavaScript. Requires HTML5.",
+          "isAccessibleForFree": true,
+          "inLanguage": ["fr", "en"],
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR",
+            "availability": "https://schema.org/InStock"
+          },
+          "featureList": [
+            "Calendrier des sorties cinéma semaine par semaine",
+            "Filtres par pays, genre, plateforme et durée",
+            "Favoris et liste à voir illimités",
+            "Listes personnalisées avec emoji et partage par lien",
+            "Notifications de sortie des films suivis",
+            "Mode sélecteur swipe (à la Tinder) pour découvrir",
+            "Mode aléatoire (Pioche un film) avec filtres",
+            "Import et export Letterboxd (CSV)",
+            "Installation PWA sur écran d'accueil",
+            "Thème clair et sombre, multilingue FR/EN",
+            "Aucune publicité, aucun abonnement, aucune inscription"
+          ],
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://quasaria.github.io/CineLume/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://quasaria.github.io/CineLume/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "CineLume est-il gratuit ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Oui, CineLume est 100% gratuit. Aucune publicité, aucun abonnement, aucun achat intégré. L'application est financée sans modèle commercial : pas de tracking, pas de vente de données."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Faut-il créer un compte pour utiliser CineLume ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Non. Aucune inscription n'est requise. Tes favoris, ta liste à voir, tes listes personnalisées et tes préférences sont stockés localement dans ton navigateur, sans aucun serveur tiers."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "D'où viennent les données des films ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Les données proviennent de TMDB (The Movie Database), une base de films communautaire et ouverte. Les disponibilités de streaming proviennent de JustWatch via TMDB."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Comment recevoir des notifications de sortie ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Ajoute des films à tes favoris, puis active les notifications dans Paramètres. Tu peux configurer des heures de calme pour ne pas être dérangé la nuit. Les notifications fonctionnent sur navigateur et en mode PWA installé."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Mes données sont-elles privées ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Oui. Aucune donnée personnelle n'est envoyée à un serveur. Tout est stocké dans localStorage côté navigateur. Tu peux exporter ou importer tes listes à tout moment via le format CSV Letterboxd ou un lien de partage."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Puis-je installer CineLume sur mon téléphone ?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Oui. CineLume est une Progressive Web App (PWA) installable sur iOS, Android et desktop. Sur iOS, utilise 'Ajouter à l'écran d'accueil' depuis Safari. Sur Android et desktop, le navigateur propose un bouton d'installation."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      /* Helper sr-only : visuellement invisible (ne change pas l'UI) mais
+         reste dans l'arbre DOM pour les screen readers et les crawlers SEO.
+         Note : on l'inline ici pour que ca marche avant que Tailwind ne soit
+         charge cote JS. */
+      .seo-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Contenu SEO statique pour les crawlers : invisible visuellement
+         (sr-only) mais present dans le HTML servi. Permet aux moteurs qui
+         n'executent pas le JS (Bing, DuckDuckGo, IA crawlers...) de
+         comprendre le contenu et le positionnement de l'app. -->
+    <div class="seo-only" aria-hidden="true">
+      <h1>CineLume — Sorties cinéma et streaming gratuit, sans publicité ni abonnement</h1>
+
+      <h2>Application web pour suivre les sorties de films au cinéma et sur les plateformes de streaming</h2>
+
+      <p>
+        CineLume est une application web et PWA gratuite qui te permet de suivre toutes les sorties cinéma et streaming, semaine par semaine. L'app est financée sans modèle commercial : <strong>aucune publicité, aucun abonnement, aucun achat intégré, aucune inscription</strong>. Tes données restent sur ton appareil.
+      </p>
+
+      <h2>Fonctionnalités principales</h2>
+      <ul>
+        <li>Calendrier des sorties cinéma semaine par semaine, par pays</li>
+        <li>Recherche de films, acteurs et réalisateurs</li>
+        <li>Page personne dédiée avec biographie et filmographie complète</li>
+        <li>Favoris (♥) et liste à voir (signet) illimités</li>
+        <li>Listes personnalisées avec emoji, drag-to-reorder, et partage par lien</li>
+        <li>Mode sélecteur swipe : carte par carte, à la Tinder</li>
+        <li>Mode "Pioche un film" pour choisir au hasard quand on hésite</li>
+        <li>Notifications de sortie pour tes favoris (avec heures de calme)</li>
+        <li>Disponibilité sur les plateformes de streaming (Netflix, Prime, Disney+, etc.) via JustWatch</li>
+        <li>Films similaires recommandés</li>
+        <li>Bandes-annonces YouTube intégrées</li>
+        <li>Ajout au calendrier (fichier .ics) des sorties à venir</li>
+        <li>Import et export de la watchlist au format Letterboxd CSV</li>
+        <li>Mode spoiler-free (titre et poster floutés jusqu'au tap)</li>
+        <li>Multilingue français et anglais</li>
+        <li>Thème clair et sombre adaptatif</li>
+        <li>Mode hors-ligne via Service Worker (PWA)</li>
+        <li>Installable sur écran d'accueil iOS, Android et desktop</li>
+      </ul>
+
+      <h2>Pourquoi CineLume ?</h2>
+      <p>
+        Contrairement à beaucoup d'applications cinéma, CineLume ne contient <strong>aucune publicité</strong>, ne nécessite <strong>aucun abonnement payant</strong> ni <strong>compte utilisateur</strong>. Tu accèdes immédiatement à toutes les fonctionnalités premium : filtres avancés, listes personnalisées, notifications, partage, import/export. Tes données restent locales (stockées dans le navigateur).
+      </p>
+
+      <h2>Données et sources</h2>
+      <p>
+        Les informations sur les films (titres, dates de sortie, synopsis, casting, posters, bandes-annonces) proviennent de TMDB (The Movie Database), une base de films communautaire et ouverte. Les disponibilités sur les plateformes de streaming sont fournies par JustWatch via TMDB.
+      </p>
+
+      <h2>Langues supportées</h2>
+      <p>CineLume est disponible en français et en anglais. La langue se base sur les préférences de ton navigateur et peut être changée dans Paramètres.</p>
+    </div>
+
+    <noscript>
+      <div style="padding: 24px; max-width: 700px; margin: 40px auto; color: #fff; background: #111; border-radius: 12px; font-family: sans-serif;">
+        <h1 style="margin-top:0">CineLume — Sorties cinéma &amp; streaming</h1>
+        <p>CineLume est une application web qui nécessite JavaScript pour fonctionner. Active JavaScript dans ton navigateur pour accéder à l'agenda des sorties cinéma et streaming, créer tes listes, suivre tes films favoris et plus encore.</p>
+        <p><strong>100% gratuit, sans publicité, sans abonnement, sans inscription.</strong></p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

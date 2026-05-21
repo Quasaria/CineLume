@@ -11,22 +11,44 @@ export default defineConfig(({ command }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'icon-maskable.svg', 'robots.txt'],
+      includeAssets: ['icon.svg', 'icon-maskable.svg', 'robots.txt', 'sitemap.xml'],
       manifest: {
-        name: 'CineLume — Sorties cinéma & streaming',
+        // Manifest enrichi pour le SEO PWA + l'experience d'install.
+        // 'name' long pour l'install prompt, 'short_name' court pour
+        // l'icone home screen.
+        name: 'CineLume — Sorties cinéma & streaming, gratuit sans pub',
         short_name: 'CineLume',
-        description: 'Suis les dernières sorties cinéma et plateformes de streaming, semaine par semaine.',
+        description: 'Application web gratuite pour suivre les sorties cinéma et streaming, semaine par semaine. Sans pub, sans abonnement, sans inscription. Favoris, listes, notifications.',
         theme_color: '#050508',
         background_color: '#050508',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui', 'browser'],
         orientation: 'portrait',
         scope: '/CineLume/',
-        start_url: '/CineLume/',
+        start_url: '/CineLume/?utm_source=pwa',
+        id: '/CineLume/',
         lang: 'fr',
-        categories: ['entertainment', 'lifestyle'],
+        dir: 'ltr',
+        categories: ['entertainment', 'lifestyle', 'utilities'],
         icons: [
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
           { src: 'icon-maskable.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+        ],
+        // Shortcuts : raccourcis longue-presse sur l'icone home-screen.
+        // Permettent l'acces direct aux fonctions cles depuis l'OS.
+        shortcuts: [
+          {
+            name: 'Mes favoris',
+            short_name: 'Favoris',
+            description: 'Voir mes films favoris',
+            url: '/CineLume/?utm_source=pwa_shortcut_favorites',
+          },
+          {
+            name: 'Pioche un film',
+            short_name: 'Pioche',
+            description: 'Tirer un film au hasard dans mes listes',
+            url: '/CineLume/?utm_source=pwa_shortcut_picker',
+          },
         ],
       },
       workbox: {

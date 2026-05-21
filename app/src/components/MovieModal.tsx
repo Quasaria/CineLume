@@ -17,6 +17,7 @@ import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useDragToClose } from '@/hooks/useDragToClose';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
+import { setDocumentTitleFromMovie } from '@/hooks/useDocumentTitle';
 import type { Movie } from '@/types/movie';
 
 interface MovieModalProps {
@@ -100,6 +101,16 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
   });
 
   const movie = details;
+
+  // Met a jour le <title> du document avec le titre du film charge. Permet
+  // au partage de lien (iMessage, Slack...) d'afficher 'Dune — CineLume' au
+  // lieu du titre generique. Reset par useDocumentTitle au close.
+  useEffect(() => {
+    if (movie?.title) {
+      setDocumentTitleFromMovie(movie.title, lang);
+    }
+  }, [movie?.title, lang]);
+
   useBodyScrollLock(currentModalMovieId !== null);
   useFocusRestore(currentModalMovieId !== null);
   // Swipe depuis le bord gauche : ferme la modale (et revient au film

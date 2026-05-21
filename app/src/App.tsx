@@ -14,6 +14,7 @@ import { useIsTouchDevice } from '@/hooks/useIsTouchDevice';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { useReleaseNotifications } from '@/hooks/useReleaseNotifications';
 import { useSharedListImport } from '@/hooks/useSharedListImport';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
 import { HeroBackdrop } from '@/components/HeroBackdrop';
@@ -85,6 +86,7 @@ export default function App() {
   useModalUrlSync();
   useReleaseNotifications();
   useSharedListImport();
+  useDocumentTitle();
 
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
     queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, sortBy, runtimeMax, lang],

@@ -1,3 +1,40 @@
+# CineLume — Application gratuite de suivi des sorties cinéma
+# 100% gratuit, sans publicité, sans abonnement, sans inscription
+
 User-agent: *
 Allow: /
+
+# Bloque les URLs de partage / modale pour eviter le duplicate content
+# (le contenu reel est sur la home, les hashs sont juste des deep-links).
+Disallow: /*#share/
+Disallow: /*#/share/
+Disallow: /*#/film/
+
+# Crawlers IA : on autorise volontairement (l'app est gratuite et open
+# d'usage, on accepte qu'elle soit citee).
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# Crawlers agressifs : on limite leur fenetre de crawl
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 10
+
 Sitemap: https://quasaria.github.io/CineLume/sitemap.xml
