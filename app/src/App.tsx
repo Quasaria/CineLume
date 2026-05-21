@@ -88,6 +88,20 @@ export default function App() {
   useSharedListImport();
   useDocumentTitle();
 
+  // Sitelinks search box Google : si l'user arrive via ?q=... (declare
+  // dans le JSON-LD SearchAction du index.html), on initialise la
+  // recherche avec le terme. One-shot a l'init.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q && q.trim().length >= 2) {
+      useAppStore.getState().setSearchQuery(q.trim());
+      // Clean l'URL (sans recharger) pour ne pas re-trigger sur reload
+      const cleanUrl = window.location.pathname + window.location.hash;
+      history.replaceState(null, '', cleanUrl);
+    }
+  }, []);
+
   const discoverQuery = useInfiniteQuery<DiscoverResponse, Error>({
     queryKey: ['movies', selYear, selMonth, selWeek, selRegion, selGenre, selReleaseMode, selProvider, selectedPerson?.id ?? null, sortBy, runtimeMax, lang],
     queryFn: async ({ pageParam = 1, signal }) => {

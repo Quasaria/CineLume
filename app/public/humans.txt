@@ -1,0 +1,20 @@
+/* TEAM */
+Project: CineLume
+Site: https://quasaria.github.io/CineLume/
+Source: https://github.com/Quasaria/CineLume
+License: MIT
+
+/* THANKS */
+TMDB (The Movie Database) — https://www.themoviedb.org/
+JustWatch — https://www.justwatch.com/
+
+/* SITE */
+Standards: HTML5, CSS3, ES2022, PWA
+Components: React 19, Vite 7, Tailwind CSS, Zustand, TanStack Query, Framer Motion, i18next
+Software: Service Worker (Workbox), HashRouter, Sonner
+IDE: Claude Code
+
+/* ABOUT */
+100% gratuit, sans publicite, sans abonnement, sans inscription.
+Aucun tracking, aucun cookie tiers, aucune telemetrie.
+Donnees stockees localement dans le navigateur (localStorage).
