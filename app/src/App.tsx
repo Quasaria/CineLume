@@ -38,6 +38,7 @@ const ListsModal = lazy(() => import('@/components/ListsModal').then((m) => ({ d
 const SettingsModal = lazy(() => import('@/components/SettingsModal').then((m) => ({ default: m.SettingsModal })));
 const PickerModal = lazy(() => import('@/components/PickerModal').then((m) => ({ default: m.PickerModal })));
 const SwipeMode = lazy(() => import('@/components/SwipeMode').then((m) => ({ default: m.SwipeMode })));
+const WatchHistoryModal = lazy(() => import('@/components/WatchHistoryModal').then((m) => ({ default: m.WatchHistoryModal })));
 
 interface DiscoverResponse {
   results: Movie[];
@@ -73,6 +74,7 @@ export default function App() {
   const isSettingsOpen = useAppStore((s) => s.isSettingsOpen);
   const isPickerOpen = useAppStore((s) => s.isPickerOpen);
   const isSwipeOpen = useAppStore((s) => s.isSwipeOpen);
+  const isWatchHistoryOpen = useAppStore((s) => s.isWatchHistoryOpen);
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
   const { push: pushSearchHistory } = useSearchHistory();
 
@@ -81,7 +83,7 @@ export default function App() {
   useEffect(() => {
     if (debouncedSearch && !selectedPerson) pushSearchHistory(debouncedSearch);
   }, [debouncedSearch, selectedPerson, pushSearchHistory]);
-  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen;
+  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen || isWatchHistoryOpen;
 
   useModalUrlSync();
   useReleaseNotifications();
@@ -268,6 +270,7 @@ export default function App() {
       import('@/components/SettingsModal');
       import('@/components/PickerModal');
       import('@/components/SwipeMode');
+      import('@/components/WatchHistoryModal');
     });
   }, []);
 
@@ -282,6 +285,7 @@ export default function App() {
         if (store.isSettingsOpen) store.closeSettings();
         if (store.isPickerOpen) store.closePicker();
         if (store.isSwipeOpen) store.closeSwipe();
+        if (store.isWatchHistoryOpen) store.closeWatchHistory();
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -403,6 +407,7 @@ export default function App() {
           <SettingsModal />
           <PickerModal />
           <SwipeMode />
+          <WatchHistoryModal />
         </Suspense>
         <Toaster
           position={isMobile ? 'bottom-center' : 'bottom-right'}

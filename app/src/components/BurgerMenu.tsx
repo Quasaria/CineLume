@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Menu, Folder, Settings as SettingsIcon, X, Shuffle, Layers } from 'lucide-react';
+import { Menu, Folder, Settings as SettingsIcon, X, Shuffle, Layers, CalendarHeart } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 
 /**
@@ -15,7 +15,9 @@ export function BurgerMenu() {
   const openSettings = useAppStore((s) => s.openSettings);
   const openPicker = useAppStore((s) => s.openPicker);
   const openSwipe = useAppStore((s) => s.openSwipe);
+  const openWatchHistory = useAppStore((s) => s.openWatchHistory);
   const customListsCount = useAppStore((s) => s.customLists.length);
+  const seenCount = useAppStore((s) => s.seen.length);
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -89,6 +91,14 @@ export function BurgerMenu() {
               label={t('nav.swipe')}
               description={t('nav.swipeDesc')}
               onClick={() => handleItem(openSwipe)}
+              accent="violet"
+            />
+            <MenuItem
+              icon={CalendarHeart}
+              label={t('nav.watchHistory')}
+              description={t('nav.watchHistoryDesc')}
+              badge={seenCount > 0 ? seenCount : undefined}
+              onClick={() => handleItem(openWatchHistory)}
               accent="violet"
             />
             <MenuItem
