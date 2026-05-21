@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://quasaria.github.io/CineLume/</loc>
-    <lastmod>2026-05-21</lastmod>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/" />
@@ -16,19 +16,19 @@
   </url>
   <url>
     <loc>https://quasaria.github.io/CineLume/about.html</loc>
-    <lastmod>2026-05-21</lastmod>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://quasaria.github.io/CineLume/privacy.html</loc>
-    <lastmod>2026-05-21</lastmod>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://quasaria.github.io/CineLume/press.html</loc>
-    <lastmod>2026-05-21</lastmod>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

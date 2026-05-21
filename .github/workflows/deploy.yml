@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Cron hebdomadaire : rebuild + redeploy chaque dimanche a 03h00 UTC
+  # (05h00 a Paris en heure d'ete, 04h00 en heure d'hiver). Permet a la
+  # date dateModified injectee par le plugin Vite injectBuildDate de
+  # rester toujours fraiche (max 7 jours d'age) sans intervention manuelle.
+  # Aucun changement de contenu requis : le site est juste re-build pour
+  # mettre a jour la date.
+  schedule:
+    - cron: '0 3 * * 0'
 
 permissions:
   contents: read
