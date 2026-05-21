@@ -19,17 +19,89 @@
     <lastmod>__BUILD_DATE_ISO__</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/about.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/about.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/about.html" />
+  </url>
+  <url>
+    <loc>https://quasaria.github.io/CineLume/en/about.html</loc>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/about.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/about.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/about.html" />
   </url>
   <url>
     <loc>https://quasaria.github.io/CineLume/privacy.html</loc>
     <lastmod>__BUILD_DATE_ISO__</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/privacy.html" />
+  </url>
+  <url>
+    <loc>https://quasaria.github.io/CineLume/en/privacy.html</loc>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/privacy.html" />
   </url>
   <url>
     <loc>https://quasaria.github.io/CineLume/press.html</loc>
     <lastmod>__BUILD_DATE_ISO__</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/press.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/press.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/press.html" />
+  </url>
+  <url>
+    <loc>https://quasaria.github.io/CineLume/en/press.html</loc>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/press.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/press.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/press.html" />
+  </url>
+  <url>
+    <loc>https://quasaria.github.io/CineLume/guide.html</loc>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/guide.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/guide.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/guide.html" />
+  </url>
+  <url>
+    <loc>https://quasaria.github.io/CineLume/en/guide.html</loc>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/guide.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/guide.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/guide.html" />
+  </url>
+  <url>
+    <loc>https://quasaria.github.io/CineLume/changelog.html</loc>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/changelog.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/changelog.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/changelog.html" />
+  </url>
+  <url>
+    <loc>https://quasaria.github.io/CineLume/en/changelog.html</loc>
+    <lastmod>__BUILD_DATE_ISO__</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/changelog.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/changelog.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/changelog.html" />
   </url>
 </urlset>

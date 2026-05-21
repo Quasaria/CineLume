@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050508" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>Guide d'utilisation — CineLume, agenda cinéma gratuit</title>
+    <meta name="description" content="Comment utiliser CineLume en 5 minutes : trouver les sorties, créer des favoris, partager une liste, recevoir des notifications, importer depuis Letterboxd, installer la PWA." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://quasaria.github.io/CineLume/guide.html" />
+    <link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/guide.html" />
+    <link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/guide.html" />
+    <link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/guide.html" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Guide CineLume — démarrer en 5 minutes" />
+    <meta property="og:description" content="Tout ce qu'il faut savoir pour utiliser CineLume : sorties, favoris, listes, notifications, import Letterboxd, installation." />
+    <meta property="og:url" content="https://quasaria.github.io/CineLume/guide.html" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:image" content="https://quasaria.github.io/CineLume/og-image.png" />
+    <meta property="article:published_time" content="2025-10-01" />
+    <meta property="article:modified_time" content="__BUILD_DATE_ISO__" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": "https://quasaria.github.io/CineLume/guide.html#article",
+          "headline": "Guide d'utilisation de CineLume",
+          "name": "Guide d'utilisation — CineLume",
+          "description": "Comment utiliser CineLume : trouver les sorties, créer des favoris, partager une liste, recevoir des notifications.",
+          "url": "https://quasaria.github.io/CineLume/guide.html",
+          "inLanguage": "fr",
+          "datePublished": "2025-10-01",
+          "dateModified": "__BUILD_DATE_ISO__",
+          "wordCount": 1200,
+          "author": { "@id": "https://quasaria.github.io/CineLume/#author" },
+          "publisher": { "@id": "https://quasaria.github.io/CineLume/#publisher" },
+          "mainEntityOfPage": "https://quasaria.github.io/CineLume/guide.html",
+          "image": "https://quasaria.github.io/CineLume/og-image.png",
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://quasaria.github.io/CineLume/" },
+              { "@type": "ListItem", "position": 2, "name": "Guide", "item": "https://quasaria.github.io/CineLume/guide.html" }
+            ]
+          }
+        },
+        {
+          "@type": "HowTo",
+          "@id": "https://quasaria.github.io/CineLume/guide.html#howto-start",
+          "name": "Démarrer avec CineLume en 5 minutes",
+          "totalTime": "PT5M",
+          "step": [
+            { "@type": "HowToStep", "position": 1, "name": "Ouvrir l'app", "text": "Va sur quasaria.github.io/CineLume. Aucune inscription, l'app est immédiatement utilisable.", "url": "https://quasaria.github.io/CineLume/guide.html#demarrer" },
+            { "@type": "HowToStep", "position": 2, "name": "Parcourir les sorties", "text": "Le calendrier affiche les sorties cinéma de la semaine courante. Utilise les flèches ou le picker mois pour naviguer.", "url": "https://quasaria.github.io/CineLume/guide.html#sorties" },
+            { "@type": "HowToStep", "position": 3, "name": "Ajouter aux favoris", "text": "Tape le cœur sur une carte de film pour l'ajouter à tes favoris. Tape le marque-page pour la watchlist.", "url": "https://quasaria.github.io/CineLume/guide.html#favoris" },
+            { "@type": "HowToStep", "position": 4, "name": "Activer les notifications", "text": "Ouvre Paramètres → Notifications → Activer. Tu recevras une alerte le jour de sortie de tes favoris.", "url": "https://quasaria.github.io/CineLume/guide.html#notifications" }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      :root { color-scheme: dark light; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: #050508; color: #fafafa; font-family: -apple-system, 'Inter', system-ui, sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+      @media (prefers-color-scheme: light) { body { background: #fafafa; color: #0a0a0f; } }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+      header nav { font-size: 14px; opacity: 0.6; margin-bottom: 32px; }
+      header nav a { color: inherit; text-decoration: none; }
+      h1 { font-size: 36px; line-height: 1.15; letter-spacing: -1px; margin: 0 0 8px; font-weight: 800; }
+      .meta { font-size: 13px; opacity: 0.55; margin-bottom: 32px; }
+      h2 { font-size: 22px; margin: 40px 0 12px; font-weight: 700; letter-spacing: -0.3px; }
+      h3 { font-size: 17px; margin: 24px 0 8px; font-weight: 700; }
+      h2:target, h3:target { scroll-margin-top: 24px; color: #a78bfa; }
+      p, li { margin: 0 0 12px; }
+      a { color: #a78bfa; }
+      ul, ol { padding-left: 22px; }
+      .toc { padding: 16px 20px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); margin: 24px 0; }
+      .toc ol { margin: 0; padding-left: 18px; }
+      .step { display: flex; gap: 12px; margin: 12px 0; align-items: flex-start; }
+      .step-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+      footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; opacity: 0.55; }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <nav><a href="/CineLume/">← CineLume</a> · <a href="/CineLume/en/guide.html">English version</a></nav>
+        <h1>Guide d'utilisation de CineLume</h1>
+        <p class="meta">Démarrer en 5 minutes · Mis à jour le __BUILD_DATE_HUMAN_FR__</p>
+      </header>
+
+      <main>
+        <div class="toc">
+          <strong>Sommaire</strong>
+          <ol>
+            <li><a href="#demarrer">Démarrer</a></li>
+            <li><a href="#sorties">Trouver les sorties</a></li>
+            <li><a href="#favoris">Favoris et watchlist</a></li>
+            <li><a href="#listes">Listes personnalisées</a></li>
+            <li><a href="#notifications">Notifications</a></li>
+            <li><a href="#modes">Modes Swipe et Pioche</a></li>
+            <li><a href="#letterboxd">Import depuis Letterboxd</a></li>
+            <li><a href="#install">Installer sur le téléphone</a></li>
+          </ol>
+        </div>
+
+        <h2 id="demarrer">1. Démarrer</h2>
+        <p>Ouvre simplement <a href="https://quasaria.github.io/CineLume/">quasaria.github.io/CineLume</a>. Aucune inscription, aucun email, aucun mot de passe. L'app est immédiatement utilisable.</p>
+        <p>Au premier lancement tu vois le calendrier des sorties cinéma de la semaine courante pour la France. Tu peux changer le pays via le bouton Filtres en haut.</p>
+
+        <h2 id="sorties">2. Trouver les sorties</h2>
+        <p>La barre de navigation centrale affiche le mois et l'année courants. Tu peux :</p>
+        <ul>
+          <li>Taper le mois pour ouvrir un picker (grille de 12 mois + flèches d'année)</li>
+          <li>Utiliser les flèches gauche/droite pour avancer mois par mois</li>
+          <li>Cliquer sur une semaine (S1, S2, S3...) pour la sélectionner</li>
+          <li>Cliquer sur l'icône calendrier pour revenir à aujourd'hui</li>
+        </ul>
+        <p>Le bouton Filtres ouvre un panneau pour affiner par <strong>genre</strong>, <strong>plateforme de streaming</strong> (Netflix, Prime Video, Disney+, etc.), <strong>type de sortie</strong> (cinéma, streaming, festival) et <strong>durée maximale</strong>.</p>
+        <p>Tu peux aussi <strong>chercher</strong> n'importe quel film, acteur ou réalisateur via la loupe en haut à droite. L'historique des 8 dernières recherches reste accessible.</p>
+
+        <h2 id="favoris">3. Favoris et watchlist</h2>
+        <p>Sur chaque carte de film, deux boutons en haut à droite :</p>
+        <ul>
+          <li><strong>Cœur (♥)</strong> = ajouter aux Favoris. Les favoris déclenchent les notifications de sortie.</li>
+          <li><strong>Marque-page</strong> = ajouter à la Watchlist (à voir plus tard).</li>
+        </ul>
+        <p>Pour consulter tes listes, clique les icônes correspondantes dans la navbar. Les deux onglets sont dans la même modale "Mes films" — tu switches entre eux sans fermer.</p>
+        <p>Les films sont automatiquement groupés par section : <strong>Cette semaine</strong>, <strong>À venir</strong>, <strong>Sortis</strong>, <strong>Date inconnue</strong>.</p>
+
+        <h2 id="listes">4. Listes personnalisées</h2>
+        <p>Pour des collections thématiques (Date night, Marathon Tarantino, À montrer à mes parents...), utilise les Listes :</p>
+        <div class="step"><span class="step-num">1</span><div>Menu burger → <strong>Mes listes</strong></div></div>
+        <div class="step"><span class="step-num">2</span><div>Bouton <strong>Nouvelle liste</strong>, donne-lui un nom</div></div>
+        <div class="step"><span class="step-num">3</span><div>Clique l'icône emoji à gauche du nom pour choisir un emoji (🎬 🍿 ⭐ ❤️...)</div></div>
+        <div class="step"><span class="step-num">4</span><div>Sur la modale d'un film, bouton <strong>Ajouter à une liste</strong></div></div>
+        <div class="step"><span class="step-num">5</span><div>Dans la liste expandée, drague la <strong>poignée GripVertical</strong> en bas-gauche d'un poster pour réorganiser</div></div>
+        <div class="step"><span class="step-num">6</span><div>Bouton <strong>Partager</strong> (icône lien) génère une URL que tu peux envoyer. Le destinataire l'ouvre, la liste s'importe chez lui en quelques secondes.</div></div>
+
+        <h2 id="notifications">5. Notifications de sortie</h2>
+        <p>Pour être prévenu le jour où tes films favoris sortent :</p>
+        <ol>
+          <li>Ajoute des films à tes Favoris (♥)</li>
+          <li>Paramètres → section Notifications → <strong>Activer</strong></li>
+          <li>Autorise dans la popup navigateur</li>
+          <li>(Optionnel) Configure les <strong>heures de calme</strong> (par exemple 22h-8h) pour ne pas être dérangé la nuit</li>
+        </ol>
+        <p>Les notifications fonctionnent en navigateur ouvert et en mode PWA installée. Aucun service push tiers : tout est local (API Notification du navigateur).</p>
+
+        <h2 id="modes">6. Modes Swipe et Pioche</h2>
+        <p>Quand tu hésites sur quel film regarder, deux modes alternatifs sont accessibles depuis le menu burger :</p>
+
+        <h3>Pioche un film</h3>
+        <p>Modale qui tire au sort un film dans la source choisie (Watchlist / Favoris / Toutes mes listes). Filtre optionnel par genre. Bouton "Une autre" pour re-piocher, "Voir les détails" pour ouvrir la modale film.</p>
+
+        <h3>Mode sélecteur (Swipe)</h3>
+        <p>À la Tinder : choisis une source (Cette semaine / Watchlist / Favoris). Une carte par carte :</p>
+        <ul>
+          <li><strong>Swipe à droite</strong> ou bouton cœur = ajouter à la watchlist</li>
+          <li><strong>Swipe à gauche</strong> ou bouton X = passer</li>
+          <li>Bouton <strong>Annuler</strong> ramène la dernière carte si erreur</li>
+          <li>Sur desktop : flèches gauche/droite du clavier marchent aussi</li>
+          <li>Scrolle vers le bas dans une carte pour voir synopsis, genres, réalisateur</li>
+        </ul>
+
+        <h2 id="letterboxd">7. Import depuis Letterboxd</h2>
+        <p>Si tu utilises déjà Letterboxd et veux migrer ta watchlist :</p>
+        <div class="step"><span class="step-num">1</span><div>Sur Letterboxd : Settings → Import &amp; Export → télécharge ton CSV</div></div>
+        <div class="step"><span class="step-num">2</span><div>Dans CineLume : Paramètres → section Letterboxd → <strong>Importer</strong></div></div>
+        <div class="step"><span class="step-num">3</span><div>Sélectionne le fichier CSV. La progression s'affiche en temps réel avec le titre courant.</div></div>
+        <div class="step"><span class="step-num">4</span><div>À la fin, un rapport détaille les films non matchés (titres ambigus ou inconnus de TMDB)</div></div>
+        <p>Tu peux aussi exporter ta watchlist CineLume au format Letterboxd CSV via le bouton <strong>Exporter</strong> de la même section, pour migrer ailleurs si tu veux.</p>
+
+        <h2 id="install">8. Installer CineLume sur ton téléphone</h2>
+        <p>CineLume est une Progressive Web App, installable sur tous les appareils :</p>
+        <h3>Sur iPhone / iPad (Safari)</h3>
+        <ol>
+          <li>Ouvre CineLume dans Safari</li>
+          <li>Tape l'icône Partager (carré avec flèche)</li>
+          <li>Sélectionne <strong>Ajouter à l'écran d'accueil</strong></li>
+        </ol>
+        <h3>Sur Android (Chrome)</h3>
+        <p>Chrome propose automatiquement un bouton "Installer l'app" en bas de l'écran après quelques visites, ou via le menu ⋮ → <strong>Installer l'app</strong>.</p>
+        <h3>Sur desktop (Chrome / Edge)</h3>
+        <p>Une icône <strong>Installer</strong> apparaît à droite de la barre d'adresse. Sinon, menu ⋮ → <strong>Installer CineLume</strong>.</p>
+        <p>Une fois installée, CineLume se lance comme une app native (sans la barre du navigateur). Long-presse l'icône sur l'écran d'accueil pour accéder aux raccourcis : <strong>Favoris</strong> et <strong>Pioche un film</strong>.</p>
+
+        <footer>
+          <p>Liens : <a href="/CineLume/">Accueil</a> · <a href="/CineLume/about.html">À propos</a> · <a href="/CineLume/privacy.html">Vie privée</a> · <a href="/CineLume/press.html">Press kit</a> · <a href="/CineLume/changelog.html">Changelog</a> · <a href="https://github.com/Quasaria/CineLume">GitHub</a></p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

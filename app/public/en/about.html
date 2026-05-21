@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050508" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>About — CineLume, free movie release tracker no ads</title>
+    <meta name="description" content="The story of CineLume: why this free movie release tracking app, with no ads, no subscription, no sign-up, no backend. Open source, MIT licensed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://quasaria.github.io/CineLume/en/about.html" />
+    <link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/about.html" />
+    <link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/about.html" />
+    <link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/about.html" />
+    <link rel="icon" type="image/svg+xml" href="../icon.svg" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="About — CineLume" />
+    <meta property="og:description" content="The origin of CineLume and the technical choices that make it an ad-free, subscription-free, tracking-free movie tracker." />
+    <meta property="og:url" content="https://quasaria.github.io/CineLume/en/about.html" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="fr_FR" />
+    <meta property="og:image" content="https://quasaria.github.io/CineLume/og-image.png" />
+    <meta property="article:published_time" content="2025-10-01" />
+    <meta property="article:modified_time" content="__BUILD_DATE_ISO__" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "@id": "https://quasaria.github.io/CineLume/en/about.html#about",
+      "url": "https://quasaria.github.io/CineLume/en/about.html",
+      "name": "About CineLume",
+      "description": "Story, motivations and technical choices of CineLume.",
+      "inLanguage": "en",
+      "datePublished": "2025-10-01",
+      "dateModified": "__BUILD_DATE_ISO__",
+      "mainEntity": { "@id": "https://quasaria.github.io/CineLume/#app" },
+      "isPartOf": { "@id": "https://quasaria.github.io/CineLume/#website" },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://quasaria.github.io/CineLume/" },
+          { "@type": "ListItem", "position": 2, "name": "About", "item": "https://quasaria.github.io/CineLume/en/about.html" }
+        ]
+      }
+    }
+    </script>
+
+    <style>
+      :root { color-scheme: dark light; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: #050508; color: #fafafa; font-family: -apple-system, 'Inter', system-ui, sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+      @media (prefers-color-scheme: light) { body { background: #fafafa; color: #0a0a0f; } }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+      header nav { font-size: 14px; opacity: 0.6; margin-bottom: 32px; }
+      header nav a { color: inherit; text-decoration: none; }
+      h1 { font-size: 36px; line-height: 1.15; letter-spacing: -1px; margin: 0 0 8px; font-weight: 800; }
+      .meta { font-size: 13px; opacity: 0.55; margin-bottom: 32px; }
+      h2 { font-size: 22px; margin: 40px 0 12px; font-weight: 700; letter-spacing: -0.3px; }
+      h3 { font-size: 17px; margin: 24px 0 8px; font-weight: 700; }
+      p { margin: 0 0 16px; }
+      a { color: #a78bfa; }
+      ul, ol { padding-left: 22px; }
+      li { margin-bottom: 6px; }
+      .cta { display: inline-block; margin-top: 24px; padding: 12px 20px; background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; border-radius: 12px; text-decoration: none; font-weight: 600; }
+      footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; opacity: 0.55; }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <nav><a href="/CineLume/">← CineLume</a> · <a href="/CineLume/about.html">Version française</a></nav>
+        <h1>About CineLume</h1>
+        <p class="meta">Published October 1, 2025 · Updated __BUILD_DATE_HUMAN_FR__</p>
+      </header>
+
+      <main>
+        <section>
+          <h2>The idea</h2>
+          <p>CineLume was born from a simple observation: no existing app directly answered my daily question, <em>what's coming out this week at the movies that I want to see?</em></p>
+          <p>The dominant apps are built around other use cases: Letterboxd is a social viewing journal, Trakt is a paid episodic tracker, IMDb is a database saturated with ads. None optimize for "weekly release agenda + personal watchlist without an account".</p>
+        </section>
+
+        <section>
+          <h2>Three concrete needs</h2>
+          <ol>
+            <li>See what's released this week at the cinema, filtered by country</li>
+            <li>Mark films I'm interested in (heart / bookmark) without account or sign-up</li>
+            <li>Get a notification on the day they're released</li>
+          </ol>
+          <p>Everything else — custom lists, swipe selector, random pick, Letterboxd import, link sharing — derives organically from these three needs.</p>
+        </section>
+
+        <section>
+          <h2>Deliberate technical choices</h2>
+          <h3>No backend</h3>
+          <p>CineLume has no server. All user data (favorites, watchlist, lists, preferences) is stored in the browser's <code>localStorage</code>. No database. No private API endpoint. This constraint makes tracking impossible, data leaks impossible, and commercial models based on ads or subscriptions unnecessary.</p>
+
+          <h3>No ads</h3>
+          <p>No banners. No interstitials. No tracking pixels. No telemetry. The experience is entirely clean. With zero infra cost (GitHub Pages hosts for free), there's no reason to inflict ads on users.</p>
+
+          <h3>No sign-up</h3>
+          <p>No email, no password, no account. Open the app and use it immediately. Since everything is local, you can export your watchlist in Letterboxd CSV format at any time to migrate elsewhere, or share it via link.</p>
+
+          <h3>Progressive Web App</h3>
+          <p>CineLume runs in any modern browser and can be installed on the home screen of iOS, Android, Windows, macOS and Linux. Offline mode via Service Worker (Workbox). The installed experience is equivalent to a native app.</p>
+
+          <h3>Open source</h3>
+          <p>The code is public under MIT license, auditable and forkable. No obfuscation, no hidden telemetry. If I disappear tomorrow, anyone can continue the project or fork their own.</p>
+        </section>
+
+        <section>
+          <h2>Data sources</h2>
+          <p>Movie information comes from <a href="https://www.themoviedb.org/">TMDB (The Movie Database)</a>, a community-driven open database founded in 2008, covering 800,000+ movies. Streaming platform availability is provided by <a href="https://www.justwatch.com/">JustWatch</a> via TMDB.</p>
+          <p>No data is invented or scraped: everything goes through official public APIs.</p>
+        </section>
+
+        <section>
+          <h2>Tech stack</h2>
+          <p>React 19 · Vite 7 · TypeScript · Tailwind CSS · Zustand · TanStack Query · Framer Motion · i18next · Workbox PWA · HashRouter · Sonner.</p>
+          <p>Code-splitting of modals (lazy loading + preload at idle), NetworkFirst service worker for TMDB APIs, CacheFirst for images. Initial bundle ~190 KB gzip.</p>
+        </section>
+
+        <a class="cta" href="/CineLume/">Open CineLume →</a>
+
+        <footer>
+          <p>Links: <a href="/CineLume/">Home</a> · <a href="/CineLume/en/privacy.html">Privacy</a> · <a href="/CineLume/en/press.html">Press kit</a> · <a href="/CineLume/en/guide.html">Guide</a> · <a href="/CineLume/en/changelog.html">Changelog</a> · <a href="https://github.com/Quasaria/CineLume">GitHub source</a></p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
