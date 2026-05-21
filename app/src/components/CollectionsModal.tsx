@@ -157,7 +157,7 @@ export function CollectionsModal() {
               >
                 <ArrowLeft className="w-5 h-5" aria-hidden="true" />
               </button>
-              <div role="tablist" aria-label={t('collections.title')} className="flex-1 flex gap-1 p-0.5 rounded-xl bg-white/[0.03]">
+              <div role="tablist" aria-label={t('collections.title')} className="flex-1 flex gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                 <TabButton
                   active={tab === 'favorites'}
                   onClick={() => setTab('favorites')}
@@ -165,6 +165,7 @@ export function CollectionsModal() {
                   label={t('favorites.title')}
                   count={favorites.length}
                   activeColor="text-red-300"
+                  activeBg="bg-red-500/10 border-red-500/30"
                 />
                 <TabButton
                   active={tab === 'watchlist'}
@@ -173,6 +174,7 @@ export function CollectionsModal() {
                   label={t('watchlist.title')}
                   count={watchlist.length}
                   activeColor="text-cyan-300"
+                  activeBg="bg-cyan-500/10 border-cyan-500/30"
                 />
               </div>
             </div>
@@ -291,28 +293,25 @@ interface TabButtonProps {
   label: string;
   count: number;
   activeColor: string;
+  activeBg: string;
 }
 
-function TabButton({ active, onClick, icon: Icon, label, count, activeColor }: TabButtonProps) {
+function TabButton({ active, onClick, icon: Icon, label, count, activeColor, activeBg }: TabButtonProps) {
   return (
     <button
       type="button"
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`flex-1 min-h-10 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-all ${
+      className={`flex-1 min-h-10 px-2.5 flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-all border ${
         active
-          ? `bg-white/[0.07] text-white shadow-sm`
-          : 'text-white/55 hover:text-white/85'
+          ? `${activeBg} ${activeColor}`
+          : 'border-transparent text-white/65 hover:text-white hover:bg-white/[0.04]'
       }`}
     >
-      <Icon className={`w-3.5 h-3.5 ${active ? `${activeColor} fill-current` : ''}`} aria-hidden="true" />
+      <Icon className={`w-4 h-4 ${active ? 'fill-current' : ''}`} aria-hidden="true" />
       <span className="truncate">{label}</span>
-      {count > 0 && (
-        <span className={`text-[11px] tabular-nums font-bold ${active ? 'text-white/75' : 'text-white/35'}`}>
-          {count}
-        </span>
-      )}
+      <span className={`text-xs font-medium ${active ? 'opacity-80' : 'text-white/40'}`}>{count}</span>
     </button>
   );
 }
