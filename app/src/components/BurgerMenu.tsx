@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Menu, Folder, Settings as SettingsIcon, X, Shuffle, Layers, CalendarHeart, CalendarRange } from 'lucide-react';
+import { Menu, Folder, Settings as SettingsIcon, X, Shuffle, Layers, CalendarHeart, CalendarRange, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 
 /**
@@ -17,6 +17,7 @@ export function BurgerMenu() {
   const openSwipe = useAppStore((s) => s.openSwipe);
   const openWatchHistory = useAppStore((s) => s.openWatchHistory);
   const openYearCalendar = useAppStore((s) => s.openYearCalendar);
+  const openWrapped = useAppStore((s) => s.openWrapped);
   const customListsCount = useAppStore((s) => s.customLists.length);
   const seenCount = useAppStore((s) => s.seen.length);
   // Dedup id : un film peut etre simultanement en favori ET en watchlist,
@@ -88,6 +89,11 @@ export function BurgerMenu() {
               WebkitBackdropFilter: 'blur(20px) saturate(140%)',
             }}
           >
+            <WrappedMenuItem
+              label={t('nav.wrapped')}
+              description={t('nav.wrappedDesc')}
+              onClick={() => handleItem(openWrapped)}
+            />
             <MenuItem
               icon={Shuffle}
               label={t('nav.surprise')}
@@ -135,6 +141,45 @@ export function BurgerMenu() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+interface WrappedMenuItemProps {
+  label: string;
+  description: string;
+  onClick: () => void;
+}
+
+function WrappedMenuItem({ label, description, onClick }: WrappedMenuItemProps) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className="w-full mx-1.5 my-1 px-3 py-2.5 rounded-xl text-left transition-all border border-white/10 hover:border-white/20 active:scale-[0.98]"
+      style={{
+        width: 'calc(100% - 12px)',
+        background:
+          'linear-gradient(135deg, rgba(124, 58, 237, 0.25) 0%, rgba(217, 70, 239, 0.18) 50%, rgba(6, 182, 212, 0.22) 100%)',
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-violet-500/60 to-fuchsia-500/60 flex items-center justify-center shadow-lg shadow-violet-500/30">
+          <Sparkles className="w-4.5 h-4.5 text-white" aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
+            <span className="bg-gradient-to-r from-violet-100 via-fuchsia-100 to-cyan-100 bg-clip-text text-transparent">
+              {label}
+            </span>
+            <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-white/20 text-white border border-white/15">
+              new
+            </span>
+          </p>
+          <p className="text-[11px] text-white/65 leading-tight truncate mt-0.5">{description}</p>
+        </div>
+      </div>
+    </button>
   );
 }
 
