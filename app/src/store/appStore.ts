@@ -43,6 +43,7 @@ interface AppState {
   isSettingsOpen: boolean;
   isPickerOpen: boolean;
   isSwipeOpen: boolean;
+  isWatchHistoryOpen: boolean;
 
   toggleTheme: () => void;
   setViewMode: (mode: ViewMode) => void;
@@ -92,6 +93,8 @@ interface AppState {
   closePicker: () => void;
   openSwipe: () => void;
   closeSwipe: () => void;
+  openWatchHistory: () => void;
+  closeWatchHistory: () => void;
   toggleBlindMode: () => void;
   setSortBy: (s: 'popularity' | 'date' | 'rating') => void;
   setRuntimeMax: (n: number | null) => void;
@@ -303,6 +306,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   isSettingsOpen: false,
   isPickerOpen: false,
   isSwipeOpen: false,
+  isWatchHistoryOpen: false,
 
   toggleTheme: () => {
     const newDark = !get().isDark;
@@ -613,6 +617,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   closePicker: () => set({ isPickerOpen: false }),
   openSwipe: () => set({ isSwipeOpen: true }),
   closeSwipe: () => set({ isSwipeOpen: false }),
+  openWatchHistory: () => set({ isWatchHistoryOpen: true }),
+  closeWatchHistory: () => set({ isWatchHistoryOpen: false }),
 
   toggleBlindMode: () => {
     const next = !get().blindMode;
