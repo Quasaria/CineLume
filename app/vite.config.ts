@@ -11,7 +11,7 @@ export default defineConfig(({ command }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'icon-maskable.svg', 'robots.txt', 'sitemap.xml', 'humans.txt'],
+      includeAssets: ['icon.svg', 'icon-maskable.svg', 'robots.txt', 'sitemap.xml', 'humans.txt', 'og-image.png', 'og-image.svg'],
       manifest: {
         // Manifest enrichi pour le SEO PWA + l'experience d'install.
         // 'name' long pour l'install prompt, 'short_name' court pour
