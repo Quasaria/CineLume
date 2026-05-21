@@ -38,7 +38,7 @@ interface AppState {
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
   isFavOpen: boolean;
-  collectionsTab: 'favorites' | 'watchlist' | 'seen';
+  collectionsTab: 'favorites' | 'watchlist';
   isListsOpen: boolean;
   isSettingsOpen: boolean;
   isPickerOpen: boolean;
@@ -85,8 +85,7 @@ interface AppState {
   closeFavorites: () => void;
   openWatchlist: () => void;
   closeWatchlist: () => void;
-  setCollectionsTab: (tab: 'favorites' | 'watchlist' | 'seen') => void;
-  openSeen: () => void;
+  setCollectionsTab: (tab: 'favorites' | 'watchlist') => void;
   openLists: () => void;
   closeLists: () => void;
   openSettings: () => void;
@@ -615,7 +614,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   closeFavorites: () => set({ isFavOpen: false }),
   openWatchlist: () => set({ isFavOpen: true, collectionsTab: 'watchlist' }),
   closeWatchlist: () => set({ isFavOpen: false }),
-  openSeen: () => set({ isFavOpen: true, collectionsTab: 'seen' }),
   setCollectionsTab: (tab) => set({ collectionsTab: tab }),
   openLists: () => set({ isListsOpen: true }),
   closeLists: () => set({ isListsOpen: false }),
