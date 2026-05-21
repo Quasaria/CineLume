@@ -58,7 +58,7 @@ interface AppState {
   toggleFav: (movie: FavoriteMovie) => void;
   removeFav: (id: number) => void;
   isFav: (id: number) => boolean;
-  toggleWatchlist: (movie: FavoriteMovie) => void;
+  toggleWatchlist: (movie: FavoriteMovie, opts?: { silent?: boolean }) => void;
   removeFromWatchlist: (id: number) => void;
   isInWatchlist: (id: number) => boolean;
   createList: (name: string) => string;
@@ -391,7 +391,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   isFav: (id) => get().favorites.some(f => f.id === id),
 
-  toggleWatchlist: (movie) => {
+  toggleWatchlist: (movie, opts) => {
     const list = [...get().watchlist];
     const idx = list.findIndex(f => f.id === movie.id);
     const wasIn = idx > -1;
@@ -406,7 +406,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       // ignore
     }
     set({ watchlist: list });
-    toast.success(i18n.t(wasIn ? 'watchlist.removed' : 'watchlist.added', { title: movie.title }));
+    // opts.silent : utilise par SwipeMode ou la carte qui disparait est
+    // deja un feedback visuel, le toast est redondant et couvrait les
+    // boutons d'action en bas.
+    if (!opts?.silent) {
+      toast.success(i18n.t(wasIn ? 'watchlist.removed' : 'watchlist.added', { title: movie.title }));
+    }
   },
 
   removeFromWatchlist: (id) => {

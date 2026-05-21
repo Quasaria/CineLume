@@ -137,6 +137,8 @@ export function SwipeMode() {
     let wasAdded = false;
     if (direction === 'right') {
       if (!isInWatchlist(current.id)) {
+        // silent: la carte disparait deja, le toast en bas couvrait les
+        // boutons d'action (skip/undo/like) et bloquait les taps suivants.
         toggleWatchlist({
           id: current.id,
           title: current.title,
@@ -145,7 +147,7 @@ export function SwipeMode() {
           vote_average: current.vote_average || 0,
           overview: current.overview,
           genre_ids: current.genre_ids,
-        });
+        }, { silent: true });
         wasAdded = true;
       }
     } else {
@@ -470,8 +472,13 @@ function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
   return (
     <motion.div
       drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.7}
+      // dragSnapToOrigin remplace dragConstraints+dragElastic : sur Chrome
+      // Android, la combinaison precedente bloquait le swipe horizontal
+      // (la carte ne bougeait pas visiblement). Avec snapToOrigin, le drag
+      // est libre dans l'axe X et revient a 0 a la fin sauf si on declenche
+      // onSwipe via le threshold.
+      dragSnapToOrigin
+      dragMomentum={false}
       style={{ x, rotate }}
       onDragEnd={(_, info) => {
         if (info.offset.x > SWIPE_THRESHOLD) {
@@ -480,8 +487,10 @@ function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
           onSwipe('left');
         }
       }}
-      whileTap={{ cursor: 'grabbing' }}
-      className="absolute inset-0 rounded-3xl overflow-hidden bg-[#15151c] border border-white/10 shadow-2xl flex flex-col cursor-grab touch-pan-y"
+      // touch-pan-y permet le scroll vertical natif tandis que drag="x"
+      // gere le swipe horizontal. Sans ca, Chrome Android peut intercepter
+      // toutes les touches et empecher le drag.
+      className="absolute inset-0 rounded-3xl overflow-hidden bg-[#15151c] border border-white/10 shadow-2xl flex flex-col cursor-grab active:cursor-grabbing touch-pan-y"
     >
       {/* LIKE / PASS overlays */}
       <motion.div
