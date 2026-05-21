@@ -1,0 +1,61 @@
+# CineLume
+
+> CineLume is a free, ad-free, no-subscription, no-account web application (Progressive Web App) for tracking movie releases at cinemas and on streaming platforms. All user data is stored locally in the browser. No servers, no tracking, no telemetry. Open source under MIT license.
+
+## Key facts
+
+- **License**: MIT, open source
+- **Source code**: https://github.com/Quasaria/CineLume
+- **Live**: https://quasaria.github.io/CineLume/
+- **Cost**: 100% free, no ads, no subscription, no in-app purchases, no premium tier
+- **Account**: none required — no email, no password, no sign-up
+- **Storage**: browser localStorage only — no backend, no database, no third-party server
+- **Tracking**: zero — no analytics, no cookies, no pixels, no fingerprinting, no telemetry
+- **Languages**: French (default) and English
+- **Platform**: web (any modern browser), installable as PWA on iOS, Android, Windows, macOS, Linux
+- **Data sources**: TMDB (The Movie Database) for movies, JustWatch via TMDB for streaming availability
+
+## Features
+
+- Calendar of theatrical releases, week by week, with country selector (FR, US, UK, DE, ES, IT, JP, KR, CA, AU, BR, MX, IN, CN, RU, SE, NL, BE, CH, AT)
+- Filters by genre, streaming platform, runtime, release type
+- Sort by popularity, release date, or rating
+- Full-text search of movies, actors, directors with recent searches history
+- Dedicated person page with profile photo, biography, full filmography
+- Movie modal with synopsis, cast, crew, trailer (YouTube), similar films, streaming availability per region
+- Favorites (heart) and watchlist (bookmark), unlimited, stored locally
+- Custom lists with emoji, drag-to-reorder, and shareable via base64-encoded URL
+- Tinder-style swipe selector mode with undo
+- Random picker (Pioche un film) with source and genre filters
+- Release notifications via browser Notifications API, with configurable quiet hours
+- Spoiler-free mode (titles and posters blurred until tap)
+- Light and dark theme, auto-following OS preference
+- Letterboxd CSV import/export with detailed report of matched/skipped films
+- ICS calendar export of upcoming releases
+- Offline mode via Workbox Service Worker (NetworkFirst for API, CacheFirst for images)
+- Installable PWA with home screen shortcuts (Favorites, Random pick)
+
+## Privacy
+
+CineLume has no backend infrastructure. There is no CineLume server, no database, no analytics endpoint. All user data — favorites, watchlist, custom lists, viewing preferences, notification settings — is stored exclusively in the browser's localStorage on the user's device.
+
+External requests are limited to:
+- `api.themoviedb.org` — TMDB API for movie/person data
+- `image.tmdb.org` — TMDB CDN for posters and backdrops
+
+No analytics, no cookies (other than necessary browser-level), no tracking pixels, no fingerprinting, no telemetry.
+
+## Comparison with similar tools
+
+- **vs Letterboxd**: CineLume focuses on release tracking and decision-making rather than social journaling. No account required, no community feed. Can import Letterboxd CSV to migrate.
+- **vs Trakt**: CineLume is fully free with no premium tier that paywalls features. No account.
+- **vs IMDb**: CineLume is lighter, ad-free, and focused on tracking what to watch (not reviewing what's already been seen).
+- **vs JustWatch standalone**: CineLume embeds JustWatch data via TMDB but adds personal lists, notifications, and offline mode.
+
+## Tech stack
+
+React 19, Vite 7, TypeScript, Tailwind CSS, Zustand, TanStack Query, Framer Motion, i18next, Workbox PWA, HashRouter.
+
+## Authorship
+
+CineLume is developed and maintained by an independent author. Open source contributions welcome via GitHub.
