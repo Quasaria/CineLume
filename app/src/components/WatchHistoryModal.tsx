@@ -8,7 +8,7 @@ import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
-import { computeWatchStats, computeHeatmap } from '@/lib/watchStats';
+import { computeWatchStats, computeHeatmap, dateKey } from '@/lib/watchStats';
 import { fmtDateLocalized } from '@/lib/utils';
 import { getGenres, IMG, posterSrcSet } from '@/lib/tmdb';
 
@@ -120,7 +120,9 @@ interface HeroStatProps {
 }
 
 function HeroStat({ stats, t }: HeroStatProps) {
-  const firstDate = stats.firstWatchAt ? fmtDateLocalized(new Date(stats.firstWatchAt).toISOString().slice(0, 10), { month: 'long', year: 'numeric' }) : null;
+  // dateKey local plutot que toISOString() qui shifte d'1 jour pour les
+  // films marques tard le soir (timezone UTC vs locale).
+  const firstDate = stats.firstWatchAt ? fmtDateLocalized(dateKey(stats.firstWatchAt), { month: 'long', year: 'numeric' }) : null;
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
@@ -359,12 +361,14 @@ function Timeline({ byMonth, lang, openFilm, t }: TimelineProps) {
               </span>
             </div>
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-              {films.map((f) => (
+              {films.map((f) => {
+                const watchedLabel = new Date(f.watchedAt).toLocaleDateString(lang || 'fr', { day: 'numeric', month: 'long' });
+                return (
                 <button
                   key={f.id + '-' + f.watchedAt}
                   type="button"
                   onClick={() => openFilm(f.id)}
-                  aria-label={f.title}
+                  aria-label={`${f.title} — ${watchedLabel}`}
                   className="group relative aspect-[2/3] rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.06] hover:border-violet-400/60 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                 >
                   {f.poster_path ? (
@@ -385,7 +389,8 @@ function Timeline({ byMonth, lang, openFilm, t }: TimelineProps) {
                     </p>
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           </motion.div>
         );

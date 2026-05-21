@@ -8,6 +8,7 @@ import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
+import { monthKey } from '@/lib/watchStats';
 import type { FavoriteMovie } from '@/types/movie';
 
 /**
@@ -42,10 +43,6 @@ const SEASON_TEXT: Record<Season, string> = {
   autumn: 'from-violet-200 via-fuchsia-200 to-rose-200',
 };
 
-function monthKey(year: number, month: number) {
-  return `${year}-${String(month + 1).padStart(2, '0')}`;
-}
-
 interface MonthBucket {
   ym: string;
   year: number;
@@ -78,7 +75,7 @@ export function YearCalendarModal() {
     const buckets: MonthBucket[] = [];
     for (let i = 0; i < 12; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      const ym = monthKey(d.getFullYear(), d.getMonth());
+      const ym = monthKey(d.getTime());
       const inMonth = films
         .filter((f) => f.release_date.slice(0, 7) === ym)
         .sort((a, b) => a.release_date.localeCompare(b.release_date));
@@ -101,10 +98,13 @@ export function YearCalendarModal() {
   useFocusRestore(isOpen);
   useSwipeBack({ onBack: close, enabled: isOpen });
 
-  // IntersectionObserver pour highlight le mois visible dans la mini-nav.
-  // On observe les sections au scroll dans le container modale.
+  // Dependance derivee : on ne recree l'observer que quand le SET de mois
+  // visibles change (ajout d'un film dans un nouveau mois), pas a chaque
+  // mutation interne du tableau visibleMonths.
+  const ymKeysSig = visibleMonths.map((m) => m.ym).join('|');
+
   useEffect(() => {
-    if (!isOpen || films.length === 0) return;
+    if (!isOpen || !ymKeysSig) return;
     const root = contentRef.current;
     if (!root) return;
     const obs = new IntersectionObserver(
@@ -116,12 +116,12 @@ export function YearCalendarModal() {
       },
       { root, threshold: [0.2, 0.5, 0.8] },
     );
-    visibleMonths.forEach(({ ym }) => {
+    for (const ym of ymKeysSig.split('|')) {
       const el = root.querySelector(`#year-month-${ym}`);
       if (el) obs.observe(el);
-    });
+    }
     return () => obs.disconnect();
-  }, [isOpen, visibleMonths, films.length]);
+  }, [isOpen, ymKeysSig]);
 
   const scrollToMonth = (ym: string) => {
     const root = contentRef.current;

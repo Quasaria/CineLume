@@ -19,9 +19,14 @@ export function BurgerMenu() {
   const openYearCalendar = useAppStore((s) => s.openYearCalendar);
   const customListsCount = useAppStore((s) => s.customLists.length);
   const seenCount = useAppStore((s) => s.seen.length);
-  const favoritesCount = useAppStore((s) => s.favorites.length);
-  const watchlistCount = useAppStore((s) => s.watchlist.length);
-  const yearTrackedCount = favoritesCount + watchlistCount;
+  // Dedup id : un film peut etre simultanement en favori ET en watchlist,
+  // le badge doit refleter le nombre de films uniques suivis pour l'annee.
+  const yearTrackedCount = useAppStore((s) => {
+    const ids = new Set<number>();
+    for (const f of s.favorites) ids.add(f.id);
+    for (const w of s.watchlist) ids.add(w.id);
+    return ids.size;
+  });
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
