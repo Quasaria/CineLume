@@ -185,7 +185,8 @@
   "collections": {
     "title": "My movies",
     "tabFavorites": "Favorites",
-    "tabWatchlist": "Watchlist"
+    "tabWatchlist": "Watchlist",
+    "inCinemaSection": "Currently in cinemas"
   },
   "search": {
     "recent": "Recent",

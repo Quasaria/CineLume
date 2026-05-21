@@ -10,8 +10,12 @@ import { BurgerMenu } from '@/components/BurgerMenu';
 function LogoMark({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <path d="M18.5 6.2a8.5 8.5 0 1 0 0 11.6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M13 10 L18.5 12 L13 14 Z" fill="currentColor" />
+      {/* Group decalee de +0.6 right pour compenser le poids visuel du C
+          qui est concentre a gauche. Donne un meilleur centrage optique. */}
+      <g transform="translate(0.6 0)">
+        <path d="M18.5 6.2a8.5 8.5 0 1 0 0 11.6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+        <path d="M13 10 L18.5 12 L13 14 Z" fill="currentColor" />
+      </g>
     </svg>
   );
 }

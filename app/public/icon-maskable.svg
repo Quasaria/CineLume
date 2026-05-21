@@ -7,7 +7,10 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#g)"/>
-  <g transform="translate(96 96)">
+  <!-- Translate(96, 96) place le contenu dans la safe zone maskable centrale
+       (80% du canvas). Decalage supplementaire +8 sur x pour compenser le
+       poids visuel du C concentre a gauche. -->
+  <g transform="translate(104 96)">
     <path d="M236 49 a107 107 0 1 0 0 154" stroke="white" stroke-width="30" stroke-linecap="round" fill="none"/>
     <path d="M156 87 L236 120 L156 153 Z" fill="white"/>
   </g>
