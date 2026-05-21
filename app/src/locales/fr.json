@@ -33,6 +33,8 @@
     "swipeDesc": "Façon Tinder : swipe pour décider ce que tu veux voir",
     "watchHistory": "Mon calendrier",
     "watchHistoryDesc": "Tous les films que tu as vus, en mode calendrier",
+    "yearCalendar": "Mon année cinéma",
+    "yearCalendarDesc": "Tes sorties à venir, en mode poster",
     "settings": "Paramètres",
     "themeDark": "Passer en mode sombre",
     "themeLight": "Passer en mode clair",
@@ -369,6 +371,15 @@
     "emptyHint": "Marque un film comme vu pour le retrouver ici",
     "watchedOn": "Vu le {{date}}",
     "stat": "Films vus"
+  },
+  "yearCalendar": {
+    "title": "Mon année cinéma",
+    "navLabel": "Naviguer entre les mois",
+    "jumpTo": "Aller à {{month}}",
+    "release_one": "{{count}} sortie",
+    "release_other": "{{count}} sorties",
+    "emptyTitle": "Ton année est vierge",
+    "emptyHint": "Ajoute des films à tes favoris ou à ta liste à voir pour les voir apparaître au fil de l'année."
   },
   "watchHistory": {
     "title": "Mon calendrier",

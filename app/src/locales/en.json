@@ -33,6 +33,8 @@
     "swipeDesc": "Tinder-style: swipe to decide what to watch",
     "watchHistory": "My calendar",
     "watchHistoryDesc": "Every film you've watched, calendar-style",
+    "yearCalendar": "My cinema year",
+    "yearCalendarDesc": "Your upcoming releases, poster-style",
     "settings": "Settings",
     "themeDark": "Switch to dark mode",
     "themeLight": "Switch to light mode",
@@ -369,6 +371,15 @@
     "emptyHint": "Mark a film as watched to find it here",
     "watchedOn": "Watched on {{date}}",
     "stat": "Watched films"
+  },
+  "yearCalendar": {
+    "title": "My cinema year",
+    "navLabel": "Navigate between months",
+    "jumpTo": "Jump to {{month}}",
+    "release_one": "{{count}} release",
+    "release_other": "{{count}} releases",
+    "emptyTitle": "Your year is blank",
+    "emptyHint": "Add films to your favorites or watchlist to see them appear through the year."
   },
   "watchHistory": {
     "title": "My calendar",

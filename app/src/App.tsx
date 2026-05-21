@@ -39,6 +39,7 @@ const SettingsModal = lazy(() => import('@/components/SettingsModal').then((m) =
 const PickerModal = lazy(() => import('@/components/PickerModal').then((m) => ({ default: m.PickerModal })));
 const SwipeMode = lazy(() => import('@/components/SwipeMode').then((m) => ({ default: m.SwipeMode })));
 const WatchHistoryModal = lazy(() => import('@/components/WatchHistoryModal').then((m) => ({ default: m.WatchHistoryModal })));
+const YearCalendarModal = lazy(() => import('@/components/YearCalendarModal').then((m) => ({ default: m.YearCalendarModal })));
 
 interface DiscoverResponse {
   results: Movie[];
@@ -75,6 +76,7 @@ export default function App() {
   const isPickerOpen = useAppStore((s) => s.isPickerOpen);
   const isSwipeOpen = useAppStore((s) => s.isSwipeOpen);
   const isWatchHistoryOpen = useAppStore((s) => s.isWatchHistoryOpen);
+  const isYearCalendarOpen = useAppStore((s) => s.isYearCalendarOpen);
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
   const { push: pushSearchHistory } = useSearchHistory();
 
@@ -83,7 +85,7 @@ export default function App() {
   useEffect(() => {
     if (debouncedSearch && !selectedPerson) pushSearchHistory(debouncedSearch);
   }, [debouncedSearch, selectedPerson, pushSearchHistory]);
-  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen || isWatchHistoryOpen;
+  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen || isWatchHistoryOpen || isYearCalendarOpen;
 
   useModalUrlSync();
   useReleaseNotifications();
@@ -271,6 +273,7 @@ export default function App() {
       import('@/components/PickerModal');
       import('@/components/SwipeMode');
       import('@/components/WatchHistoryModal');
+      import('@/components/YearCalendarModal');
     });
   }, []);
 
@@ -286,6 +289,7 @@ export default function App() {
         if (store.isPickerOpen) store.closePicker();
         if (store.isSwipeOpen) store.closeSwipe();
         if (store.isWatchHistoryOpen) store.closeWatchHistory();
+        if (store.isYearCalendarOpen) store.closeYearCalendar();
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -408,6 +412,7 @@ export default function App() {
           <PickerModal />
           <SwipeMode />
           <WatchHistoryModal />
+          <YearCalendarModal />
         </Suspense>
         <Toaster
           position={isMobile ? 'bottom-center' : 'bottom-right'}
