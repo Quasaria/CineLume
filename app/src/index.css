@@ -114,6 +114,14 @@ html.light {
 html {
   /* Empeche le pull-to-refresh Chrome Android et le bounce iOS sur la page */
   overscroll-behavior-y: none;
+  /* Verrou horizontal : interdit tout scroll lateral parasite.
+     `clip` est preferable a `hidden` car il ne cree pas de contexte
+     de scroll (donc position:sticky des descendants reste intact).
+     Fallback `hidden` pour les anciens browsers. */
+  overflow-x: hidden;
+  overflow-x: clip;
+  /* Defense supplementaire : meme si un enfant deborde, on le clamp. */
+  max-width: 100vw;
 }
 
 body {
@@ -121,10 +129,23 @@ body {
   color: var(--text);
   min-height: 100dvh;
   overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100vw;
+  /* Empeche le rebond horizontal iOS Safari quand un swipe horizontal
+     atteint le bord d'un container scrollable (ex: cast horizontal). */
+  overscroll-behavior-x: none;
   transition: background-color 0.3s ease, color 0.3s ease;
   font-family: 'Inter', system-ui, sans-serif;
   /* Pas de fond gris au tap sur iOS/Android */
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Defensif : le root React et les containers principaux ne doivent
+   jamais deborder lateralement. */
+#root {
+  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 /* Boutons : pas de tap highlight visible */
