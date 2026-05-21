@@ -1,12 +1,11 @@
 import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film, Eye } from 'lucide-react';
+import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film, ArrowLeft } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useDragToClose } from '@/hooks/useDragToClose';
@@ -89,29 +88,20 @@ export function CollectionsModal() {
   const isMobile = useIsMobile();
   const isOpen = useAppStore((s) => s.isFavOpen);
   const closeModal = useAppStore((s) => s.closeFavorites);
-  const tab = useAppStore((s) => s.collectionsTab);
+  const tabRaw = useAppStore((s) => s.collectionsTab);
+  // Defensive : l'onglet 'seen' a ete retire (Mon Calendrier le remplace).
+  // Si le store contient encore cette valeur (legacy), on retombe sur favoris.
+  const tab: 'favorites' | 'watchlist' = tabRaw === 'watchlist' ? 'watchlist' : 'favorites';
   const setTab = useAppStore((s) => s.setCollectionsTab);
   const favorites = useAppStore((s) => s.favorites);
   const watchlist = useAppStore((s) => s.watchlist);
-  const seen = useAppStore((s) => s.seen);
   const removeFav = useAppStore((s) => s.removeFav);
   const removeFromWatchlist = useAppStore((s) => s.removeFromWatchlist);
-  const unmarkAsSeen = useAppStore((s) => s.unmarkAsSeen);
   const openFilmModal = useAppStore((s) => s.openModal);
 
-  const items: FavoriteMovie[] = tab === 'favorites' ? favorites : tab === 'watchlist' ? watchlist : seen;
-  const prefix = tab === 'favorites' ? 'favorites' : tab === 'watchlist' ? 'watchlist' : 'seen';
-  // Pour 'seen' on n'utilise pas le grouping par date de sortie (la majorite
-  // des films vus sont 'released', un seul bucket aplati). On affiche
-  // chronologiquement reverse par watchedAt directement.
-  const groups = useMemo(
-    () => tab === 'seen' ? [] : groupByRelease(items, prefix),
-    [items, prefix, tab],
-  );
-  const seenSorted = useMemo(
-    () => tab === 'seen' ? [...seen].sort((a, b) => b.watchedAt - a.watchedAt) : [],
-    [seen, tab],
-  );
+  const items: FavoriteMovie[] = tab === 'favorites' ? favorites : watchlist;
+  const prefix = tab === 'favorites' ? 'favorites' : 'watchlist';
+  const groups = useMemo(() => groupByRelease(items, prefix), [items, prefix]);
   const fmtDate = (d?: string) => fmtDateLocalized(d);
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeModal, contentRef });
@@ -122,8 +112,7 @@ export function CollectionsModal() {
 
   function handleRemove(id: number) {
     if (tab === 'favorites') removeFav(id);
-    else if (tab === 'watchlist') removeFromWatchlist(id);
-    else unmarkAsSeen(id);
+    else removeFromWatchlist(id);
   }
 
   return (
@@ -149,49 +138,43 @@ export function CollectionsModal() {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="collections-modal-title"
+            aria-label={t('collections.title')}
             className="relative bg-[#0f0f15] rounded-t-3xl md:rounded-3xl px-5 pt-3 pb-6 md:p-6 max-w-lg w-full max-h-[90dvh] md:max-h-[80vh] border border-white/10 shadow-2xl flex flex-col"
             {...dragHandlers}
           >
             <div className="w-12 h-1.5 rounded-full bg-white/30 mx-auto mb-3 md:hidden" aria-hidden="true" />
 
-            <ModalHeader
-              titleId="collections-modal-title"
-              onBack={closeModal}
-              backLabel={t(`${prefix}.close`)}
-              title={t('collections.title')}
-            />
-
-            {/* Tabs : favoris / watchlist. Toujours visibles meme si l'un
-                est vide, pour que l'user puisse switcher. */}
-            <div role="tablist" aria-label={t('collections.title')} className="flex gap-1 p-1 mb-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-              <TabButton
-                active={tab === 'favorites'}
-                onClick={() => setTab('favorites')}
-                icon={Heart}
-                label={t('favorites.title')}
-                count={favorites.length}
-                activeColor="text-red-300"
-                activeBg="bg-red-500/10 border-red-500/30"
-              />
-              <TabButton
-                active={tab === 'watchlist'}
-                onClick={() => setTab('watchlist')}
-                icon={Bookmark}
-                label={t('watchlist.title')}
-                count={watchlist.length}
-                activeColor="text-cyan-300"
-                activeBg="bg-cyan-500/10 border-cyan-500/30"
-              />
-              <TabButton
-                active={tab === 'seen'}
-                onClick={() => setTab('seen')}
-                icon={Eye}
-                label={t('seen.tab')}
-                count={seen.length}
-                activeColor="text-emerald-300"
-                activeBg="bg-emerald-500/10 border-emerald-500/30"
-              />
+            {/* Header compact : back + tab strip sur une seule ligne.
+                Pas de titre separe ; les tabs servent de heading puisque
+                seules deux sources existent (favoris + watchlist), le titre
+                "Mes films" etait redondant. */}
+            <div className="flex items-center gap-2 mb-4">
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label={t(`${prefix}.close`)}
+                className="min-w-11 min-h-11 -ml-1 shrink-0 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 text-white/75 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+              </button>
+              <div role="tablist" aria-label={t('collections.title')} className="flex-1 flex gap-1 p-0.5 rounded-xl bg-white/[0.03]">
+                <TabButton
+                  active={tab === 'favorites'}
+                  onClick={() => setTab('favorites')}
+                  icon={Heart}
+                  label={t('favorites.title')}
+                  count={favorites.length}
+                  activeColor="text-red-300"
+                />
+                <TabButton
+                  active={tab === 'watchlist'}
+                  onClick={() => setTab('watchlist')}
+                  icon={Bookmark}
+                  label={t('watchlist.title')}
+                  count={watchlist.length}
+                  activeColor="text-cyan-300"
+                />
+              </div>
             </div>
 
             {items.length === 0 ? (
@@ -199,68 +182,12 @@ export function CollectionsModal() {
                 <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/5 flex items-center justify-center">
                   {tab === 'favorites' ? (
                     <Heart className="w-7 h-7 text-white/30" aria-hidden="true" />
-                  ) : tab === 'watchlist' ? (
-                    <Bookmark className="w-7 h-7 text-white/30" aria-hidden="true" />
                   ) : (
-                    <Eye className="w-7 h-7 text-white/30" aria-hidden="true" />
+                    <Bookmark className="w-7 h-7 text-white/30" aria-hidden="true" />
                   )}
                 </div>
                 <p className="text-white/60 text-sm">{t(`${prefix}.empty`)}</p>
                 <p className="text-white/40 text-xs mt-1">{t(`${prefix}.emptyHint`)}</p>
-              </div>
-            ) : tab === 'seen' ? (
-              <div ref={contentRef} className="overflow-y-auto custom-scroll overscroll-contain flex-1 -mx-2 px-2">
-                <h4 className="flex items-center gap-1.5 text-xs uppercase tracking-wider font-bold mb-2 text-emerald-300">
-                  <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                  {t('seen.title')}
-                  <span className="text-white/40 normal-case tracking-normal font-medium">({seenSorted.length})</span>
-                </h4>
-                <div className="space-y-1">
-                  {seenSorted.map((f) => (
-                    <motion.div
-                      key={f.id}
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0, x: -50 }}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors"
-                      onClick={() => {
-                        closeModal();
-                        openFilmModal(f.id);
-                      }}
-                    >
-                      <div className="w-10 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
-                        {f.poster_path && (
-                          <img
-                            src={`${IMG}${f.poster_path}`}
-                            srcSet={posterSrcSet(f.poster_path)}
-                            sizes="40px"
-                            alt={f.title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">{f.title}</p>
-                        <p className="text-xs text-emerald-300/80">
-                          {t('seen.watchedOn', { date: fmtDate(new Date(f.watchedAt).toISOString().slice(0, 10)) })}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        aria-label={t('seen.unmark')}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          unmarkAsSeen(f.id);
-                        }}
-                        className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors shrink-0"
-                      >
-                        <Trash2 className="w-4 h-4" aria-hidden="true" />
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
               </div>
             ) : (
               <div ref={contentRef} className="overflow-y-auto custom-scroll overscroll-contain flex-1 -mx-2 px-2 space-y-5">
@@ -364,25 +291,28 @@ interface TabButtonProps {
   label: string;
   count: number;
   activeColor: string;
-  activeBg: string;
 }
 
-function TabButton({ active, onClick, icon: Icon, label, count, activeColor, activeBg }: TabButtonProps) {
+function TabButton({ active, onClick, icon: Icon, label, count, activeColor }: TabButtonProps) {
   return (
     <button
       type="button"
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`flex-1 min-h-11 flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-all border ${
+      className={`flex-1 min-h-10 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-sm font-semibold transition-all ${
         active
-          ? `${activeBg} ${activeColor}`
-          : 'border-transparent text-white/65 hover:text-white hover:bg-white/[0.04]'
+          ? `bg-white/[0.07] text-white shadow-sm`
+          : 'text-white/55 hover:text-white/85'
       }`}
     >
-      <Icon className={`w-4 h-4 ${active ? 'fill-current' : ''}`} aria-hidden="true" />
+      <Icon className={`w-3.5 h-3.5 ${active ? `${activeColor} fill-current` : ''}`} aria-hidden="true" />
       <span className="truncate">{label}</span>
-      <span className={`text-xs font-medium ${active ? 'opacity-80' : 'text-white/40'}`}>{count}</span>
+      {count > 0 && (
+        <span className={`text-[11px] tabular-nums font-bold ${active ? 'text-white/75' : 'text-white/35'}`}>
+          {count}
+        </span>
+      )}
     </button>
   );
 }
