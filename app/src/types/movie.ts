@@ -87,6 +87,15 @@ export interface FavoriteMovie {
   genre_ids?: number[];
 }
 
+/**
+ * Film marque comme vu. Etend FavoriteMovie avec un timestamp de visionnage
+ * pour permettre le tri chronologique reverse et les stats temporelles
+ * ('vus ce mois', 'vus cette annee', etc).
+ */
+export interface SeenMovie extends FavoriteMovie {
+  watchedAt: number;
+}
+
 export type ViewMode = 'grid' | 'list';
 
 export interface CustomList {

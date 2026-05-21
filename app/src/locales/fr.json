@@ -356,6 +356,18 @@
     "removed": "{{title}} retiré de ta liste",
     "close": "Fermer la liste à voir"
   },
+  "seen": {
+    "title": "Vus",
+    "tab": "Vus",
+    "mark": "Marquer comme vu",
+    "unmark": "Retirer de mes vus",
+    "added": "{{title}} marqué comme vu",
+    "removed": "{{title}} retiré de tes vus",
+    "empty": "Aucun film vu pour l'instant",
+    "emptyHint": "Marque un film comme vu pour le retrouver ici",
+    "watchedOn": "Vu le {{date}}",
+    "stat": "Films vus"
+  },
   "persons": {
     "title": "Personnes",
     "viewFilmography": "Voir la filmographie de {{name}}",

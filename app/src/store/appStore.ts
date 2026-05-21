@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { toast } from 'sonner';
-import type { FavoriteMovie, ViewMode, CustomList } from '@/types/movie';
+import type { FavoriteMovie, ViewMode, CustomList, SeenMovie } from '@/types/movie';
 import { getCurrentCinemaContext, getCinemaWeeksOfMonth } from '@/lib/cinema-week';
 import i18n from '@/i18n';
 
@@ -26,6 +26,7 @@ interface AppState {
   previousFilmId: number | null;  // pour le bouton 'retour au film' depuis la vue personne
   favorites: FavoriteMovie[];
   watchlist: FavoriteMovie[];
+  seen: SeenMovie[];
   customLists: CustomList[];
   blindMode: boolean;
   sortBy: 'popularity' | 'date' | 'rating';
@@ -37,7 +38,7 @@ interface AppState {
   currentModalMovieId: number | null;
   isFilterOpen: boolean;
   isFavOpen: boolean;
-  collectionsTab: 'favorites' | 'watchlist';
+  collectionsTab: 'favorites' | 'watchlist' | 'seen';
   isListsOpen: boolean;
   isSettingsOpen: boolean;
   isPickerOpen: boolean;
@@ -61,6 +62,9 @@ interface AppState {
   toggleWatchlist: (movie: FavoriteMovie, opts?: { silent?: boolean }) => void;
   removeFromWatchlist: (id: number) => void;
   isInWatchlist: (id: number) => boolean;
+  markAsSeen: (movie: FavoriteMovie) => void;
+  unmarkAsSeen: (id: number) => void;
+  isSeen: (id: number) => boolean;
   createList: (name: string) => string;
   renameList: (id: string, name: string) => void;
   setListEmoji: (id: string, emoji: string | undefined) => void;
@@ -78,7 +82,8 @@ interface AppState {
   closeFavorites: () => void;
   openWatchlist: () => void;
   closeWatchlist: () => void;
-  setCollectionsTab: (tab: 'favorites' | 'watchlist') => void;
+  setCollectionsTab: (tab: 'favorites' | 'watchlist' | 'seen') => void;
+  openSeen: () => void;
   openLists: () => void;
   closeLists: () => void;
   openSettings: () => void;
@@ -190,6 +195,23 @@ function safeParseWatchlist(): FavoriteMovie[] {
   return safeParseList('cinelume_watchlist');
 }
 
+function safeParseSeen(): SeenMovie[] {
+  try {
+    const raw = localStorage.getItem('cinelume_seen');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((m): m is SeenMovie =>
+      typeof m === 'object' && m !== null
+      && typeof (m as SeenMovie).id === 'number'
+      && typeof (m as SeenMovie).title === 'string'
+      && typeof (m as SeenMovie).watchedAt === 'number',
+    );
+  } catch {
+    return [];
+  }
+}
+
 function isValidFilm(f: unknown): f is FavoriteMovie {
   return typeof f === 'object' && f !== null
     && typeof (f as FavoriteMovie).id === 'number'
@@ -251,6 +273,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   previousFilmId: null,
   favorites: safeParseFavs(),
   watchlist: safeParseWatchlist(),
+  seen: safeParseSeen(),
   customLists: safeParseCustomLists(),
   blindMode: savedBlindMode,
   sortBy: (localStorage.getItem('cinelume_sort') as 'popularity' | 'date' | 'rating') || 'popularity',
@@ -455,6 +478,42 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   isInWatchlist: (id) => get().watchlist.some(f => f.id === id),
 
+  // Marquer un film comme vu : l'ajoute a la liste 'seen' avec timestamp,
+  // et le retire de la watchlist (puisque l'user l'a regarde, plus
+  // d'interet pour le 'a voir'). Garde les favoris inchanges (favoris
+  // = films aimes, concept distinct de 'vu').
+  markAsSeen: (movie) => {
+    const state = get();
+    if (state.seen.some(s => s.id === movie.id)) return; // deja vu
+    const seenMovie: SeenMovie = { ...movie, watchedAt: Date.now() };
+    const newSeen = [...state.seen, seenMovie];
+    const newWatchlist = state.watchlist.filter(f => f.id !== movie.id);
+    try {
+      localStorage.setItem('cinelume_seen', JSON.stringify(newSeen));
+      localStorage.setItem('cinelume_watchlist', JSON.stringify(newWatchlist));
+    } catch {
+      // quota plein, on ignore
+    }
+    set({ seen: newSeen, watchlist: newWatchlist });
+    toast.success(i18n.t('seen.added', { title: movie.title }));
+  },
+
+  unmarkAsSeen: (id) => {
+    const target = get().seen.find(f => f.id === id);
+    const newSeen = get().seen.filter(f => f.id !== id);
+    try {
+      localStorage.setItem('cinelume_seen', JSON.stringify(newSeen));
+    } catch {
+      // ignore
+    }
+    set({ seen: newSeen });
+    if (target) {
+      toast.success(i18n.t('seen.removed', { title: target.title }));
+    }
+  },
+
+  isSeen: (id) => get().seen.some(f => f.id === id),
+
   createList: (name) => {
     const id = genId();
     const list: CustomList = { id, name: name.trim() || i18n.t('lists.defaultName'), films: [], createdAt: Date.now() };
@@ -544,6 +603,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   closeFavorites: () => set({ isFavOpen: false }),
   openWatchlist: () => set({ isFavOpen: true, collectionsTab: 'watchlist' }),
   closeWatchlist: () => set({ isFavOpen: false }),
+  openSeen: () => set({ isFavOpen: true, collectionsTab: 'seen' }),
   setCollectionsTab: (tab) => set({ collectionsTab: tab }),
   openLists: () => set({ isListsOpen: true }),
   closeLists: () => set({ isListsOpen: false }),
