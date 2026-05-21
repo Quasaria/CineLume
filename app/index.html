@@ -117,6 +117,8 @@
           "name": "CineLume",
           "description": "Application gratuite de suivi des sorties cinéma et streaming, sans publicité ni abonnement.",
           "inLanguage": ["fr", "en"],
+          "datePublished": "2025-10-01",
+          "dateModified": "2026-05-21",
           "publisher": {
             "@id": "https://quasaria.github.io/CineLume/#publisher"
           },
@@ -153,12 +155,14 @@
           "alternateName": "CineLume — Sorties cinéma & streaming",
           "url": "https://quasaria.github.io/CineLume/",
           "description": "Application web gratuite et sans publicité pour suivre les sorties cinéma et streaming, créer des listes personnelles, recevoir des notifications de sortie. Aucune inscription requise, aucun abonnement.",
-          "image": "https://quasaria.github.io/CineLume/icon.svg",
+          "image": "https://quasaria.github.io/CineLume/og-image.png",
           "applicationCategory": "EntertainmentApplication",
           "applicationSubCategory": "MovieDatabase",
           "operatingSystem": "Web, iOS, Android, Windows, macOS, Linux",
           "browserRequirements": "Requires JavaScript. Requires HTML5.",
           "softwareVersion": "1.0",
+          "datePublished": "2025-10-01",
+          "dateModified": "2026-05-21",
           "isAccessibleForFree": true,
           "inLanguage": ["fr", "en"],
           "audience": {
@@ -439,6 +443,24 @@
     <main class="seo-only" aria-hidden="true">
       <article>
         <h1>CineLume — Sorties cinéma et streaming gratuit, sans publicité ni abonnement</h1>
+
+        <p><em>Dernière mise à jour : 21 mai 2026.</em></p>
+
+        <section>
+          <h2>L'origine du projet (point de vue de l'auteur)</h2>
+          <p>
+            J'ai créé CineLume parce qu'il n'existait aucune application qui réponde simplement à la question : <em>qu'est-ce qui sort cette semaine au cinéma que j'ai envie de voir ?</em> Les applications existantes sont soit truffées de publicités, soit derrière un compte payant, soit orientées journal de visionnage social (Letterboxd, Trakt) plus que tracking de sorties à venir.
+          </p>
+          <p>
+            Mon objectif était trois choses concrètes : <strong>(1)</strong> un agenda hebdomadaire des sorties cinéma filtré par pays, <strong>(2)</strong> une watchlist personnelle sans avoir à créer de compte, <strong>(3)</strong> une notification le jour où mes films favoris sortent. Tout le reste est dérivé de ces trois besoins.
+          </p>
+          <p>
+            Le choix de ne PAS avoir de backend est délibéré : pas de serveur signifie pas de coût d'infra, pas de modèle commercial qui force la pub ou l'abonnement, pas de risque de fuite de données, pas de RGPD à gérer. Tout est stocké en localStorage côté navigateur. Si je disparais, l'app continue de fonctionner tant que GitHub Pages tourne.
+          </p>
+          <p>
+            CineLume est open source sous licence MIT. Le code est public, auditable, forkable. Aucune télémétrie, aucun pixel publicitaire, aucun cookie de tracking : il n'y a même pas de serveur où envoyer ces données.
+          </p>
+        </section>
 
         <section>
           <h2>Application web et PWA pour suivre les sorties de films au cinéma et sur les plateformes de streaming</h2>
