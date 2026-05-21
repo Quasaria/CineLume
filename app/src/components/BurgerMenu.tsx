@@ -89,11 +89,6 @@ export function BurgerMenu() {
               WebkitBackdropFilter: 'blur(20px) saturate(140%)',
             }}
           >
-            <WrappedMenuItem
-              label={t('nav.wrapped')}
-              description={t('nav.wrappedDesc')}
-              onClick={() => handleItem(openWrapped)}
-            />
             <MenuItem
               icon={Shuffle}
               label={t('nav.surprise')}
@@ -123,6 +118,11 @@ export function BurgerMenu() {
               badge={yearTrackedCount > 0 ? yearTrackedCount : undefined}
               onClick={() => handleItem(openYearCalendar)}
               accent="violet"
+            />
+            <WrappedMenuItem
+              label={t('nav.wrapped')}
+              description={t('nav.wrappedDesc')}
+              onClick={() => handleItem(openWrapped)}
             />
             <MenuItem
               icon={Folder}
@@ -168,12 +168,9 @@ function WrappedMenuItem({ label, description, onClick }: WrappedMenuItemProps) 
           <Sparkles className="w-4.5 h-4.5 text-white" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
+          <p className="text-sm font-black text-white tracking-tight">
             <span className="bg-gradient-to-r from-violet-100 via-fuchsia-100 to-cyan-100 bg-clip-text text-transparent">
               {label}
-            </span>
-            <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-white/20 text-white border border-white/15">
-              new
             </span>
           </p>
           <p className="text-[11px] text-white/65 leading-tight truncate mt-0.5">{description}</p>
