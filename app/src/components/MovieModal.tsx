@@ -207,13 +207,14 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
             </button>
 
             {/* Prev/Next : visibles uniquement si le film courant est dans la
-                liste actuelle (sinon on ne sait pas dans quoi naviguer).
-                Position top-left, en miroir du bouton X a top-right. */}
+                liste actuelle. Position top-right (la fleche retour est
+                maintenant a top-left, donc on les separe pour eviter la
+                superposition signalee sur Chrome Android). */}
             {currentIndex >= 0 && (
               <div
                 style={{
                   top: 'max(1.25rem, env(safe-area-inset-top))',
-                  left: 'max(1.25rem, env(safe-area-inset-left))',
+                  right: 'max(1.25rem, env(safe-area-inset-right))',
                 }}
                 className="absolute z-50 flex items-center gap-1"
               >

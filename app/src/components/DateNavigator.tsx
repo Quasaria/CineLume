@@ -192,10 +192,20 @@ export function DateNavigator() {
                   transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                   role="dialog"
                   aria-label={t('common.today')}
-                  className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-40 rounded-2xl border border-white/10 shadow-2xl shadow-black/40 p-3"
+                  // Position fixed avec calcul dynamique : evite que le popup
+                  // ne deborde du viewport sur petits ecrans (ce qui sur
+                  // certains browsers Android creait un scroll horizontal
+                  // qui decalait toute la page). On clamp left/right pour
+                  // toujours rester dans l'ecran avec une marge de 12px.
+                  className="fixed z-40 rounded-2xl border border-white/10 shadow-2xl shadow-black/40 p-3"
                   style={{
-                    // Sur les screens <320px, clamp pour ne pas overflow.
-                    width: 'min(280px, calc(100vw - 32px))',
+                    top: pickerTriggerRef.current
+                      ? pickerTriggerRef.current.getBoundingClientRect().bottom + 8
+                      : 80,
+                    left: 12,
+                    right: 12,
+                    margin: '0 auto',
+                    maxWidth: 'min(280px, calc(100vw - 24px))',
                     backgroundColor: 'color-mix(in srgb, var(--surface) 98%, transparent)',
                     backdropFilter: 'blur(20px) saturate(140%)',
                     WebkitBackdropFilter: 'blur(20px) saturate(140%)',
