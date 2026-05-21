@@ -52,25 +52,66 @@ export function DateNavigator() {
       setPickerPos(null);
       return;
     }
+    // Hauteur estimee du popup picker (4 rangees de mois ~44px + year nav
+    // ~36px + paddings + gaps). Sert a decider si on l'affiche au-dessus
+    // ou en-dessous du trigger selon la place disponible.
+    const ESTIMATED_HEIGHT = 220;
+    let rafId: number | null = null;
+
     function updatePos() {
       const trigger = pickerTriggerRef.current;
       if (!trigger) return;
       const rect = trigger.getBoundingClientRect();
+      // Skip si trigger detache du DOM (rect a 0)
+      if (rect.width === 0 && rect.height === 0) return;
       const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
       const width = Math.min(280, viewportW - 24);
       const triggerCenter = rect.left + rect.width / 2;
       let left = triggerCenter - width / 2;
       left = Math.max(12, Math.min(viewportW - width - 12, left));
-      setPickerPos({ top: rect.bottom + 6, left, width });
+      // Si pas assez de place en-dessous (iPhone SE petit ecran), on
+      // affiche le popup AU-DESSUS du trigger
+      const spaceBelow = viewportH - rect.bottom;
+      const top = spaceBelow >= ESTIMATED_HEIGHT
+        ? rect.bottom + 6
+        : Math.max(12, rect.top - ESTIMATED_HEIGHT - 6);
+      setPickerPos({ top, left, width });
     }
+
+    // Throttle via requestAnimationFrame : evite de spam setState sur
+    // chaque event scroll (qui fire ~60-120 fois par seconde).
+    function scheduleUpdate() {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updatePos();
+      });
+    }
+
     updatePos();
-    window.addEventListener('scroll', updatePos, { capture: true, passive: true });
-    window.addEventListener('resize', updatePos);
+    window.addEventListener('scroll', scheduleUpdate, { capture: true, passive: true });
+    window.addEventListener('resize', scheduleUpdate);
     return () => {
-      window.removeEventListener('scroll', updatePos, { capture: true });
-      window.removeEventListener('resize', updatePos);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', scheduleUpdate, { capture: true });
+      window.removeEventListener('resize', scheduleUpdate);
     };
   }, [pickerOpen]);
+
+  // Si l'user rotate son ecran de portrait (mobile, picker visible) vers
+  // paysage tablette/desktop (>= md:768), le picker DOM disparait via
+  // .md:hidden mais l'etat pickerOpen reste true (orphan). Ferme proactivement
+  // pour eviter le desync.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(min-width: 768px)');
+    function onChange(e: MediaQueryListEvent) {
+      if (e.matches) setPickerOpen(false);
+    }
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   useEffect(() => {
     if (weeks > 0 && selWeek > weeks) {
