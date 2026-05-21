@@ -22,6 +22,8 @@ function monthKey(timestamp: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+export { dateKey, monthKey };
+
 /**
  * Calcule un ensemble de stats agrégées sur l'historique des films vus.
  * Streak = nombre de jours consecutifs (ou non) avec au moins 1 visionnage.
@@ -73,7 +75,10 @@ export function computeWatchStats(seen: SeenMovie[]): WatchStats {
     cursor.setDate(cursor.getDate() - 1);
   }
 
-  // Max streak : on parcourt tous les jours et on track le run max.
+  // Max streak. On compare via Math.round((b - a) / 86400000) === 1 plutot
+  // que strict ===, parce qu'aux jours de changement d'heure (DST) deux
+  // minuits consecutifs sont espaces de 23 ou 25h, pas 24. Le round arrondit
+  // au jour calendaire le plus proche.
   const sortedDays = Array.from(daysWithFilm).sort();
   let maxStreak = 0;
   let currentRun = 0;
@@ -81,7 +86,7 @@ export function computeWatchStats(seen: SeenMovie[]): WatchStats {
   for (const dk of sortedDays) {
     const [y, m, d] = dk.split('-').map(Number);
     const day = new Date(y, m - 1, d);
-    if (prevDay && (day.getTime() - prevDay.getTime()) === 24 * 60 * 60 * 1000) {
+    if (prevDay && Math.round((day.getTime() - prevDay.getTime()) / 86400000) === 1) {
       currentRun++;
     } else {
       currentRun = 1;
