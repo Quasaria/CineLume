@@ -116,6 +116,20 @@ if (isDark) {
   document.documentElement.classList.add('light');
 }
 
+// Pose le meta theme-color initial selon la preference user persistee.
+// Les meta media queries dans index.html suivent les prefs OS, mais si
+// l'user a override dans Settings, il faut que la status bar le suive aussi.
+(function applyInitialThemeColor() {
+  const color = isDark ? '#050508' : '#fafafa';
+  let m = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]:not([media])');
+  if (!m) {
+    m = document.createElement('meta');
+    m.name = 'theme-color';
+    document.head.appendChild(m);
+  }
+  m.content = color;
+})();
+
 // Si pas de preference user, on ecoute les changements OS pour basculer
 // automatiquement. Listener attache une seule fois au module load.
 if (!savedTheme && typeof window !== 'undefined' && window.matchMedia) {
@@ -276,6 +290,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     } else {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.add('light');
+    }
+    // Met a jour le meta theme-color pour que la status bar Android
+    // matche le nouveau theme. Sans ca, le toggle dans l'app changeait
+    // le bg mais la status bar gardait l'ancienne couleur (issue des
+    // meta media queries qui ne suivent que la pref OS, pas l'override
+    // user dans l'app).
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]:not([media])');
+    const color = newDark ? '#050508' : '#fafafa';
+    if (themeMeta) {
+      themeMeta.setAttribute('content', color);
+    } else {
+      const m = document.createElement('meta');
+      m.name = 'theme-color';
+      m.content = color;
+      document.head.appendChild(m);
     }
     set({ isDark: newDark });
   },

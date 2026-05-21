@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar, Filter, ChevronDown } from 'lucide-react';
@@ -39,15 +39,19 @@ export function DateNavigator() {
   const monthGridRef = useRef<HTMLDivElement>(null);
   // Index focuse du clavier dans la grille des 12 mois (pour la nav fleches).
   const [focusedMonth, setFocusedMonth] = useState<number | null>(null);
-  // Position dynamique du popup picker : recalculee sur scroll/resize pour
-  // toujours coller au trigger meme quand l'user scroll apres ouverture.
-  const [pickerPos, setPickerPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 12, width: 280 });
+  // Position dynamique du popup picker : null tant qu'on n'a pas mesure
+  // le trigger. Le popup n'est rendu que quand pickerPos est non-null,
+  // ce qui evite le flash au top:0 avant que useLayoutEffect ait calcule.
+  const [pickerPos, setPickerPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
-  // Recompute la position du popup picker chaque fois que le trigger bouge
-  // (scroll, resize, ouverture/fermeture). Centre horizontalement sur le
-  // trigger mais clamp aux bords du viewport avec 12px de marge mini.
-  useEffect(() => {
-    if (!pickerOpen) return;
+  // useLayoutEffect (et pas useEffect) pour calculer la position AVANT que
+  // le browser peinte le popup. Evite le flash visuel ou il apparaitrait
+  // au top:0 puis sauterait a la bonne position.
+  useLayoutEffect(() => {
+    if (!pickerOpen) {
+      setPickerPos(null);
+      return;
+    }
     function updatePos() {
       const trigger = pickerTriggerRef.current;
       if (!trigger) return;
@@ -56,7 +60,6 @@ export function DateNavigator() {
       const width = Math.min(280, viewportW - 24);
       const triggerCenter = rect.left + rect.width / 2;
       let left = triggerCenter - width / 2;
-      // Clamp horizontal : minimum 12px du bord gauche, maximum 12px du bord droit
       left = Math.max(12, Math.min(viewportW - width - 12, left));
       setPickerPos({ top: rect.bottom + 6, left, width });
     }
@@ -64,7 +67,7 @@ export function DateNavigator() {
     window.addEventListener('scroll', updatePos, { capture: true, passive: true });
     window.addEventListener('resize', updatePos);
     return () => {
-      window.removeEventListener('scroll', updatePos, true);
+      window.removeEventListener('scroll', updatePos, { capture: true });
       window.removeEventListener('resize', updatePos);
     };
   }, [pickerOpen]);
@@ -213,7 +216,7 @@ export function DateNavigator() {
             </button>
 
             <AnimatePresence>
-              {pickerOpen && (
+              {pickerOpen && pickerPos && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96, y: -4 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
