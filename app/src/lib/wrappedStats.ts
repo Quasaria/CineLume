@@ -1,4 +1,5 @@
 import type { SeenMovie } from '@/types/movie';
+import { dateKey as toDateKey, monthKey as toMonthKey } from './watchStats';
 
 export type WrappedPeriod = 'month' | 'year';
 
@@ -43,16 +44,6 @@ export interface WrappedStats {
 }
 
 const DAY_MS = 86400000;
-
-function localDateKey(ts: number): string {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function localMonthKey(ts: number): string {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
 
 function decadeOf(releaseDate: string | undefined): number | null {
   if (!releaseDate || releaseDate.length < 4) return null;
@@ -109,7 +100,7 @@ function periodBounds(
     prevStartTs,
     prevEndTs,
     periodLabel,
-    periodKey: localMonthKey(startTs),
+    periodKey: toMonthKey(startTs),
   };
 }
 
@@ -174,9 +165,9 @@ export function computeWrappedStats(
   let maxDecade: number | null = null;
 
   for (const s of films) {
-    const dk = localDateKey(s.watchedAt);
+    const dk = toDateKey(s.watchedAt);
     dayCounts.set(dk, (dayCounts.get(dk) || 0) + 1);
-    const mk = localMonthKey(s.watchedAt);
+    const mk = toMonthKey(s.watchedAt);
     monthCounts.set(mk, (monthCounts.get(mk) || 0) + 1);
     dowCounts[dayOfWeekIdx(new Date(s.watchedAt))]++;
     for (const g of s.genre_ids || []) {

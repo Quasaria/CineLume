@@ -27,7 +27,35 @@ import {
   copyToClipboard,
 } from '@/lib/wrappedShare';
 
-const APP_URL = 'https://cinelume.fr';
+// URL canonique du deploy (GitHub Pages avec base /CineLume/). En dev
+// on retombe sur localhost ce qui n'est pas grave pour les tests.
+const APP_URL =
+  typeof window !== 'undefined'
+    ? `${window.location.origin}${import.meta.env.BASE_URL || '/'}`
+    : 'https://quasaria.github.io/CineLume/';
+
+type TFn = (k: string, opts?: Record<string, unknown>) => string;
+
+// Construit la map des labels traduits pour l'export Canvas. Les chaines
+// sont passees explicitement plutot que d'avoir des fallbacks francais
+// hardcodes dans wrappedImage.ts.
+function buildCanvasLabels(t: TFn) {
+  return {
+    brand: t('wrapped.canvasBrand'),
+    filmsSeenLabel: t('wrapped.filmsSeenLabel'),
+    vsPrev: t('wrapped.vsPrevFull'),
+    firstPeriod: t('wrapped.firstPeriod'),
+    topFilm: t('wrapped.topFilmLabel'),
+    topFilms: t('wrapped.topFilmsLabel'),
+    favGenre: t('wrapped.favGenre'),
+    yourGenres: t('wrapped.yourGenres'),
+    streak: t('wrapped.streak'),
+    decade: t('wrapped.decadeFav'),
+    biggestDay: t('wrapped.biggestDay'),
+    daysShort: t('wrapped.daysShort'),
+    filmsShort: t('wrapped.filmsShort'),
+  };
+}
 
 export function WrappedModal() {
   const { t, i18n } = useTranslation();
@@ -150,9 +178,9 @@ export function WrappedModal() {
               <EmptyState t={t} />
             ) : (
               <div className="px-4 sm:px-6 space-y-3 sm:space-y-4">
-                <SlideCover stats={stats} />
-                <SlideTopGenre stats={stats} genreMap={genreMap} />
-                <SlideTopFilms stats={stats} />
+                <SlideCover stats={stats} t={t} />
+                <SlideTopGenre stats={stats} genreMap={genreMap} t={t} />
+                <SlideTopFilms stats={stats} t={t} />
                 <SlideHabits stats={stats} lang={lang} t={t} />
                 {stats.period === 'year' && <SlideMonthlyDistribution stats={stats} t={t} />}
                 <SlideDecades stats={stats} t={t} />
@@ -321,7 +349,7 @@ function EmptyState({ t }: { t: (k: string) => string }) {
 
 // ---------- Slides ----------
 
-function SlideCover({ stats }: { stats: WrappedStats }) {
+function SlideCover({ stats, t }: { stats: WrappedStats; t: TFn }) {
   const deltaSign = stats.prevPeriodDelta !== null && stats.prevPeriodDelta > 0 ? '+' : '';
   return (
     <motion.section
@@ -339,7 +367,7 @@ function SlideCover({ stats }: { stats: WrappedStats }) {
     >
       <p className="text-xs uppercase tracking-[0.3em] font-black text-white/55 mb-2 flex items-center gap-2">
         <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-        Wrapped
+        {t('wrapped.coverLabel')}
       </p>
       <h3 className="text-7xl sm:text-8xl font-black tracking-tighter leading-[0.95]">
         <span className="bg-gradient-to-br from-white via-violet-100 to-cyan-100 bg-clip-text text-transparent tabular-nums">
@@ -347,14 +375,14 @@ function SlideCover({ stats }: { stats: WrappedStats }) {
         </span>
       </h3>
       <p className="text-base sm:text-lg font-semibold text-white/85 mt-2">
-        {stats.total > 1 ? 'films vus' : 'film vu'}
+        {t('wrapped.filmsSeen', { count: stats.total })}
       </p>
       <p className="text-xs sm:text-sm text-white/50 mt-1 capitalize">{stats.periodLabel}</p>
       {stats.prevPeriodDelta !== null && (
         <div className="mt-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/10">
           <TrendingUp className={`w-3 h-3 ${stats.prevPeriodDelta >= 0 ? 'text-emerald-300' : 'text-rose-300'}`} aria-hidden="true" />
           <span className="text-[11px] font-bold text-white/85 tabular-nums">
-            {deltaSign}{stats.prevPeriodDelta}% vs precedent
+            {deltaSign}{stats.prevPeriodDelta}% {t('wrapped.vsPrev')}
           </span>
         </div>
       )}
@@ -363,10 +391,11 @@ function SlideCover({ stats }: { stats: WrappedStats }) {
 }
 
 function SlideTopGenre({
-  stats, genreMap,
+  stats, genreMap, t,
 }: {
   stats: WrappedStats;
   genreMap: Map<number, string>;
+  t: TFn;
 }) {
   const top = stats.topGenres[0];
   if (!top) return null;
@@ -388,15 +417,15 @@ function SlideTopGenre({
     >
       <p className="text-xs uppercase tracking-[0.3em] font-black text-white/55 mb-2 flex items-center gap-2">
         <Film className="w-3.5 h-3.5" aria-hidden="true" />
-        Ton genre favori
+        {t('wrapped.favGenre')}
       </p>
-      <h3 className="text-5xl sm:text-6xl font-black tracking-tighter leading-none uppercase">
+      <h3 className="text-5xl sm:text-6xl font-black tracking-tighter leading-none uppercase break-words">
         <span className="bg-gradient-to-r from-fuchsia-200 via-violet-200 to-cyan-200 bg-clip-text text-transparent">
           {name}
         </span>
       </h3>
       <p className="mt-3 text-base font-semibold text-white/80 tabular-nums">
-        {top.count} films · {top.pct}%
+        {t('wrapped.filmsCount', { count: top.count })} · {top.pct}%
       </p>
       {stats.topGenres.length > 1 && (
         <div className="mt-5 flex flex-wrap gap-1.5">
@@ -418,7 +447,7 @@ function SlideTopGenre({
   );
 }
 
-function SlideTopFilms({ stats }: { stats: WrappedStats }) {
+function SlideTopFilms({ stats, t }: { stats: WrappedStats; t: TFn }) {
   if (stats.topFilms.length === 0) return null;
   return (
     <motion.section
@@ -430,7 +459,7 @@ function SlideTopFilms({ stats }: { stats: WrappedStats }) {
     >
       <p className="text-xs uppercase tracking-[0.3em] font-black text-white/55 mb-4 flex items-center gap-2">
         <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-        Tes derniers vus
+        {t('wrapped.recentFilms')}
       </p>
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
         {stats.topFilms.map((f, i) => (
@@ -469,7 +498,7 @@ function SlideHabits({
 }: {
   stats: WrappedStats;
   lang: string;
-  t: (k: string) => string;
+  t: TFn;
 }) {
   const bestDow = stats.byDayOfWeek
     .map((c, i) => ({ i, c }))
@@ -491,30 +520,32 @@ function SlideHabits({
     >
       <p className="text-xs uppercase tracking-[0.3em] font-black text-white/55 mb-4 flex items-center gap-2">
         <Flame className="w-3.5 h-3.5" aria-hidden="true" />
-        Tes habitudes
+        {t('wrapped.habits')}
       </p>
       <div className="grid grid-cols-2 gap-3">
         <HabitCard
           label={t('wrapped.streak')}
           value={String(stats.longestStreak)}
-          suffix={stats.longestStreak > 1 ? 'jours' : 'jour'}
+          suffix={t('wrapped.daysUnit', { count: stats.longestStreak })}
           accent="amber"
         />
         <HabitCard
           label={t('wrapped.daysWatched')}
           value={String(stats.daysWithFilm)}
-          suffix={stats.daysWithFilm > 1 ? 'jours' : 'jour'}
+          suffix={t('wrapped.daysUnit', { count: stats.daysWithFilm })}
           accent="violet"
         />
         {stats.bestDay && (
           <HabitCard
             label={t('wrapped.bestDay')}
             value={String(stats.bestDay.count)}
-            suffix={'le ' + new Date(
-              parseInt(stats.bestDay.dateKey.slice(0, 4), 10),
-              parseInt(stats.bestDay.dateKey.slice(5, 7), 10) - 1,
-              parseInt(stats.bestDay.dateKey.slice(8, 10), 10),
-            ).toLocaleDateString(lang || 'fr', { day: 'numeric', month: 'short' })}
+            suffix={t('wrapped.bestDayDate', {
+              date: new Date(
+                parseInt(stats.bestDay.dateKey.slice(0, 4), 10),
+                parseInt(stats.bestDay.dateKey.slice(5, 7), 10) - 1,
+                parseInt(stats.bestDay.dateKey.slice(8, 10), 10),
+              ).toLocaleDateString(lang || 'fr', { day: 'numeric', month: 'short' }),
+            })}
             accent="fuchsia"
           />
         )}
@@ -522,7 +553,7 @@ function SlideHabits({
           <HabitCard
             label={t('wrapped.favDay')}
             value={dayOfWeekLabel(bestDow.i, lang).slice(0, 3).toUpperCase()}
-            suffix={bestDow.c + ' films'}
+            suffix={t('wrapped.filmsCount', { count: bestDow.c })}
             accent="cyan"
           />
         )}
@@ -688,10 +719,14 @@ interface ShareSheetProps {
 
 function ShareSheet({ open, onClose, stats, genreMap, lang, t }: ShareSheetProps) {
   const [variant, setVariant] = useState<WrappedImageVariant>('simple');
-  const [generating, setGenerating] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Cache du blob genere pour le partage : on le reutilise dans les
+  // handlers de share AU LIEU de re-generer, ce qui (a) evite de gaspiller
+  // du CPU et (b) preserve le user-gesture context (un await avant
+  // navigator.share ferait throw NotAllowedError sur iOS Safari).
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
 
   // Reset statut + copy quand la sheet ferme.
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -703,6 +738,13 @@ function ShareSheet({ open, onClose, stats, genreMap, lang, t }: ShareSheetProps
   }, [open]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  // Auto-dismiss du statut apres 3s pour ne pas rester coince.
+  useEffect(() => {
+    if (!statusMsg) return;
+    const id = setTimeout(() => setStatusMsg(null), 3000);
+    return () => clearTimeout(id);
+  }, [statusMsg]);
+
   // Revoque l'object URL precedente : a chaque fois que previewUrl change ou
   // que la sheet est demontee, on libere la memoire de la blob URL.
   useEffect(() => {
@@ -710,13 +752,15 @@ function ShareSheet({ open, onClose, stats, genreMap, lang, t }: ShareSheetProps
     return () => URL.revokeObjectURL(previewUrl);
   }, [previewUrl]);
 
-  // Regenere une preview a chaque changement de variante quand le sheet est ouvert.
   // Regenere la preview a chaque changement de variante/periode. Le cleanup
-  // de la blob URL se fait dans l'effet dedie ci-dessus.
+  // de la blob URL se fait dans l'effet dedie ci-dessus. On stocke aussi le
+  // blob brut pour le partage (evite de regenerer dans le handler, ce qui
+  // casserait le gesture context sur iOS).
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) {
       setPreviewUrl(null);
+      setPreviewBlob(null);
       return;
     }
     let cancelled = false;
@@ -726,10 +770,12 @@ function ShareSheet({ open, onClose, stats, genreMap, lang, t }: ShareSheetProps
           variant,
           genreNames: genreMap,
           lang,
+          labels: buildCanvasLabels(t),
           brandTagline: t('wrapped.brandTagline'),
           appUrl: APP_URL,
         });
         if (cancelled) return;
+        setPreviewBlob(blob);
         setPreviewUrl(URL.createObjectURL(blob));
       } catch {
         // ignore : preview optionnelle
@@ -741,36 +787,36 @@ function ShareSheet({ open, onClose, stats, genreMap, lang, t }: ShareSheetProps
   }, [open, variant, stats, genreMap, lang, t]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const shareText = stats.period === 'year'
-    ? `Mon Wrapped CineLume ${stats.periodLabel} : ${stats.total} films vus`
-    : `Mon Wrapped CineLume · ${stats.periodLabel} : ${stats.total} films vus`;
+  const shareText = t(
+    stats.period === 'year' ? 'wrapped.shareTextYear' : 'wrapped.shareTextMonth',
+    { period: stats.periodLabel, count: stats.total },
+  );
+  const filename = `cinelume-wrapped-${stats.periodKey}.png`;
 
-  async function generateBlob() {
-    setGenerating(true);
-    try {
-      return await generateWrappedImage(stats, {
-        variant,
-        genreNames: genreMap,
-        lang,
-        brandTagline: t('wrapped.brandTagline'),
-        appUrl: APP_URL,
-      });
-    } finally {
-      setGenerating(false);
+  // Tous les handlers reutilisent previewBlob (genere par l'effet ci-dessus
+  // au moment ou la sheet s'ouvre / change de variante). Pas d'await avant
+  // l'appel a navigator.share / window.open : preserve le user-gesture
+  // context, requis par iOS Safari et les popup blockers.
+
+  function notReady(): boolean {
+    if (!previewBlob) {
+      setStatusMsg(t('wrapped.notReady'));
+      return true;
     }
+    return false;
   }
 
   async function handleNativeShare() {
+    if (notReady()) return;
     try {
-      const blob = await generateBlob();
-      const result = await shareWrappedImage(blob, `cinelume-wrapped-${stats.periodKey}.png`, {
+      const result = await shareWrappedImage(previewBlob!, filename, {
         text: shareText,
         url: APP_URL,
       });
-      if (result.method === 'download') {
+      if (result.method === 'native') {
+        setStatusMsg(t('wrapped.sharedSuccess'));
+      } else if (result.method === 'download') {
         setStatusMsg(t('wrapped.downloadedHint'));
-      } else if (result.method === 'cancelled') {
-        // nothing
       } else if (result.method === 'error') {
         setStatusMsg(t('wrapped.shareError'));
       }
@@ -779,38 +825,29 @@ function ShareSheet({ open, onClose, stats, genreMap, lang, t }: ShareSheetProps
     }
   }
 
-  async function handleDownload() {
-    try {
-      const blob = await generateBlob();
-      const r = downloadBlob(blob, `cinelume-wrapped-${stats.periodKey}.png`);
-      if (r.method === 'download') setStatusMsg(t('wrapped.downloadedHint'));
-      else setStatusMsg(t('wrapped.shareError'));
-    } catch {
-      setStatusMsg(t('wrapped.shareError'));
-    }
+  function handleDownload() {
+    if (notReady()) return;
+    const r = downloadBlob(previewBlob!, filename);
+    if (r.method === 'download') setStatusMsg(t('wrapped.downloadedHint'));
+    else setStatusMsg(t('wrapped.shareError'));
   }
 
-  async function handleTwitter() {
-    // Download image first so user can attach manually, then open intent
-    try {
-      const blob = await generateBlob();
-      downloadBlob(blob, `cinelume-wrapped-${stats.periodKey}.png`);
-      openTwitterIntent(shareText, APP_URL);
-    } catch {
-      setStatusMsg(t('wrapped.shareError'));
-    }
+  function handleTwitter() {
+    if (notReady()) return;
+    // Telecharge l'image PUIS ouvre l'intent dans la meme micro-task : pas
+    // d'await entre les deux pour ne pas perdre le gesture context (popup blocker).
+    downloadBlob(previewBlob!, filename);
+    openTwitterIntent(shareText, APP_URL);
   }
 
   async function handleWhatsApp() {
+    if (notReady()) return;
     try {
-      const blob = await generateBlob();
-      // Try native share first since WhatsApp accepts files via share sheet on mobile
-      const r = await shareWrappedImage(blob, `cinelume-wrapped-${stats.periodKey}.png`, {
+      const r = await shareWrappedImage(previewBlob!, filename, {
         text: shareText,
         url: APP_URL,
       });
       if (r.method === 'download') {
-        // Desktop : download + open wa.me
         openWhatsAppIntent(shareText, APP_URL);
       }
     } catch {
@@ -904,26 +941,26 @@ function ShareSheet({ open, onClose, stats, genreMap, lang, t }: ShareSheetProps
                   hint={t('wrapped.shareNativeHint')}
                   primary
                   onClick={handleNativeShare}
-                  disabled={generating}
+                  disabled={!previewBlob}
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <ShareButton
                     icon={Twitter}
                     label="Twitter / X"
                     onClick={handleTwitter}
-                    disabled={generating}
+                    disabled={!previewBlob}
                   />
                   <ShareButton
                     icon={MessageCircle}
                     label="WhatsApp"
                     onClick={handleWhatsApp}
-                    disabled={generating}
+                    disabled={!previewBlob}
                   />
                   <ShareButton
                     icon={Download}
                     label={t('wrapped.download')}
                     onClick={handleDownload}
-                    disabled={generating}
+                    disabled={!previewBlob}
                   />
                   <ShareButton
                     icon={copied ? Check : Copy}

@@ -14,8 +14,25 @@ import type { WrappedStats } from './wrappedStats';
  */
 export type WrappedImageVariant = 'simple' | 'detailed';
 
+export interface WrappedImageLabels {
+  brand: string;
+  filmsSeenLabel: string;
+  vsPrev: string;
+  firstPeriod: string;
+  topFilm: string;
+  topFilms: string;
+  favGenre: string;
+  yourGenres: string;
+  streak: string;
+  decade: string;
+  biggestDay: string;
+  daysShort: string;
+  filmsShort: string;
+}
+
 const W = 1080;
 const H = 1920;
+const FONT = 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w500';
 
@@ -23,6 +40,7 @@ interface GenerateOptions {
   variant: WrappedImageVariant;
   genreNames: Map<number, string>;
   lang: string;
+  labels: WrappedImageLabels;
   brandTagline: string;
   appUrl: string;
 }
@@ -38,25 +56,27 @@ export async function generateWrappedImage(
   if (!ctx) throw new Error('Canvas 2D context indisponible');
 
   drawBackground(ctx);
-  await drawHeader(ctx, stats);
-  await drawHeroStat(ctx, stats);
+  drawHeader(ctx, stats, options.labels);
+  drawHeroStat(ctx, stats, options.labels);
 
   if (options.variant === 'simple') {
-    await drawPosterStrip(ctx, stats.topFilms.slice(0, 3), 880, 320);
-    drawTopGenreCallout(ctx, stats, options.genreNames, 1260);
+    await drawPosterStrip(ctx, stats.topFilms.slice(0, 3), 880, 320, options.labels);
+    drawTopGenreCallout(ctx, stats, options.genreNames, 1260, options.labels);
     drawFooter(ctx, options);
   } else {
-    await drawPosterStrip(ctx, stats.topFilms.slice(0, 5), 840, 280);
-    drawTopGenresBars(ctx, stats, options.genreNames, 1170);
-    drawSecondaryStats(ctx, stats, options, 1490);
+    await drawPosterStrip(ctx, stats.topFilms.slice(0, 5), 840, 280, options.labels);
+    drawTopGenresBars(ctx, stats, options.genreNames, 1170, options.labels);
+    drawSecondaryStats(ctx, stats, options.labels, 1490);
     drawFooter(ctx, options);
   }
 
+  // toBlob peut echouer si le canvas est taint (CORS poster manque) :
+  // on essaie sans posters en fallback en re-rendant juste le texte.
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
         if (blob) resolve(blob);
-        else reject(new Error('canvas.toBlob a renvoye null'));
+        else reject(new Error('canvas.toBlob a renvoye null (canvas potentiellement taint)'));
       },
       'image/png',
       0.95,
@@ -97,16 +117,14 @@ function drawBlob(
   ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 }
 
-async function drawHeader(ctx: CanvasRenderingContext2D, stats: WrappedStats) {
-  // Brand small label en haut
-  ctx.font = '700 28px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+function drawHeader(ctx: CanvasRenderingContext2D, stats: WrappedStats, labels: WrappedImageLabels) {
+  ctx.font = `700 28px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
   ctx.textAlign = 'center';
-  ctx.fillText('CINELUME · WRAPPED', W / 2, 120);
+  ctx.fillText(`CINELUME · ${labels.brand}`, W / 2, 120);
 
-  // Period label centre, typo gradient
   const periodText = stats.periodLabel.toUpperCase();
-  ctx.font = '900 84px ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.font = `900 84px ${FONT}`;
   const grad = ctx.createLinearGradient(0, 180, W, 280);
   grad.addColorStop(0, '#c4b5fd');
   grad.addColorStop(0.5, '#f0abfc');
@@ -116,33 +134,39 @@ async function drawHeader(ctx: CanvasRenderingContext2D, stats: WrappedStats) {
   ctx.fillText(periodText, W / 2, 250);
 }
 
-async function drawHeroStat(ctx: CanvasRenderingContext2D, stats: WrappedStats) {
-  // Petit label "FILMS VUS" centre
-  ctx.font = '800 26px ui-sans-serif, system-ui, sans-serif';
+function drawHeroStat(ctx: CanvasRenderingContext2D, stats: WrappedStats, labels: WrappedImageLabels) {
+  ctx.font = `800 26px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.textAlign = 'center';
-  ctx.fillText('FILMS VUS', W / 2, 360);
+  ctx.fillText(labels.filmsSeenLabel.toUpperCase(), W / 2, 360);
 
-  // Le grand chiffre central
-  ctx.font = '900 320px ui-sans-serif, system-ui, sans-serif';
+  // Grand chiffre central. On scale dynamiquement si le total est tres grand
+  // (e.g. 10000+ films) pour ne pas deborder du canvas.
+  const totalStr = String(stats.total);
+  const maxWidth = W - 120;
+  let fontSize = 320;
+  ctx.font = `900 ${fontSize}px ${FONT}`;
+  const measured = ctx.measureText(totalStr);
+  if (measured.width > maxWidth) {
+    fontSize = Math.floor((fontSize * maxWidth) / measured.width);
+    ctx.font = `900 ${fontSize}px ${FONT}`;
+  }
   const heroGrad = ctx.createLinearGradient(0, 400, 0, 720);
   heroGrad.addColorStop(0, '#ffffff');
   heroGrad.addColorStop(0.6, '#e9d5ff');
   heroGrad.addColorStop(1, '#a5f3fc');
   ctx.fillStyle = heroGrad;
   ctx.textBaseline = 'middle';
-  ctx.fillText(String(stats.total), W / 2, 560);
+  ctx.fillText(totalStr, W / 2, 560);
   ctx.textBaseline = 'alphabetic';
 
-  // Sous-titre : delta vs periode precedente si disponible
-  ctx.font = '700 30px ui-sans-serif, system-ui, sans-serif';
+  ctx.font = `700 30px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   if (stats.prevPeriodDelta !== null) {
     const sign = stats.prevPeriodDelta > 0 ? '+' : '';
-    const text = `${sign}${stats.prevPeriodDelta}% vs periode precedente`;
-    ctx.fillText(text, W / 2, 760);
+    ctx.fillText(`${sign}${stats.prevPeriodDelta}% ${labels.vsPrev}`, W / 2, 760);
   } else if (stats.prevPeriodTotal === 0 && stats.total > 0) {
-    ctx.fillText('Premiere periode trackee', W / 2, 760);
+    ctx.fillText(labels.firstPeriod, W / 2, 760);
   }
 }
 
@@ -162,10 +186,11 @@ async function drawPosterStrip(
   films: WrappedStats['topFilms'],
   y: number,
   posterHeight: number,
+  labels: WrappedImageLabels,
 ) {
   if (films.length === 0) return;
-  const label = films.length === 1 ? 'TON FILM' : 'TES TOP FILMS';
-  ctx.font = '800 26px ui-sans-serif, system-ui, sans-serif';
+  const label = (films.length === 1 ? labels.topFilm : labels.topFilms).toUpperCase();
+  ctx.font = `800 26px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.textAlign = 'center';
   ctx.fillText(label, W / 2, y - 36);
@@ -229,7 +254,7 @@ function drawRoundedPoster(
     ctx.fillStyle = g;
     ctx.fillRect(x, y, w, h);
     ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    ctx.font = '700 22px ui-sans-serif, system-ui, sans-serif';
+    ctx.font = `700 22px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.fillText(truncate(fallbackTitle, 18), x + w / 2, y + h / 2);
   }
@@ -265,23 +290,32 @@ function drawTopGenreCallout(
   stats: WrappedStats,
   genreNames: Map<number, string>,
   y: number,
+  labels: WrappedImageLabels,
 ) {
   const top = stats.topGenres[0];
   if (!top) return;
-  const name = genreNames.get(top.id) || '—';
+  const rawName = genreNames.get(top.id) || '—';
 
-  ctx.font = '800 24px ui-sans-serif, system-ui, sans-serif';
+  ctx.font = `800 24px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
   ctx.textAlign = 'center';
-  ctx.fillText('TON GENRE FAVORI', W / 2, y);
+  ctx.fillText(labels.favGenre.toUpperCase(), W / 2, y);
 
-  // Gradient bar derriere le nom
-  const txt = name.toUpperCase();
-  ctx.font = '900 96px ui-sans-serif, system-ui, sans-serif';
-  const measured = ctx.measureText(txt);
+  // Auto-scale du nom pour rentrer dans la bar (sinon genres longs comme
+  // "Science-Fiction" depassent visuellement la bar gradient).
   const padX = 48;
-  const barW = Math.min(W - 80, measured.width + padX * 2);
-  const barH = 130;
+  const maxBarW = W - 80;
+  let fontSize = 96;
+  const txt = truncate(rawName.toUpperCase(), 22);
+  ctx.font = `900 ${fontSize}px ${FONT}`;
+  let measured = ctx.measureText(txt);
+  while (measured.width + padX * 2 > maxBarW && fontSize > 36) {
+    fontSize -= 6;
+    ctx.font = `900 ${fontSize}px ${FONT}`;
+    measured = ctx.measureText(txt);
+  }
+  const barW = Math.min(maxBarW, measured.width + padX * 2);
+  const barH = Math.max(110, fontSize + 34);
   const barX = (W - barW) / 2;
   const barY = y + 30;
   ctx.save();
@@ -301,11 +335,9 @@ function drawTopGenreCallout(
   ctx.fillText(txt, W / 2, barY + barH / 2);
   ctx.textBaseline = 'alphabetic';
 
-  // Count + pct sous le label
-  ctx.font = '700 28px ui-sans-serif, system-ui, sans-serif';
+  ctx.font = `700 28px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-  const sub = `${top.count} films · ${top.pct}%`;
-  ctx.fillText(sub, W / 2, barY + barH + 50);
+  ctx.fillText(`${top.count} ${labels.filmsShort} · ${top.pct}%`, W / 2, barY + barH + 50);
 }
 
 function drawTopGenresBars(
@@ -313,14 +345,15 @@ function drawTopGenresBars(
   stats: WrappedStats,
   genreNames: Map<number, string>,
   y: number,
+  labels: WrappedImageLabels,
 ) {
   const genres = stats.topGenres.slice(0, 4);
   if (genres.length === 0) return;
 
-  ctx.font = '800 26px ui-sans-serif, system-ui, sans-serif';
+  ctx.font = `800 26px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.textAlign = 'center';
-  ctx.fillText('TES GENRES', W / 2, y);
+  ctx.fillText(labels.yourGenres.toUpperCase(), W / 2, y);
 
   const max = genres[0].count;
   const barX = 100;
@@ -333,8 +366,7 @@ function drawTopGenresBars(
 
   for (const g of genres) {
     const name = (genreNames.get(g.id) || '—').toUpperCase();
-    // Label
-    ctx.font = '800 32px ui-sans-serif, system-ui, sans-serif';
+    ctx.font = `800 32px ${FONT}`;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'left';
     ctx.fillText(truncate(name, 18), barX, rowY + 28);
@@ -353,8 +385,7 @@ function drawTopGenresBars(
     ctx.fillStyle = gr;
     ctx.fill();
     ctx.restore();
-    // Count
-    ctx.font = '800 28px ui-sans-serif, system-ui, sans-serif';
+    ctx.font = `800 28px ${FONT}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.textAlign = 'right';
     ctx.fillText(String(g.count), barTrackX + barTrackW + 60, rowY + 28);
@@ -365,25 +396,24 @@ function drawTopGenresBars(
 function drawSecondaryStats(
   ctx: CanvasRenderingContext2D,
   stats: WrappedStats,
-  _options: GenerateOptions,
+  labels: WrappedImageLabels,
   y: number,
 ) {
-  // 3 stats secondaires en cards
   const items: Array<{ label: string; value: string }> = [];
   items.push({
-    label: 'PLUS LONGUE SERIE',
-    value: stats.longestStreak > 0 ? `${stats.longestStreak} j` : '—',
+    label: labels.streak.toUpperCase(),
+    value: stats.longestStreak > 0 ? `${stats.longestStreak} ${labels.daysShort}` : '—',
   });
   if (stats.topDecade) {
     items.push({
-      label: 'DECENNIE FAVORITE',
+      label: labels.decade.toUpperCase(),
       value: `${stats.topDecade.decade}s`,
     });
   }
   if (stats.bestDay) {
     items.push({
-      label: 'PLUS GROSSE JOURNEE',
-      value: `${stats.bestDay.count} films`,
+      label: labels.biggestDay.toUpperCase(),
+      value: `${stats.bestDay.count} ${labels.filmsShort}`,
     });
   }
   while (items.length < 3) items.push({ label: '—', value: '—' });
@@ -402,7 +432,7 @@ function drawSecondaryStats(
     ctx.stroke();
     ctx.restore();
 
-    ctx.font = '900 56px ui-sans-serif, system-ui, sans-serif';
+    ctx.font = `900 56px ${FONT}`;
     const g = ctx.createLinearGradient(x, y, x + cardW, y + cardH);
     g.addColorStop(0, '#c4b5fd');
     g.addColorStop(1, '#67e8f9');
@@ -411,7 +441,7 @@ function drawSecondaryStats(
     ctx.textBaseline = 'middle';
     ctx.fillText(it.value, x + cardW / 2, y + 80);
 
-    ctx.font = '700 18px ui-sans-serif, system-ui, sans-serif';
+    ctx.font = `700 18px ${FONT}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.fillText(it.label, x + cardW / 2, y + 158);
 
@@ -421,11 +451,11 @@ function drawSecondaryStats(
 }
 
 function drawFooter(ctx: CanvasRenderingContext2D, options: GenerateOptions) {
-  ctx.font = '700 24px ui-sans-serif, system-ui, sans-serif';
+  ctx.font = `700 24px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
   ctx.textAlign = 'center';
   ctx.fillText(options.brandTagline, W / 2, H - 110);
-  ctx.font = '600 22px ui-sans-serif, system-ui, sans-serif';
+  ctx.font = `600 22px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
   ctx.fillText(options.appUrl, W / 2, H - 70);
 }
