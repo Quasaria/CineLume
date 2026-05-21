@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Menu, Folder, Settings as SettingsIcon, X, Shuffle, Layers, CalendarHeart } from 'lucide-react';
+import { Menu, Folder, Settings as SettingsIcon, X, Shuffle, Layers, CalendarHeart, CalendarRange } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 
 /**
@@ -16,8 +16,12 @@ export function BurgerMenu() {
   const openPicker = useAppStore((s) => s.openPicker);
   const openSwipe = useAppStore((s) => s.openSwipe);
   const openWatchHistory = useAppStore((s) => s.openWatchHistory);
+  const openYearCalendar = useAppStore((s) => s.openYearCalendar);
   const customListsCount = useAppStore((s) => s.customLists.length);
   const seenCount = useAppStore((s) => s.seen.length);
+  const favoritesCount = useAppStore((s) => s.favorites.length);
+  const watchlistCount = useAppStore((s) => s.watchlist.length);
+  const yearTrackedCount = favoritesCount + watchlistCount;
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -99,6 +103,14 @@ export function BurgerMenu() {
               description={t('nav.watchHistoryDesc')}
               badge={seenCount > 0 ? seenCount : undefined}
               onClick={() => handleItem(openWatchHistory)}
+              accent="violet"
+            />
+            <MenuItem
+              icon={CalendarRange}
+              label={t('nav.yearCalendar')}
+              description={t('nav.yearCalendarDesc')}
+              badge={yearTrackedCount > 0 ? yearTrackedCount : undefined}
+              onClick={() => handleItem(openYearCalendar)}
               accent="violet"
             />
             <MenuItem
