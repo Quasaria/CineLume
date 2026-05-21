@@ -166,6 +166,7 @@
     "allOptions": "All options",
     "dataByJustwatch": "Data: JustWatch via TMDB",
     "similarFilms": "You may also like",
+    "noSimilar": "No similar films found",
     "status": {
       "Released": "Released",
       "Upcoming": "Upcoming",
