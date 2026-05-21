@@ -45,6 +45,7 @@ interface AppState {
   isSwipeOpen: boolean;
   isWatchHistoryOpen: boolean;
   isYearCalendarOpen: boolean;
+  isWrappedOpen: boolean;
 
   toggleTheme: () => void;
   setViewMode: (mode: ViewMode) => void;
@@ -98,6 +99,8 @@ interface AppState {
   closeWatchHistory: () => void;
   openYearCalendar: () => void;
   closeYearCalendar: () => void;
+  openWrapped: () => void;
+  closeWrapped: () => void;
   toggleBlindMode: () => void;
   setSortBy: (s: 'popularity' | 'date' | 'rating') => void;
   setRuntimeMax: (n: number | null) => void;
@@ -311,6 +314,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   isSwipeOpen: false,
   isWatchHistoryOpen: false,
   isYearCalendarOpen: false,
+  isWrappedOpen: false,
 
   toggleTheme: () => {
     const newDark = !get().isDark;
@@ -625,6 +629,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   closeWatchHistory: () => set({ isWatchHistoryOpen: false }),
   openYearCalendar: () => set({ isYearCalendarOpen: true }),
   closeYearCalendar: () => set({ isYearCalendarOpen: false }),
+  openWrapped: () => set({ isWrappedOpen: true }),
+  closeWrapped: () => set({ isWrappedOpen: false }),
 
   toggleBlindMode: () => {
     const next = !get().blindMode;

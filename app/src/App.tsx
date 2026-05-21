@@ -40,6 +40,7 @@ const PickerModal = lazy(() => import('@/components/PickerModal').then((m) => ({
 const SwipeMode = lazy(() => import('@/components/SwipeMode').then((m) => ({ default: m.SwipeMode })));
 const WatchHistoryModal = lazy(() => import('@/components/WatchHistoryModal').then((m) => ({ default: m.WatchHistoryModal })));
 const YearCalendarModal = lazy(() => import('@/components/YearCalendarModal').then((m) => ({ default: m.YearCalendarModal })));
+const WrappedModal = lazy(() => import('@/components/WrappedModal').then((m) => ({ default: m.WrappedModal })));
 
 interface DiscoverResponse {
   results: Movie[];
@@ -77,6 +78,7 @@ export default function App() {
   const isSwipeOpen = useAppStore((s) => s.isSwipeOpen);
   const isWatchHistoryOpen = useAppStore((s) => s.isWatchHistoryOpen);
   const isYearCalendarOpen = useAppStore((s) => s.isYearCalendarOpen);
+  const isWrappedOpen = useAppStore((s) => s.isWrappedOpen);
   const debouncedSearch = useDebouncedValue(searchQuery.trim(), 300);
   const { push: pushSearchHistory } = useSearchHistory();
 
@@ -85,7 +87,7 @@ export default function App() {
   useEffect(() => {
     if (debouncedSearch && !selectedPerson) pushSearchHistory(debouncedSearch);
   }, [debouncedSearch, selectedPerson, pushSearchHistory]);
-  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen || isWatchHistoryOpen || isYearCalendarOpen;
+  const anyModalOpen = currentModalMovieId !== null || isFilterOpen || isFavOpen || isListsOpen || isSettingsOpen || isPickerOpen || isSwipeOpen || isWatchHistoryOpen || isYearCalendarOpen || isWrappedOpen;
 
   useModalUrlSync();
   useReleaseNotifications();
@@ -274,6 +276,7 @@ export default function App() {
       import('@/components/SwipeMode');
       import('@/components/WatchHistoryModal');
       import('@/components/YearCalendarModal');
+      import('@/components/WrappedModal');
     });
   }, []);
 
@@ -290,6 +293,7 @@ export default function App() {
         if (store.isSwipeOpen) store.closeSwipe();
         if (store.isWatchHistoryOpen) store.closeWatchHistory();
         if (store.isYearCalendarOpen) store.closeYearCalendar();
+        if (store.isWrappedOpen) store.closeWrapped();
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -413,6 +417,7 @@ export default function App() {
           <SwipeMode />
           <WatchHistoryModal />
           <YearCalendarModal />
+          <WrappedModal />
         </Suspense>
         <Toaster
           position={isMobile ? 'bottom-center' : 'bottom-right'}
