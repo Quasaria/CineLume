@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive } from 'lucide-react';
+import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
@@ -22,7 +22,7 @@ function parseLocalDate(s: string | null | undefined): Date | null {
 }
 
 interface Group {
-  key: 'week' | 'upcoming' | 'released' | 'undated';
+  key: 'cinema' | 'week' | 'upcoming' | 'released' | 'undated';
   labelKey: string;
   icon: typeof Calendar;
   accent: string;
@@ -34,7 +34,14 @@ function groupByRelease(items: FavoriteMovie[], prefix: string): Group[] {
   today.setHours(0, 0, 0, 0);
   const weekEnd = new Date(today);
   weekEnd.setDate(today.getDate() + 7);
+  // Films sortis dans les 21 derniers jours = probablement encore au
+  // cinema (les sorties tiennent ~2-4 semaines en salles). On les met
+  // en premier, c'est ce que l'user a le plus de chance de vouloir voir
+  // tout de suite.
+  const cinemaStart = new Date(today);
+  cinemaStart.setDate(today.getDate() - 21);
 
+  const cinema: FavoriteMovie[] = [];
   const week: FavoriteMovie[] = [];
   const upcoming: FavoriteMovie[] = [];
   const released: FavoriteMovie[] = [];
@@ -43,7 +50,8 @@ function groupByRelease(items: FavoriteMovie[], prefix: string): Group[] {
   for (const it of items) {
     const d = parseLocalDate(it.release_date);
     if (!d) undated.push(it);
-    else if (d < today) released.push(it);
+    else if (d < cinemaStart) released.push(it);
+    else if (d < today) cinema.push(it);
     else if (d <= weekEnd) week.push(it);
     else upcoming.push(it);
   }
@@ -53,11 +61,15 @@ function groupByRelease(items: FavoriteMovie[], prefix: string): Group[] {
   const byDateDesc = (a: FavoriteMovie, b: FavoriteMovie) =>
     (b.release_date || '').localeCompare(a.release_date || '');
 
+  // Section 'Actuellement au cinema' triee par date de sortie la plus
+  // recente d'abord (les sorties du jour avant celles d'il y a 3 semaines).
+  cinema.sort(byDateDesc);
   week.sort(byDateAsc);
   upcoming.sort(byDateAsc);
   released.sort(byDateDesc);
 
   return [
+    { key: 'cinema' as const, labelKey: 'collections.inCinemaSection', icon: Film, accent: 'text-amber-300', items: cinema },
     { key: 'week' as const, labelKey: `${prefix}.weekSection`, icon: Calendar, accent: 'text-cyan-300', items: week },
     { key: 'upcoming' as const, labelKey: `${prefix}.upcomingSection`, icon: Sparkles, accent: 'text-violet-300', items: upcoming },
     { key: 'released' as const, labelKey: `${prefix}.releasedSection`, icon: Archive, accent: 'text-white/60', items: released },

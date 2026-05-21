@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#050508" />
+    <!-- theme-color avec media queries : la status bar Android matche
+         exactement le bg de l'app selon le mode (clair ou sombre), donnant
+         une experience PWA edge-to-edge sans demarcation visuelle entre
+         status bar et navbar. -->
+    <meta name="theme-color" content="#050508" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <meta name="color-scheme" content="dark light" />
 
     <!-- SEO : titre court mais avec les mots-cles principaux. 'gratuit'
