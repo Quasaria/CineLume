@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Heart, Calendar, Bookmark, Star, Info, ChevronDown, RotateCcw, Undo2, X as XIcon } from 'lucide-react';
@@ -455,6 +455,67 @@ function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
   const likeOpacity = useTransform(x, [40, 140], [0, 1]);
   const passOpacity = useTransform(x, [-140, -40], [1, 0]);
 
+  // Etat du drag (pointer events natifs au lieu de framer-motion drag, qui
+  // ne fonctionnait pas fiablement sur Chrome Android). On detecte
+  // l'intention (horizontal vs vertical) sur les premiers 8px de mouvement
+  // et on lock la direction. Si horizontal -> swipe, sinon -> laisse le
+  // browser scroller verticalement le contenu de la carte.
+  const dragStateRef = useRef<{
+    startX: number;
+    startY: number;
+    locked: 'h' | 'v' | null;
+    pointerId: number;
+  } | null>(null);
+
+  function handlePointerDown(e: React.PointerEvent) {
+    // Souris : seulement bouton gauche
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    dragStateRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      locked: null,
+      pointerId: e.pointerId,
+    };
+  }
+
+  function handlePointerMove(e: React.PointerEvent) {
+    const state = dragStateRef.current;
+    if (!state || state.pointerId !== e.pointerId) return;
+    const dx = e.clientX - state.startX;
+    const dy = e.clientY - state.startY;
+    if (state.locked === null) {
+      const adx = Math.abs(dx);
+      const ady = Math.abs(dy);
+      if (adx > 8 || ady > 8) {
+        state.locked = adx > ady ? 'h' : 'v';
+        if (state.locked === 'h') {
+          // Capture le pointer : on continue a recevoir les events meme si
+          // le doigt sort de l'element pendant le drag.
+          try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch { /* ignore */ }
+        }
+      }
+    }
+    if (state.locked === 'h') {
+      x.set(dx);
+    }
+  }
+
+  function handlePointerEnd(e: React.PointerEvent) {
+    const state = dragStateRef.current;
+    if (!state || state.pointerId !== e.pointerId) return;
+    const dx = e.clientX - state.startX;
+    const wasHorizontal = state.locked === 'h';
+    dragStateRef.current = null;
+    if (!wasHorizontal) return;
+    if (dx > SWIPE_THRESHOLD) {
+      onSwipe('right');
+    } else if (dx < -SWIPE_THRESHOLD) {
+      onSwipe('left');
+    } else {
+      animate(x, 0, { type: 'spring', stiffness: 400, damping: 30 });
+    }
+  }
+
   // Detail fetch (synopsis enrichi, runtime, genres)
   const { data: details } = useQuery({
     queryKey: ['movieDetails', movie.id, i18n.language],
@@ -471,26 +532,12 @@ function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
 
   return (
     <motion.div
-      drag="x"
-      // dragSnapToOrigin remplace dragConstraints+dragElastic : sur Chrome
-      // Android, la combinaison precedente bloquait le swipe horizontal
-      // (la carte ne bougeait pas visiblement). Avec snapToOrigin, le drag
-      // est libre dans l'axe X et revient a 0 a la fin sauf si on declenche
-      // onSwipe via le threshold.
-      dragSnapToOrigin
-      dragMomentum={false}
-      style={{ x, rotate }}
-      onDragEnd={(_, info) => {
-        if (info.offset.x > SWIPE_THRESHOLD) {
-          onSwipe('right');
-        } else if (info.offset.x < -SWIPE_THRESHOLD) {
-          onSwipe('left');
-        }
-      }}
-      // touch-pan-y permet le scroll vertical natif tandis que drag="x"
-      // gere le swipe horizontal. Sans ca, Chrome Android peut intercepter
-      // toutes les touches et empecher le drag.
-      className="absolute inset-0 rounded-3xl overflow-hidden bg-[#15151c] border border-white/10 shadow-2xl flex flex-col cursor-grab active:cursor-grabbing touch-pan-y"
+      style={{ x, rotate, touchAction: 'pan-y' }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+      className="absolute inset-0 rounded-3xl overflow-hidden bg-[#15151c] border border-white/10 shadow-2xl flex flex-col cursor-grab active:cursor-grabbing"
     >
       {/* LIKE / PASS overlays */}
       <motion.div
