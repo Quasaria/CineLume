@@ -18,6 +18,7 @@
     "searchMoviePlaceholder": "Search a movie...",
     "favorites": "My favorites",
     "favoritesAria": "My favorites ({{count}})",
+    "collectionsAria": "My movies ({{count}})",
     "watchlist": "My watchlist",
     "watchlistAria": "My watchlist ({{count}})",
     "menu": "Menu",

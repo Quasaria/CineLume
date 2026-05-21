@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Search, Heart, Sun, Moon, X, Bookmark } from 'lucide-react';
+import { Search, Heart, Sun, Moon, X } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ function LogoMark({ className = '' }: { className?: string }) {
 
 export function Navbar() {
   const { t } = useTranslation();
-  const { isDark, toggleTheme, openFavorites, openWatchlist, favorites, watchlist, searchQuery, setSearchQuery } = useAppStore();
+  const { isDark, toggleTheme, openFavorites, favorites, watchlist, searchQuery, setSearchQuery } = useAppStore();
   const { history: searchHistory, remove: removeFromHistory, clear: clearHistory } = useSearchHistory();
   const [scrolled, setScrolled] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
@@ -59,8 +59,14 @@ export function Navbar() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const favCount = favorites.length;
-  const watchCount = watchlist.length;
+  // Compteur unifie pour le bouton 'Mes films' : on dedoublonne par id
+  // pour ne pas compter 2 fois un film present dans favoris ET watchlist.
+  const totalSavedCount = useMemo(() => {
+    const ids = new Set<number>();
+    for (const f of favorites) ids.add(f.id);
+    for (const f of watchlist) ids.add(f.id);
+    return ids.size;
+  }, [favorites, watchlist]);
 
   return (
     <motion.nav
@@ -149,29 +155,14 @@ export function Navbar() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={openWatchlist}
-            aria-label={watchCount > 0 ? t('nav.watchlistAria', { count: watchCount }) : t('nav.watchlist')}
-            className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors relative"
-          >
-            <Bookmark className="w-5 h-5 text-white/70" aria-hidden="true" />
-            {watchCount > 0 && (
-              <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-cyan-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                {watchCount}
-              </span>
-            )}
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={openFavorites}
-            aria-label={favCount > 0 ? t('nav.favoritesAria', { count: favCount }) : t('nav.favorites')}
+            aria-label={totalSavedCount > 0 ? t('nav.collectionsAria', { count: totalSavedCount }) : t('collections.title')}
             className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors relative"
           >
             <Heart className="w-5 h-5 text-white/70" aria-hidden="true" />
-            {favCount > 0 && (
+            {totalSavedCount > 0 && (
               <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-violet-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                {favCount}
+                {totalSavedCount}
               </span>
             )}
           </motion.button>
