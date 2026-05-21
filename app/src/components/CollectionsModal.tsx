@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film } from 'lucide-react';
+import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film, Eye } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
@@ -93,13 +93,25 @@ export function CollectionsModal() {
   const setTab = useAppStore((s) => s.setCollectionsTab);
   const favorites = useAppStore((s) => s.favorites);
   const watchlist = useAppStore((s) => s.watchlist);
+  const seen = useAppStore((s) => s.seen);
   const removeFav = useAppStore((s) => s.removeFav);
   const removeFromWatchlist = useAppStore((s) => s.removeFromWatchlist);
+  const unmarkAsSeen = useAppStore((s) => s.unmarkAsSeen);
   const openFilmModal = useAppStore((s) => s.openModal);
 
-  const items = tab === 'favorites' ? favorites : watchlist;
-  const prefix = tab === 'favorites' ? 'favorites' : 'watchlist';
-  const groups = useMemo(() => groupByRelease(items, prefix), [items, prefix]);
+  const items: FavoriteMovie[] = tab === 'favorites' ? favorites : tab === 'watchlist' ? watchlist : seen;
+  const prefix = tab === 'favorites' ? 'favorites' : tab === 'watchlist' ? 'watchlist' : 'seen';
+  // Pour 'seen' on n'utilise pas le grouping par date de sortie (la majorite
+  // des films vus sont 'released', un seul bucket aplati). On affiche
+  // chronologiquement reverse par watchedAt directement.
+  const groups = useMemo(
+    () => tab === 'seen' ? [] : groupByRelease(items, prefix),
+    [items, prefix, tab],
+  );
+  const seenSorted = useMemo(
+    () => tab === 'seen' ? [...seen].sort((a, b) => b.watchedAt - a.watchedAt) : [],
+    [seen, tab],
+  );
   const fmtDate = (d?: string) => fmtDateLocalized(d);
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeModal, contentRef });
@@ -110,7 +122,8 @@ export function CollectionsModal() {
 
   function handleRemove(id: number) {
     if (tab === 'favorites') removeFav(id);
-    else removeFromWatchlist(id);
+    else if (tab === 'watchlist') removeFromWatchlist(id);
+    else unmarkAsSeen(id);
   }
 
   return (
@@ -170,6 +183,15 @@ export function CollectionsModal() {
                 activeColor="text-cyan-300"
                 activeBg="bg-cyan-500/10 border-cyan-500/30"
               />
+              <TabButton
+                active={tab === 'seen'}
+                onClick={() => setTab('seen')}
+                icon={Eye}
+                label={t('seen.tab')}
+                count={seen.length}
+                activeColor="text-emerald-300"
+                activeBg="bg-emerald-500/10 border-emerald-500/30"
+              />
             </div>
 
             {items.length === 0 ? (
@@ -177,12 +199,68 @@ export function CollectionsModal() {
                 <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/5 flex items-center justify-center">
                   {tab === 'favorites' ? (
                     <Heart className="w-7 h-7 text-white/30" aria-hidden="true" />
-                  ) : (
+                  ) : tab === 'watchlist' ? (
                     <Bookmark className="w-7 h-7 text-white/30" aria-hidden="true" />
+                  ) : (
+                    <Eye className="w-7 h-7 text-white/30" aria-hidden="true" />
                   )}
                 </div>
                 <p className="text-white/60 text-sm">{t(`${prefix}.empty`)}</p>
                 <p className="text-white/40 text-xs mt-1">{t(`${prefix}.emptyHint`)}</p>
+              </div>
+            ) : tab === 'seen' ? (
+              <div ref={contentRef} className="overflow-y-auto custom-scroll overscroll-contain flex-1 -mx-2 px-2">
+                <h4 className="flex items-center gap-1.5 text-xs uppercase tracking-wider font-bold mb-2 text-emerald-300">
+                  <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                  {t('seen.title')}
+                  <span className="text-white/40 normal-case tracking-normal font-medium">({seenSorted.length})</span>
+                </h4>
+                <div className="space-y-1">
+                  {seenSorted.map((f) => (
+                    <motion.div
+                      key={f.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0, x: -50 }}
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors"
+                      onClick={() => {
+                        closeModal();
+                        openFilmModal(f.id);
+                      }}
+                    >
+                      <div className="w-10 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                        {f.poster_path && (
+                          <img
+                            src={`${IMG}${f.poster_path}`}
+                            srcSet={posterSrcSet(f.poster_path)}
+                            sizes="40px"
+                            alt={f.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">{f.title}</p>
+                        <p className="text-xs text-emerald-300/80">
+                          {t('seen.watchedOn', { date: fmtDate(new Date(f.watchedAt).toISOString().slice(0, 10)) })}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={t('seen.unmark')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          unmarkAsSeen(f.id);
+                        }}
+                        className="min-w-11 min-h-11 flex items-center justify-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div ref={contentRef} className="overflow-y-auto custom-scroll overscroll-contain flex-1 -mx-2 px-2 space-y-5">

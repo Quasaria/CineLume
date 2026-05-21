@@ -356,6 +356,18 @@
     "removed": "{{title}} removed from watchlist",
     "close": "Close watchlist"
   },
+  "seen": {
+    "title": "Watched",
+    "tab": "Watched",
+    "mark": "Mark as watched",
+    "unmark": "Remove from watched",
+    "added": "{{title}} marked as watched",
+    "removed": "{{title}} removed from watched",
+    "empty": "No watched films yet",
+    "emptyHint": "Mark a film as watched to find it here",
+    "watchedOn": "Watched on {{date}}",
+    "stat": "Watched films"
+  },
   "persons": {
     "title": "People",
     "viewFilmography": "See {{name}}'s filmography",

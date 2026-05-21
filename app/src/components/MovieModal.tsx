@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight, CalendarPlus, Bookmark, MapPin, ArrowLeft } from 'lucide-react';
+import { X, Heart, Star, ExternalLink, Share2, Play, Clock, Users, Maximize2, ChevronLeft, ChevronRight, CalendarPlus, Bookmark, MapPin, ArrowLeft, Eye } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -27,7 +27,7 @@ interface MovieModalProps {
 export function MovieModal({ movies = [] }: MovieModalProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
-  const { currentModalMovieId, closeModal, openModal, isFav, toggleFav, isInWatchlist, toggleWatchlist, selRegion } = useAppStore();
+  const { currentModalMovieId, closeModal, openModal, isFav, toggleFav, isInWatchlist, toggleWatchlist, isSeen, markAsSeen, unmarkAsSeen, selRegion } = useAppStore();
 
   // Index du film courant dans la liste affichee actuellement. Si l'user
   // est arrive via URL deep-link sur un film qui n'est pas dans la liste
@@ -391,6 +391,31 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                           >
                             <Heart className={`w-5 h-5 ${isFav(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isSeen(movie.id)) {
+                                unmarkAsSeen(movie.id);
+                              } else {
+                                markAsSeen({
+                                  id: movie.id,
+                                  title: movie.title,
+                                  poster_path: movie.poster_path,
+                                  release_date: movie.release_date,
+                                  vote_average: movie.vote_average,
+                                  overview: movie.overview,
+                                  genre_ids: movie.genre_ids,
+                                });
+                              }
+                            }}
+                            aria-label={isSeen(movie.id) ? t('seen.unmark') : t('seen.mark')}
+                            aria-pressed={isSeen(movie.id)}
+                            className={`min-w-11 min-h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors ${
+                              isSeen(movie.id) ? 'text-emerald-400' : 'text-white/80'
+                            }`}
+                          >
+                            <Eye className={`w-5 h-5 ${isSeen(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
+                          </button>
                         </div>
                       </div>
 
@@ -683,6 +708,31 @@ export function MovieModal({ movies = [] }: MovieModalProps) {
                   }`}
                 >
                   <Heart className={`w-5 h-5 ${isFav(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isSeen(movie.id)) {
+                      unmarkAsSeen(movie.id);
+                    } else {
+                      markAsSeen({
+                        id: movie.id,
+                        title: movie.title,
+                        poster_path: movie.poster_path,
+                        release_date: movie.release_date,
+                        vote_average: movie.vote_average,
+                        overview: movie.overview,
+                        genre_ids: movie.genre_ids,
+                      });
+                    }
+                  }}
+                  aria-label={isSeen(movie.id) ? t('seen.unmark') : t('seen.mark')}
+                  aria-pressed={isSeen(movie.id)}
+                  className={`min-w-12 min-h-12 flex items-center justify-center rounded-xl bg-white/8 active:bg-white/15 border border-white/10 transition-colors ${
+                    isSeen(movie.id) ? 'text-emerald-400' : 'text-white/80'
+                  }`}
+                >
+                  <Eye className={`w-5 h-5 ${isSeen(movie.id) ? 'fill-current' : ''}`} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
