@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film } from 'lucide-react';
@@ -196,30 +196,35 @@ export function CollectionsModal() {
                         <span className="text-white/40 normal-case tracking-normal font-medium">({group.items.length})</span>
                       </h4>
                       <div className="space-y-1">
-                        {group.items.map((f, idx) => {
+                        {group.items.flatMap((f, idx) => {
                           // Micro-demarcation par mois dans 'A venir' :
                           // insere un petit header de mois entre les films
                           // quand le mois change entre deux entrees consecutives.
-                          // Aide a scanner visuellement quand on a beaucoup
-                          // de films attendus dans des mois differents.
+                          // flatMap permet d'inserer le header au meme niveau
+                          // que la motion.div, sans Fragment qui casserait le
+                          // tracking de key/layout par framer-motion.
                           const showMonthDivider = group.key === 'upcoming' && (() => {
                             if (idx === 0) return true;
                             const prev = group.items[idx - 1];
-                            const prevMonth = (prev.release_date || '').slice(0, 7); // YYYY-MM
+                            const prevMonth = (prev.release_date || '').slice(0, 7);
                             const curMonth = (f.release_date || '').slice(0, 7);
                             return prevMonth !== curMonth;
                           })();
                           const monthLabel = group.key === 'upcoming' && f.release_date
                             ? fmtDateLocalized(f.release_date, { month: 'long', year: 'numeric' })
                             : null;
-                          return (
-                          <Fragment key={f.id}>
-                            {showMonthDivider && monthLabel && (
-                              <p className="text-[10px] uppercase tracking-wider font-bold text-white/45 px-2 pt-2 pb-1 first:pt-0">
+                          const monthKey = f.release_date?.slice(0, 7) || 'unknown';
+                          const nodes = [];
+                          if (showMonthDivider && monthLabel) {
+                            nodes.push(
+                              <p key={`month-${monthKey}`} className="text-[10px] uppercase tracking-wider font-bold text-white/45 px-2 pt-2 pb-1 first:pt-0">
                                 {monthLabel}
                               </p>
-                            )}
+                            );
+                          }
+                          nodes.push(
                           <motion.div
+                            key={f.id}
                             layout
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -258,8 +263,8 @@ export function CollectionsModal() {
                               <Trash2 className="w-4 h-4" aria-hidden="true" />
                             </button>
                           </motion.div>
-                          </Fragment>
                           );
+                          return nodes;
                         })}
                       </div>
                     </section>

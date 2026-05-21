@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,6 +20,14 @@ export function SimilarFilms({ movieId }: SimilarFilmsProps) {
   const { t } = useTranslation();
   const openModal = useAppStore((s) => s.openModal);
   const [expanded, setExpanded] = useState(false);
+
+  // Reset l'etat 'deplie' quand on change de film. Sinon ouvrir film A,
+  // deplier similaires, naviguer vers film B via prev/next ou similaires
+  // gardait la section ouverte avec les bonnes donnees mais l'animation
+  // d'entree etait sautee, et le user pouvait se perdre.
+  useEffect(() => {
+    setExpanded(false);
+  }, [movieId]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['similar', movieId],
