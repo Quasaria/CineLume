@@ -146,7 +146,18 @@
           },
           "sameAs": [
             "https://github.com/Quasaria/CineLume"
-          ]
+          ],
+          "founder": {
+            "@id": "https://quasaria.github.io/CineLume/#author"
+          }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://quasaria.github.io/CineLume/#author",
+          "name": "Quasaria",
+          "url": "https://github.com/Quasaria",
+          "sameAs": ["https://github.com/Quasaria"],
+          "jobTitle": "Createur de CineLume"
         },
         {
           "@type": "WebApplication",
@@ -180,6 +191,22 @@
           "publisher": {
             "@id": "https://quasaria.github.io/CineLume/#publisher"
           },
+          "creator": {
+            "@id": "https://quasaria.github.io/CineLume/#author"
+          },
+          "author": {
+            "@id": "https://quasaria.github.io/CineLume/#author"
+          },
+          "about": [
+            { "@type": "Thing", "name": "Cinéma", "sameAs": "https://fr.wikipedia.org/wiki/Cinéma" },
+            { "@type": "Thing", "name": "Film", "sameAs": "https://www.wikidata.org/wiki/Q11424" },
+            { "@type": "Thing", "name": "Streaming vidéo", "sameAs": "https://fr.wikipedia.org/wiki/Vidéo_à_la_demande" }
+          ],
+          "mentions": [
+            { "@type": "Organization", "name": "The Movie Database (TMDB)", "url": "https://www.themoviedb.org/", "sameAs": "https://en.wikipedia.org/wiki/The_Movie_Database" },
+            { "@type": "Organization", "name": "JustWatch", "url": "https://www.justwatch.com/", "sameAs": "https://en.wikipedia.org/wiki/JustWatch" },
+            { "@type": "Organization", "name": "Letterboxd", "url": "https://letterboxd.com/", "sameAs": "https://en.wikipedia.org/wiki/Letterboxd" }
+          ],
           "featureList": [
             "Calendrier des sorties cinéma semaine par semaine, par pays",
             "Filtres par pays, genre, plateforme de streaming et durée",
@@ -570,6 +597,16 @@
             Sorties cinéma 2026, sorties cinéma de la semaine, calendrier sorties films, agenda cinéma gratuit, tracker films, watchlist cinéma, films à voir, nouveautés Netflix, nouveautés Prime Video, nouveautés Disney Plus, application cinéma gratuite, app films sans pub, alternative Letterboxd gratuite, alternative Trakt sans abonnement, alternative IMDb sans inscription, suivi sorties cinéma France, sorties streaming France, programme cinéma Paris, PWA cinéma installable, app suivi films iOS, app suivi films Android.
           </p>
         </section>
+
+        <nav aria-label="Liens internes">
+          <h2>Pages associées</h2>
+          <ul>
+            <li><a href="about.html">À propos de CineLume — origine et choix techniques</a></li>
+            <li><a href="privacy.html">Politique de vie privée — aucune donnée collectée</a></li>
+            <li><a href="press.html">Press kit — un-pager presse</a></li>
+            <li><a href="https://github.com/Quasaria/CineLume">Code source GitHub</a></li>
+          </ul>
+        </nav>
       </article>
     </main>
 

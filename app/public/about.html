@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050508" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>À propos — CineLume, agenda cinéma gratuit sans pub</title>
+    <meta name="description" content="L'histoire de CineLume : pourquoi cette application gratuite de suivi des sorties cinéma, sans publicité, sans abonnement, sans inscription, sans backend. Open source, MIT." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://quasaria.github.io/CineLume/about.html" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="À propos — CineLume" />
+    <meta property="og:description" content="L'origine de CineLume et les choix techniques qui en font une application sans publicité, sans abonnement, sans tracking." />
+    <meta property="og:url" content="https://quasaria.github.io/CineLume/about.html" />
+    <meta property="og:image" content="https://quasaria.github.io/CineLume/og-image.png" />
+    <meta property="article:published_time" content="2025-10-01" />
+    <meta property="article:modified_time" content="2026-05-21" />
+    <meta property="article:section" content="About" />
+    <meta property="article:tag" content="cinéma" />
+    <meta property="article:tag" content="streaming" />
+    <meta property="article:tag" content="PWA" />
+    <meta property="article:tag" content="gratuit" />
+    <meta property="article:tag" content="open source" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "@id": "https://quasaria.github.io/CineLume/about.html#about",
+      "url": "https://quasaria.github.io/CineLume/about.html",
+      "name": "À propos de CineLume",
+      "description": "Histoire, motivations et choix techniques de CineLume.",
+      "inLanguage": "fr",
+      "datePublished": "2025-10-01",
+      "dateModified": "2026-05-21",
+      "mainEntity": {
+        "@id": "https://quasaria.github.io/CineLume/#app"
+      },
+      "isPartOf": {
+        "@id": "https://quasaria.github.io/CineLume/#website"
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://quasaria.github.io/CineLume/" },
+          { "@type": "ListItem", "position": 2, "name": "À propos", "item": "https://quasaria.github.io/CineLume/about.html" }
+        ]
+      }
+    }
+    </script>
+
+    <style>
+      :root { color-scheme: dark light; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: #050508;
+        color: #fafafa;
+        font-family: -apple-system, 'Inter', system-ui, sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      @media (prefers-color-scheme: light) {
+        body { background: #fafafa; color: #0a0a0f; }
+      }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+      header nav { font-size: 14px; opacity: 0.6; margin-bottom: 32px; }
+      header nav a { color: inherit; text-decoration: none; }
+      header nav a:hover { text-decoration: underline; }
+      h1 { font-size: 36px; line-height: 1.15; letter-spacing: -1px; margin: 0 0 8px; font-weight: 800; }
+      .meta { font-size: 13px; opacity: 0.55; margin-bottom: 32px; }
+      h2 { font-size: 22px; margin: 40px 0 12px; font-weight: 700; letter-spacing: -0.3px; }
+      p { margin: 0 0 16px; }
+      a { color: #a78bfa; }
+      ul { padding-left: 22px; }
+      li { margin-bottom: 6px; }
+      .cta { display: inline-block; margin-top: 24px; padding: 12px 20px; background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; border-radius: 12px; text-decoration: none; font-weight: 600; }
+      footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; opacity: 0.55; }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <nav><a href="/CineLume/">← CineLume</a></nav>
+        <h1>À propos de CineLume</h1>
+        <p class="meta">Publié le 1<sup>er</sup> octobre 2025 · Mis à jour le 21 mai 2026</p>
+      </header>
+
+      <main>
+        <section>
+          <h2>L'idée</h2>
+          <p>
+            CineLume est né d'un constat simple : il n'existait aucune application qui réponde directement à ma question quotidienne, <em>qu'est-ce qui sort cette semaine au cinéma que j'ai envie de voir ?</em>
+          </p>
+          <p>
+            Les applications dominantes sont organisées autour d'autres usages : Letterboxd est un journal social de visionnage, Trakt est un tracker épisodique avec compte payant, IMDb est une base de données saturée de publicités. Aucune n'optimise l'usage <em>"agenda hebdomadaire des sorties + watchlist personnelle sans compte"</em>.
+          </p>
+        </section>
+
+        <section>
+          <h2>Trois besoins concrets</h2>
+          <ol>
+            <li>Voir ce qui sort cette semaine au cinéma, filtré par pays</li>
+            <li>Marquer les films qui m'intéressent (heart / bookmark) sans compte ni inscription</li>
+            <li>Recevoir une notification le jour de leur sortie</li>
+          </ol>
+          <p>Tout le reste de l'application — listes personnalisées, mode sélecteur swipe, pioche aléatoire, import Letterboxd, partage par lien — est dérivé organiquement de ces trois besoins, pas plaqué pour faire joli.</p>
+        </section>
+
+        <section>
+          <h2>Choix techniques délibérés</h2>
+          <h3>Pas de backend</h3>
+          <p>
+            CineLume n'a pas de serveur. Toutes les données utilisateur (favoris, watchlist, listes, préférences) sont stockées dans le <code>localStorage</code> du navigateur. Aucune base de données. Aucun endpoint API privé. Cette contrainte rend impossible le tracking, la fuite de données, et les modèles commerciaux basés sur la pub ou les abonnements.
+          </p>
+
+          <h3>Pas de publicité</h3>
+          <p>
+            Aucune bannière. Aucun interstitiel. Aucun pixel publicitaire. Aucune télémétrie. L'expérience est entièrement épurée. Le coût d'infra étant nul (GitHub Pages héberge gratuitement), il n'y a pas de raison d'imposer de la pub.
+          </p>
+
+          <h3>Pas d'inscription</h3>
+          <p>
+            Aucun email, aucun mot de passe, aucun compte. Tu ouvres l'app et tu l'utilises immédiatement. Comme tout est local, tu peux exporter ta watchlist au format Letterboxd CSV à tout moment pour la migrer ailleurs, ou la partager par lien.
+          </p>
+
+          <h3>Progressive Web App</h3>
+          <p>
+            CineLume fonctionne dans n'importe quel navigateur moderne et peut être installée sur l'écran d'accueil iOS, Android, Windows, macOS et Linux. Mode hors-ligne via Service Worker (Workbox). L'expérience installée est équivalente à une app native.
+          </p>
+
+          <h3>Open source</h3>
+          <p>
+            Le code est public sous licence MIT, auditable et forkable. Aucune obfuscation, aucune télémétrie cachée. Si je disparais demain, n'importe qui peut continuer le projet ou faire le sien.
+          </p>
+        </section>
+
+        <section>
+          <h2>Sources de données</h2>
+          <p>
+            Les informations sur les films viennent de <a href="https://www.themoviedb.org/">TMDB (The Movie Database)</a>, une base communautaire ouverte créée en 2008 qui couvre plus de 800&nbsp;000 films. Les disponibilités sur les plateformes de streaming sont fournies par <a href="https://www.justwatch.com/">JustWatch</a> via TMDB.
+          </p>
+          <p>
+            Aucune donnée n'est inventée ou scrappée : tout passe par les APIs publiques officielles.
+          </p>
+        </section>
+
+        <section>
+          <h2>Stack technique</h2>
+          <p>
+            React 19 · Vite 7 · TypeScript · Tailwind CSS · Zustand · TanStack Query · Framer Motion · i18next · Workbox PWA · HashRouter · Sonner.
+          </p>
+          <p>
+            Code splitting des modales (lazy loading + preload au idle), service worker NetworkFirst pour les API TMDB, CacheFirst pour les images. Bundle initial ~190 KB gzip.
+          </p>
+        </section>
+
+        <a class="cta" href="/CineLume/">Ouvrir CineLume →</a>
+
+        <footer>
+          <p>Liens : <a href="/CineLume/">Accueil</a> · <a href="/CineLume/privacy.html">Vie privée</a> · <a href="/CineLume/press.html">Press kit</a> · <a href="https://github.com/Quasaria/CineLume">Code source GitHub</a></p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
