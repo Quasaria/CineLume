@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050508" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>Changelog — CineLume, version history</title>
+    <meta name="description" content="CineLume version history: new features, improvements and fixes. Actively maintained open-source project." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://quasaria.github.io/CineLume/en/changelog.html" />
+    <link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/changelog.html" />
+    <link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/changelog.html" />
+    <link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/changelog.html" />
+    <link rel="icon" type="image/svg+xml" href="../icon.svg" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Changelog — CineLume" />
+    <meta property="og:description" content="Version history and updates for CineLume." />
+    <meta property="og:url" content="https://quasaria.github.io/CineLume/en/changelog.html" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://quasaria.github.io/CineLume/og-image.png" />
+    <meta property="article:published_time" content="2025-10-01" />
+    <meta property="article:modified_time" content="__BUILD_DATE_ISO__" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://quasaria.github.io/CineLume/en/changelog.html#page",
+      "url": "https://quasaria.github.io/CineLume/en/changelog.html",
+      "name": "Changelog — CineLume",
+      "description": "Version history and what's new.",
+      "inLanguage": "en",
+      "datePublished": "2025-10-01",
+      "dateModified": "__BUILD_DATE_ISO__",
+      "isPartOf": { "@id": "https://quasaria.github.io/CineLume/#website" },
+      "about": { "@id": "https://quasaria.github.io/CineLume/#app" },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://quasaria.github.io/CineLume/" },
+          { "@type": "ListItem", "position": 2, "name": "Changelog", "item": "https://quasaria.github.io/CineLume/en/changelog.html" }
+        ]
+      }
+    }
+    </script>
+
+    <style>
+      :root { color-scheme: dark light; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: #050508; color: #fafafa; font-family: -apple-system, 'Inter', system-ui, sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+      @media (prefers-color-scheme: light) { body { background: #fafafa; color: #0a0a0f; } }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+      header nav { font-size: 14px; opacity: 0.6; margin-bottom: 32px; }
+      header nav a { color: inherit; text-decoration: none; }
+      h1 { font-size: 36px; line-height: 1.15; letter-spacing: -1px; margin: 0 0 8px; font-weight: 800; }
+      .meta { font-size: 13px; opacity: 0.55; margin-bottom: 32px; }
+      .release { margin: 40px 0; padding-left: 16px; border-left: 2px solid rgba(124, 58, 237, 0.4); }
+      .release h2 { font-size: 20px; margin: 0 0 4px; font-weight: 700; }
+      .release .date { font-size: 12px; opacity: 0.55; margin-bottom: 12px; }
+      .release ul { padding-left: 18px; margin: 0; }
+      .release li { margin-bottom: 6px; }
+      .tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-right: 6px; vertical-align: middle; letter-spacing: 0.3px; text-transform: uppercase; }
+      .tag-feat { background: rgba(124, 58, 237, 0.18); color: #c4b5fd; }
+      .tag-fix { background: rgba(6, 182, 212, 0.18); color: #67e8f9; }
+      .tag-perf { background: rgba(217, 70, 239, 0.18); color: #f0abfc; }
+      .tag-seo { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; }
+      a { color: #a78bfa; }
+      footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; opacity: 0.55; }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <nav><a href="/CineLume/">← CineLume</a> · <a href="/CineLume/changelog.html">Version française</a></nav>
+        <h1>Changelog</h1>
+        <p class="meta">Version history · Updated __BUILD_DATE_HUMAN_FR__ · Full detail: <a href="https://github.com/Quasaria/CineLume/commits/main">GitHub commits</a></p>
+      </header>
+
+      <main>
+        <div class="release">
+          <h2>v1.8 — May 2026</h2>
+          <p class="date">May 21, 2026</p>
+          <ul>
+            <li><span class="tag tag-seo">SEO</span>Major SEO/GEO overhaul: rich structured data (WebApplication, FAQPage × 15, HowTo, BreadcrumbList, Person, Organization)</li>
+            <li><span class="tag tag-feat">FEAT</span>Separate static pages: /about, /privacy, /press, /guide, /changelog in FR + EN</li>
+            <li><span class="tag tag-feat">FEAT</span>Auto-freshness: build date injection + weekly GitHub Action cron</li>
+            <li><span class="tag tag-feat">FEAT</span>Dedicated 1200×630 OG image</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.7 — May 2026</h2>
+          <p class="date">May 15, 2026</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>Dedicated person page with photo, biography and filmography</li>
+            <li><span class="tag tag-feat">FEAT</span>Clickable director in movie modal</li>
+            <li><span class="tag tag-feat">FEAT</span>"Back to film" button from person page</li>
+            <li><span class="tag tag-feat">FEAT</span>"Pick a movie" modal with source + genre filter</li>
+            <li><span class="tag tag-feat">FEAT</span>Tinder-style swipe selector mode with undo</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.6 — May 2026</h2>
+          <p class="date">May 10, 2026</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>Combined Favorites + Watchlist in tabbed modal</li>
+            <li><span class="tag tag-feat">FEAT</span>Custom lists: emoji, drag-to-reorder, share by link</li>
+            <li><span class="tag tag-feat">FEAT</span>Search: history of last 8 + match highlighting</li>
+            <li><span class="tag tag-feat">FEAT</span>Letterboxd import with detailed per-film report</li>
+            <li><span class="tag tag-feat">FEAT</span>Notifications: configurable quiet hours</li>
+            <li><span class="tag tag-feat">FEAT</span>Contextual PWA install banner</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.5 — April 2026</h2>
+          <p class="date">April 28, 2026</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>"Where to watch" section (Netflix, Prime, Disney+, etc.) via JustWatch</li>
+            <li><span class="tag tag-feat">FEAT</span>Similar films recommendations</li>
+            <li><span class="tag tag-feat">FEAT</span>Spoiler-free mode (titles and posters blurred until tap)</li>
+            <li><span class="tag tag-feat">FEAT</span>Sort: popularity, date, rating</li>
+            <li><span class="tag tag-feat">FEAT</span>Max runtime filter</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.4 — April 2026</h2>
+          <p class="date">April 10, 2026</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>Back navigation everywhere + iOS-like swipe-from-left-edge</li>
+            <li><span class="tag tag-feat">FEAT</span>Settings redesigned in section cards</li>
+            <li><span class="tag tag-feat">FEAT</span>Mobile DateNavigator: tappable month/year picker</li>
+            <li><span class="tag tag-feat">FEAT</span>Pull-to-refresh extended to tablets</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.3 — March 2026</h2>
+          <p class="date">March 15, 2026</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>Adaptive light/dark theme</li>
+            <li><span class="tag tag-feat">FEAT</span>Multilingual French / English</li>
+            <li><span class="tag tag-perf">PERF</span>Modal code-splitting (initial bundle -240 KB)</li>
+            <li><span class="tag tag-perf">PERF</span>Granular Zustand selectors (re-renders divided by 10)</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.2 — February 2026</h2>
+          <p class="date">February 10, 2026</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>Release notifications for favorites</li>
+            <li><span class="tag tag-feat">FEAT</span>Offline mode via Service Worker (Workbox)</li>
+            <li><span class="tag tag-feat">FEAT</span>PWA installation on iOS, Android, desktop</li>
+            <li><span class="tag tag-feat">FEAT</span>Calendar export (.ics)</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.1 — December 2025</h2>
+          <p class="date">December 15, 2025</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>Custom lists (create, add, delete)</li>
+            <li><span class="tag tag-feat">FEAT</span>Full-text search for films and people</li>
+            <li><span class="tag tag-feat">FEAT</span>Advanced filters (genre, platform, release type)</li>
+            <li><span class="tag tag-feat">FEAT</span>Letterboxd CSV import/export</li>
+          </ul>
+        </div>
+
+        <div class="release">
+          <h2>v1.0 — October 2025</h2>
+          <p class="date">October 1, 2025 — Initial release</p>
+          <ul>
+            <li><span class="tag tag-feat">FEAT</span>Theatrical release calendar, week by week</li>
+            <li><span class="tag tag-feat">FEAT</span>Favorites (♥) and watchlist (bookmark)</li>
+            <li><span class="tag tag-feat">FEAT</span>Full details: cast, synopsis, YouTube trailer</li>
+            <li><span class="tag tag-feat">FEAT</span>Country filter (FR, US, UK, DE, JP, etc.)</li>
+            <li><span class="tag tag-feat">FEAT</span>Data via TMDB API</li>
+          </ul>
+        </div>
+
+        <footer>
+          <p>Links: <a href="/CineLume/">Home</a> · <a href="/CineLume/en/about.html">About</a> · <a href="/CineLume/en/guide.html">Guide</a> · <a href="/CineLume/en/privacy.html">Privacy</a> · <a href="https://github.com/Quasaria/CineLume/releases">GitHub releases</a></p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

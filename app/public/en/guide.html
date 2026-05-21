@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050508" />
+    <meta name="color-scheme" content="dark light" />
+
+    <title>User guide — CineLume, free movie release tracker</title>
+    <meta name="description" content="How to use CineLume in 5 minutes: find releases, save favorites, share a list, get notifications, import from Letterboxd, install the PWA." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://quasaria.github.io/CineLume/en/guide.html" />
+    <link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/guide.html" />
+    <link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/en/guide.html" />
+    <link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/guide.html" />
+    <link rel="icon" type="image/svg+xml" href="../icon.svg" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="CineLume guide — get started in 5 minutes" />
+    <meta property="og:description" content="Everything you need to use CineLume: releases, favorites, lists, notifications, Letterboxd import, installation." />
+    <meta property="og:url" content="https://quasaria.github.io/CineLume/en/guide.html" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://quasaria.github.io/CineLume/og-image.png" />
+    <meta property="article:published_time" content="2025-10-01" />
+    <meta property="article:modified_time" content="__BUILD_DATE_ISO__" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Article",
+          "@id": "https://quasaria.github.io/CineLume/en/guide.html#article",
+          "headline": "CineLume user guide",
+          "name": "User guide — CineLume",
+          "description": "How to use CineLume: find releases, save favorites, share a list, get notifications.",
+          "url": "https://quasaria.github.io/CineLume/en/guide.html",
+          "inLanguage": "en",
+          "datePublished": "2025-10-01",
+          "dateModified": "__BUILD_DATE_ISO__",
+          "wordCount": 1200,
+          "author": { "@id": "https://quasaria.github.io/CineLume/#author" },
+          "publisher": { "@id": "https://quasaria.github.io/CineLume/#publisher" },
+          "mainEntityOfPage": "https://quasaria.github.io/CineLume/en/guide.html",
+          "image": "https://quasaria.github.io/CineLume/og-image.png"
+        },
+        {
+          "@type": "HowTo",
+          "@id": "https://quasaria.github.io/CineLume/en/guide.html#howto-start",
+          "name": "Get started with CineLume in 5 minutes",
+          "totalTime": "PT5M",
+          "step": [
+            { "@type": "HowToStep", "position": 1, "name": "Open the app", "text": "Go to quasaria.github.io/CineLume. No sign-up, immediately usable." },
+            { "@type": "HowToStep", "position": 2, "name": "Browse releases", "text": "The calendar shows current week's theatrical releases. Use arrows or month picker to navigate." },
+            { "@type": "HowToStep", "position": 3, "name": "Add to favorites", "text": "Tap the heart on any movie card to add to favorites. Tap the bookmark for watchlist." },
+            { "@type": "HowToStep", "position": 4, "name": "Enable notifications", "text": "Open Settings → Notifications → Enable. You'll get alerted on release day of your favorites." }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <style>
+      :root { color-scheme: dark light; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: #050508; color: #fafafa; font-family: -apple-system, 'Inter', system-ui, sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+      @media (prefers-color-scheme: light) { body { background: #fafafa; color: #0a0a0f; } }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+      header nav { font-size: 14px; opacity: 0.6; margin-bottom: 32px; }
+      header nav a { color: inherit; text-decoration: none; }
+      h1 { font-size: 36px; line-height: 1.15; letter-spacing: -1px; margin: 0 0 8px; font-weight: 800; }
+      .meta { font-size: 13px; opacity: 0.55; margin-bottom: 32px; }
+      h2 { font-size: 22px; margin: 40px 0 12px; font-weight: 700; }
+      h3 { font-size: 17px; margin: 24px 0 8px; font-weight: 700; }
+      h2:target, h3:target { scroll-margin-top: 24px; color: #a78bfa; }
+      p, li { margin: 0 0 12px; }
+      a { color: #a78bfa; }
+      ul, ol { padding-left: 22px; }
+      .toc { padding: 16px 20px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); margin: 24px 0; }
+      .toc ol { margin: 0; padding-left: 18px; }
+      .step { display: flex; gap: 12px; margin: 12px 0; align-items: flex-start; }
+      .step-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #06b6d4); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+      footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; opacity: 0.55; }
+      footer a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <nav><a href="/CineLume/">← CineLume</a> · <a href="/CineLume/guide.html">Version française</a></nav>
+        <h1>CineLume user guide</h1>
+        <p class="meta">Get started in 5 minutes · Updated __BUILD_DATE_HUMAN_FR__</p>
+      </header>
+
+      <main>
+        <div class="toc">
+          <strong>Table of contents</strong>
+          <ol>
+            <li><a href="#start">Getting started</a></li>
+            <li><a href="#releases">Finding releases</a></li>
+            <li><a href="#favorites">Favorites and watchlist</a></li>
+            <li><a href="#lists">Custom lists</a></li>
+            <li><a href="#notifications">Notifications</a></li>
+            <li><a href="#modes">Swipe and Pick modes</a></li>
+            <li><a href="#letterboxd">Letterboxd import</a></li>
+            <li><a href="#install">Installing on your phone</a></li>
+          </ol>
+        </div>
+
+        <h2 id="start">1. Getting started</h2>
+        <p>Just open <a href="https://quasaria.github.io/CineLume/">quasaria.github.io/CineLume</a>. No sign-up, no email, no password. The app is immediately usable.</p>
+        <p>On first launch you see the theatrical release calendar for the current week in France. You can change the country via the Filters button at the top.</p>
+
+        <h2 id="releases">2. Finding releases</h2>
+        <p>The central navigation bar shows the current month and year. You can:</p>
+        <ul>
+          <li>Tap the month to open a picker (12-month grid + year arrows)</li>
+          <li>Use left/right arrows to navigate month by month</li>
+          <li>Click a week (W1, W2, W3...) to select it</li>
+          <li>Click the calendar icon to return to today</li>
+        </ul>
+        <p>The Filters button opens a panel to refine by <strong>genre</strong>, <strong>streaming platform</strong> (Netflix, Prime Video, Disney+, etc.), <strong>release type</strong> (theatrical, streaming, festival) and <strong>max runtime</strong>.</p>
+        <p>You can also <strong>search</strong> any movie, actor or director via the magnifier in the top right. Recent search history (last 8) is shown when the input is empty.</p>
+
+        <h2 id="favorites">3. Favorites and watchlist</h2>
+        <p>On each movie card, two buttons at the top right:</p>
+        <ul>
+          <li><strong>Heart (♥)</strong> = add to Favorites. Favorites trigger release notifications.</li>
+          <li><strong>Bookmark</strong> = add to Watchlist (to watch later).</li>
+        </ul>
+        <p>To view your lists, click the corresponding icons in the navbar. Both tabs live in the same "My movies" modal — switch between them without closing.</p>
+        <p>Movies are automatically grouped: <strong>This week</strong>, <strong>Upcoming</strong>, <strong>Released</strong>, <strong>Unknown date</strong>.</p>
+
+        <h2 id="lists">4. Custom lists</h2>
+        <p>For thematic collections (Date night, Tarantino marathon, To show my parents...), use Lists:</p>
+        <div class="step"><span class="step-num">1</span><div>Burger menu → <strong>My lists</strong></div></div>
+        <div class="step"><span class="step-num">2</span><div><strong>New list</strong> button, give it a name</div></div>
+        <div class="step"><span class="step-num">3</span><div>Click the emoji icon left of the name to pick an emoji (🎬 🍿 ⭐ ❤️...)</div></div>
+        <div class="step"><span class="step-num">4</span><div>From a movie modal, <strong>Add to a list</strong> button</div></div>
+        <div class="step"><span class="step-num">5</span><div>In the expanded list, drag the <strong>GripVertical handle</strong> at the bottom-left of a poster to reorder</div></div>
+        <div class="step"><span class="step-num">6</span><div><strong>Share</strong> button (link icon) generates a URL you can send. Recipient opens it, list auto-imports.</div></div>
+
+        <h2 id="notifications">5. Release notifications</h2>
+        <p>To be notified on the day your favorite movies release:</p>
+        <ol>
+          <li>Add movies to your Favorites (♥)</li>
+          <li>Settings → Notifications section → <strong>Enable</strong></li>
+          <li>Allow in the browser popup</li>
+          <li>(Optional) Configure <strong>quiet hours</strong> (e.g. 10pm-8am) to avoid being disturbed at night</li>
+        </ol>
+        <p>Notifications work in the open browser and in installed PWA mode. No third-party push service: everything is local (browser Notification API).</p>
+
+        <h2 id="modes">6. Swipe and Pick modes</h2>
+        <p>When you can't decide what to watch, two alternative modes are in the burger menu:</p>
+
+        <h3>Pick a movie</h3>
+        <p>A modal that randomly picks a movie from the chosen source (Watchlist / Favorites / All my lists). Optional genre filter. "Another one" button to reroll, "View details" to open the full modal.</p>
+
+        <h3>Swipe selector mode</h3>
+        <p>Tinder-style: choose a source (This week / Watchlist / Favorites). Card by card:</p>
+        <ul>
+          <li><strong>Swipe right</strong> or heart button = add to watchlist</li>
+          <li><strong>Swipe left</strong> or X button = skip</li>
+          <li><strong>Undo</strong> button brings back the last card if you mis-swiped</li>
+          <li>On desktop: left/right keyboard arrows also work</li>
+          <li>Scroll down within a card to see synopsis, genres, director</li>
+        </ul>
+
+        <h2 id="letterboxd">7. Letterboxd import</h2>
+        <p>If you already use Letterboxd and want to migrate your watchlist:</p>
+        <div class="step"><span class="step-num">1</span><div>On Letterboxd: Settings → Import &amp; Export → download your CSV</div></div>
+        <div class="step"><span class="step-num">2</span><div>In CineLume: Settings → Letterboxd section → <strong>Import</strong></div></div>
+        <div class="step"><span class="step-num">3</span><div>Select the CSV file. Progress shows in real time with current title.</div></div>
+        <div class="step"><span class="step-num">4</span><div>A detailed report lists skipped films (ambiguous titles or unknown to TMDB)</div></div>
+        <p>You can also export your CineLume watchlist in Letterboxd CSV format via the <strong>Export</strong> button in the same section, to migrate elsewhere if desired.</p>
+
+        <h2 id="install">8. Install CineLume on your phone</h2>
+        <p>CineLume is a Progressive Web App, installable on all devices:</p>
+        <h3>On iPhone / iPad (Safari)</h3>
+        <ol>
+          <li>Open CineLume in Safari</li>
+          <li>Tap the Share icon (square with arrow)</li>
+          <li>Select <strong>Add to Home Screen</strong></li>
+        </ol>
+        <h3>On Android (Chrome)</h3>
+        <p>Chrome automatically suggests an "Install app" button at the bottom of the screen after a few visits, or via menu ⋮ → <strong>Install app</strong>.</p>
+        <h3>On desktop (Chrome / Edge)</h3>
+        <p>An <strong>Install</strong> icon appears at the right of the address bar. Otherwise, menu ⋮ → <strong>Install CineLume</strong>.</p>
+        <p>Once installed, CineLume launches like a native app (without browser chrome). Long-press the home screen icon for shortcuts: <strong>Favorites</strong> and <strong>Pick a movie</strong>.</p>
+
+        <footer>
+          <p>Links: <a href="/CineLume/">Home</a> · <a href="/CineLume/en/about.html">About</a> · <a href="/CineLume/en/privacy.html">Privacy</a> · <a href="/CineLume/en/press.html">Press kit</a> · <a href="/CineLume/en/changelog.html">Changelog</a> · <a href="https://github.com/Quasaria/CineLume">GitHub</a></p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

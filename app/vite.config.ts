@@ -43,7 +43,10 @@ function injectBuildDate(): Plugin {
       // Les fichiers de /public sont copies tels quels dans /dist. On les
       // post-process apres le bundle pour remplacer les placeholders.
       const distDir = path.resolve(__dirname, 'dist');
-      const filesToProcess = ['about.html', 'privacy.html', 'press.html', 'sitemap.xml'];
+      const filesToProcess = [
+        'about.html', 'privacy.html', 'press.html', 'guide.html', 'changelog.html', 'sitemap.xml',
+        'en/about.html', 'en/privacy.html', 'en/press.html', 'en/guide.html', 'en/changelog.html',
+      ];
       for (const f of filesToProcess) {
         const p = path.join(distDir, f);
         if (!fs.existsSync(p)) continue;
@@ -63,7 +66,12 @@ export default defineConfig(({ command }) => ({
     injectBuildDate(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'icon-maskable.svg', 'robots.txt', 'sitemap.xml', 'humans.txt', 'llms.txt', 'og-image.png', 'og-image.svg', 'about.html', 'privacy.html', 'press.html'],
+      includeAssets: [
+        'icon.svg', 'icon-maskable.svg', 'robots.txt', 'sitemap.xml',
+        'humans.txt', 'llms.txt', 'og-image.png', 'og-image.svg',
+        'about.html', 'privacy.html', 'press.html', 'guide.html', 'changelog.html',
+        'en/about.html', 'en/privacy.html', 'en/press.html', 'en/guide.html', 'en/changelog.html',
+      ],
       manifest: {
         // Manifest enrichi pour le SEO PWA + l'experience d'install.
         // 'name' long pour l'install prompt, 'short_name' court pour
