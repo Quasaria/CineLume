@@ -3,10 +3,14 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://quasaria.github.io/CineLume/</loc>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="fr" href="https://quasaria.github.io/CineLume/" />
+    <xhtml:link rel="alternate" hreflang="fr-FR" href="https://quasaria.github.io/CineLume/" />
+    <xhtml:link rel="alternate" hreflang="fr-CA" href="https://quasaria.github.io/CineLume/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://quasaria.github.io/CineLume/" />
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://quasaria.github.io/CineLume/" />
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://quasaria.github.io/CineLume/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://quasaria.github.io/CineLume/" />
   </url>
 </urlset>
