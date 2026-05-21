@@ -39,6 +39,35 @@ export function DateNavigator() {
   const monthGridRef = useRef<HTMLDivElement>(null);
   // Index focuse du clavier dans la grille des 12 mois (pour la nav fleches).
   const [focusedMonth, setFocusedMonth] = useState<number | null>(null);
+  // Position dynamique du popup picker : recalculee sur scroll/resize pour
+  // toujours coller au trigger meme quand l'user scroll apres ouverture.
+  const [pickerPos, setPickerPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 12, width: 280 });
+
+  // Recompute la position du popup picker chaque fois que le trigger bouge
+  // (scroll, resize, ouverture/fermeture). Centre horizontalement sur le
+  // trigger mais clamp aux bords du viewport avec 12px de marge mini.
+  useEffect(() => {
+    if (!pickerOpen) return;
+    function updatePos() {
+      const trigger = pickerTriggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const viewportW = window.innerWidth;
+      const width = Math.min(280, viewportW - 24);
+      const triggerCenter = rect.left + rect.width / 2;
+      let left = triggerCenter - width / 2;
+      // Clamp horizontal : minimum 12px du bord gauche, maximum 12px du bord droit
+      left = Math.max(12, Math.min(viewportW - width - 12, left));
+      setPickerPos({ top: rect.bottom + 6, left, width });
+    }
+    updatePos();
+    window.addEventListener('scroll', updatePos, { capture: true, passive: true });
+    window.addEventListener('resize', updatePos);
+    return () => {
+      window.removeEventListener('scroll', updatePos, true);
+      window.removeEventListener('resize', updatePos);
+    };
+  }, [pickerOpen]);
 
   useEffect(() => {
     if (weeks > 0 && selWeek > weeks) {
@@ -192,20 +221,15 @@ export function DateNavigator() {
                   transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                   role="dialog"
                   aria-label={t('common.today')}
-                  // Position fixed avec calcul dynamique : evite que le popup
-                  // ne deborde du viewport sur petits ecrans (ce qui sur
-                  // certains browsers Android creait un scroll horizontal
-                  // qui decalait toute la page). On clamp left/right pour
-                  // toujours rester dans l'ecran avec une marge de 12px.
+                  // Position fixed mais mise a jour dynamique via le useEffect
+                  // ci-dessus (scroll + resize). Le popup suit toujours le
+                  // trigger meme quand l'user scroll apres ouverture, et est
+                  // centre horizontalement sur le trigger avec clamp viewport.
                   className="fixed z-40 rounded-2xl border border-white/10 shadow-2xl shadow-black/40 p-3"
                   style={{
-                    top: pickerTriggerRef.current
-                      ? pickerTriggerRef.current.getBoundingClientRect().bottom + 8
-                      : 80,
-                    left: 12,
-                    right: 12,
-                    margin: '0 auto',
-                    maxWidth: 'min(280px, calc(100vw - 24px))',
+                    top: pickerPos.top,
+                    left: pickerPos.left,
+                    width: pickerPos.width,
                     backgroundColor: 'color-mix(in srgb, var(--surface) 98%, transparent)',
                     backdropFilter: 'blur(20px) saturate(140%)',
                     WebkitBackdropFilter: 'blur(20px) saturate(140%)',
