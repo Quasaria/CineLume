@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -88,7 +88,7 @@ export function WatchHistoryModal() {
               <>
                 <HeroStat stats={stats} t={t} />
                 <StatGrid stats={stats} t={t} i18n={i18n.language} />
-                <Heatmap heatmap={heatmap} t={t} />
+                <Heatmap heatmap={heatmap} t={t} lang={i18n.language} />
                 {stats.topGenres.length > 0 && genreMap.size > 0 && (
                   <GenreBreakdown topGenres={stats.topGenres} genreMap={genreMap} total={stats.total} t={t} />
                 )}
@@ -216,16 +216,75 @@ function StatCard({ icon: Icon, label, value, suffix, accent, delay = 0, small }
 interface HeatmapProps {
   heatmap: ReturnType<typeof computeHeatmap>;
   t: (k: string) => string;
+  lang: string;
 }
 
-function Heatmap({ heatmap, t }: HeatmapProps) {
-  // Gradient violet selon le compte : 0 = bg subtil, 1 = violet leger, 2-3 = medium, 4+ = sature
-  function cellClass(count: number) {
-    if (count === 0) return 'bg-white/[0.04] border-white/[0.04]';
-    if (count === 1) return 'bg-violet-500/30 border-violet-500/40';
-    if (count <= 3) return 'bg-violet-500/55 border-violet-500/60';
-    return 'bg-gradient-to-br from-violet-400 to-fuchsia-400 border-transparent';
+/**
+ * Heatmap GitHub-style retravaillee : cells 16px (au lieu de 12), labels
+ * mois alignes en haut sur la semaine ou commence chaque mois, labels jours
+ * de la semaine a gauche, et scroll auto sur la semaine courante au mount
+ * pour que l'user ait sa propre activite sous les yeux sans scroller.
+ */
+function Heatmap({ heatmap, t, lang }: HeatmapProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const CELL = 16;
+  const GAP = 4;
+
+  // Niveaux d'intensite : 0 vide / 1-3 violet progressif / 4+ gradient.
+  // Niveau 1 boost (45 au lieu de 30) pour etre visible meme sur fond noir.
+  function cellClass(count: number): string {
+    if (count === 0) return 'bg-white/[0.06] border border-white/[0.04]';
+    if (count === 1) return 'bg-violet-500/45 border border-violet-500/55';
+    if (count <= 3) return 'bg-violet-500/75 border border-violet-500/85';
+    return 'bg-gradient-to-br from-violet-400 to-fuchsia-400 border border-transparent';
   }
+
+  // Calcule la position de chaque label de mois : on cherche dans les cellules
+  // de la 1ere ligne (dayIdx === 0, lundi) le premier lundi de chaque mois.
+  const monthLabels = useMemo(() => {
+    const labels: Array<{ weekIdx: number; label: string }> = [];
+    let lastMonth = -1;
+    for (const cell of heatmap.cells) {
+      if (cell.dayIdx !== 0) continue;
+      const m = cell.date.getMonth();
+      if (m !== lastMonth) {
+        labels.push({
+          weekIdx: cell.weekIdx,
+          label: cell.date.toLocaleDateString(lang || 'fr', { month: 'short' }),
+        });
+        lastMonth = m;
+      }
+    }
+    // Si deux labels sont trop proches (premier mois partiel), on omet le 1er.
+    return labels.filter((l, i) => i === 0 ? l.weekIdx >= 1 : l.weekIdx - labels[i - 1].weekIdx >= 2);
+  }, [heatmap.cells, lang]);
+
+  // Labels jours : Lundi, Mercredi, Vendredi (toutes les autres lignes
+  // restent vides pour eviter d'encombrer).
+  const dayLabels = useMemo(() => {
+    const ref = new Date(2024, 0, 1); // 2024-01-01 = lundi
+    return [0, 2, 4].map((dayIdx) => {
+      const d = new Date(ref);
+      d.setDate(ref.getDate() + dayIdx);
+      return {
+        dayIdx,
+        label: d.toLocaleDateString(lang || 'fr', { weekday: 'short' }).slice(0, 3),
+      };
+    });
+  }, [lang]);
+
+  // Scroll horizontal vers la semaine courante (la derniere) au mount.
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const root = scrollRef.current;
+    // Defer pour laisser le rendu se stabiliser
+    requestAnimationFrame(() => {
+      root.scrollLeft = root.scrollWidth - root.clientWidth;
+    });
+  }, [heatmap.weeks]);
+
+  const gridWidth = heatmap.weeks * (CELL + GAP);
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
@@ -233,35 +292,74 @@ function Heatmap({ heatmap, t }: HeatmapProps) {
       transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-5 mb-4 overflow-hidden"
     >
-      <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-white/55 mb-3 flex items-center gap-2">
+      <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-white/55 mb-4 flex items-center gap-2">
         <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
         {t('watchHistory.heatmapTitle')}
       </h3>
-      {/* Scroll horizontal possible si l'ecran est tres petit */}
-      <div className="overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
-        <div
-          className="grid grid-flow-col gap-[3px]"
-          style={{ gridTemplateRows: 'repeat(7, 12px)', gridAutoColumns: '12px' }}
-          role="img"
-          aria-label={t('watchHistory.heatmapAria')}
-        >
-          {heatmap.cells.map((cell) => (
+
+      <div
+        className="flex gap-1.5"
+        role="img"
+        aria-label={t('watchHistory.heatmapAria')}
+      >
+        {/* Colonne des labels jours, en dehors du scroll pour rester visible */}
+        <div className="flex flex-col shrink-0 pt-5" style={{ width: 24, gap: GAP }} aria-hidden="true">
+          {Array.from({ length: 7 }, (_, i) => {
+            const label = dayLabels.find((d) => d.dayIdx === i);
+            return (
+              <div
+                key={i}
+                className="text-[10px] font-bold text-white/55 flex items-center capitalize"
+                style={{ height: CELL }}
+              >
+                {label ? label.label.replace('.', '') : ''}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Zone scrollable : grille + labels mois alignes */}
+        <div ref={scrollRef} className="overflow-x-auto custom-scroll pb-1 flex-1">
+          <div className="relative" style={{ width: gridWidth, paddingTop: 20 }}>
+            <div className="absolute top-0 left-0 right-0 h-5 pointer-events-none" aria-hidden="true">
+              {monthLabels.map((m) => (
+                <span
+                  key={`${m.weekIdx}-${m.label}`}
+                  className="absolute text-[10px] uppercase tracking-wider font-bold text-white/60 capitalize"
+                  style={{ left: m.weekIdx * (CELL + GAP) }}
+                >
+                  {m.label.replace('.', '')}
+                </span>
+              ))}
+            </div>
+
             <div
-              key={cell.dateKey}
-              className={`rounded-[3px] border ${cellClass(cell.count)} transition-colors`}
-              title={`${cell.dateKey} · ${cell.count}`}
-              aria-hidden="true"
-            />
-          ))}
+              className="grid grid-flow-col"
+              style={{
+                gridTemplateRows: `repeat(7, ${CELL}px)`,
+                gridAutoColumns: `${CELL}px`,
+                gap: GAP,
+              }}
+            >
+              {heatmap.cells.map((cell) => (
+                <div
+                  key={cell.dateKey}
+                  className={`rounded-[4px] ${cellClass(cell.count)} transition-colors`}
+                  title={`${cell.dateKey} · ${cell.count}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-      {/* Legende mini */}
-      <div className="flex items-center justify-end gap-1.5 mt-3 text-[10px] text-white/45">
+
+      {/* Legende */}
+      <div className="flex items-center justify-end gap-1.5 mt-4 text-[10px] text-white/50 font-semibold">
         <span>{t('watchHistory.less')}</span>
-        <span className="w-2.5 h-2.5 rounded-sm bg-white/[0.04]" />
-        <span className="w-2.5 h-2.5 rounded-sm bg-violet-500/30" />
-        <span className="w-2.5 h-2.5 rounded-sm bg-violet-500/55" />
-        <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-violet-400 to-fuchsia-400" />
+        <span className="w-3 h-3 rounded-[3px] bg-white/[0.06] border border-white/[0.04]" />
+        <span className="w-3 h-3 rounded-[3px] bg-violet-500/45 border border-violet-500/55" />
+        <span className="w-3 h-3 rounded-[3px] bg-violet-500/75 border border-violet-500/85" />
+        <span className="w-3 h-3 rounded-[3px] bg-gradient-to-br from-violet-400 to-fuchsia-400" />
         <span>{t('watchHistory.more')}</span>
       </div>
     </motion.section>
