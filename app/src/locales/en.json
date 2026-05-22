@@ -465,6 +465,10 @@
     "timelineTitle": "Your timeline",
     "monthCount_one": "{{count}} film",
     "monthCount_other": "{{count}} films",
+    "monthEmpty": "Nothing this month",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "todayJump": "Today",
     "emptyTitle": "Your calendar is empty",
     "emptyHint": "Mark some films as watched to see your cinephile life take shape here."
   },

@@ -1,8 +1,8 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Eye, Flame, Calendar, Sparkles, Film, TrendingUp } from 'lucide-react';
+import { Eye, Flame, Calendar, Sparkles, Film, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
@@ -92,7 +92,8 @@ export function WatchHistoryModal() {
                   <GenreBreakdown topGenres={stats.topGenres} genreMap={genreMap} total={stats.total} t={t} />
                 )}
                 <CalendarMonths
-                  byMonth={stats.byMonth}
+                  seen={seen}
+                  firstWatchAt={stats.firstWatchAt}
                   lang={i18n.language}
                   openFilm={(id) => { close(); openFilm(id); }}
                   t={t}
@@ -278,48 +279,132 @@ function GenreBreakdown({ topGenres, genreMap, total, t }: GenreBreakdownProps) 
 // ---------------------------------------------------------------------------
 
 interface CalendarMonthsProps {
-  byMonth: ReturnType<typeof computeWatchStats>['byMonth'];
+  seen: SeenMovie[];
+  firstWatchAt: number | null;
   lang: string;
   openFilm: (id: number) => void;
   t: (k: string, opts?: Record<string, unknown>) => string;
 }
 
-function CalendarMonths({ byMonth, lang, openFilm, t }: CalendarMonthsProps) {
-  // Headers jours en lang locale : lundi -> dimanche, premiere lettre uniquement
-  // pour rester compact a 7 colonnes sur mobile (~36-40px par cellule).
+function CalendarMonths({ seen, firstWatchAt, lang, openFilm, t }: CalendarMonthsProps) {
+  // Anchor : on demarre sur le mois courant, l'user navigue librement
+  // avec les chevrons. Pas de bornes dures - on borne uniquement le
+  // bouton "next" pour ne pas aller dans le futur lointain (max = mois
+  // courant), et "prev" pour ne pas remonter avant le tout premier film
+  // vu si on en a un.
+  const now = new Date();
+  const [anchor, setAnchor] = useState({ year: now.getFullYear(), month: now.getMonth() });
+
   const dayHeaders = useMemo(() => {
     const ref = new Date(2024, 0, 1); // 2024-01-01 = lundi
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(ref);
       d.setDate(ref.getDate() + i);
-      const long = d.toLocaleDateString(lang || 'fr', { weekday: 'narrow' });
-      return long.toUpperCase();
+      return d.toLocaleDateString(lang || 'fr', { weekday: 'narrow' }).toUpperCase();
     });
   }, [lang]);
+
+  // Films vus dans le mois ancre, ordonnes du plus recent au plus ancien
+  // (le composant CalendarCell pioche films[0] comme affiche principale).
+  const filmsOfMonth = useMemo(() => {
+    return seen
+      .filter((f) => {
+        const d = new Date(f.watchedAt);
+        return d.getFullYear() === anchor.year && d.getMonth() === anchor.month;
+      })
+      .sort((a, b) => b.watchedAt - a.watchedAt);
+  }, [seen, anchor]);
+
+  const ym = `${anchor.year}-${String(anchor.month + 1).padStart(2, '0')}`;
+
+  function goPrev() {
+    setAnchor((a) => a.month === 0 ? { year: a.year - 1, month: 11 } : { year: a.year, month: a.month - 1 });
+  }
+  function goNext() {
+    setAnchor((a) => a.month === 11 ? { year: a.year + 1, month: 0 } : { year: a.year, month: a.month + 1 });
+  }
+  function goToday() {
+    const t = new Date();
+    setAnchor({ year: t.getFullYear(), month: t.getMonth() });
+  }
+
+  // Bornes : prev desactive si on est avant le premier film vu (et le mois
+  // courant n'a rien d'anterieur a montrer non plus). Next desactive si on
+  // est sur le mois courant (pas de futur).
+  const isCurrentMonth = anchor.year === now.getFullYear() && anchor.month === now.getMonth();
+  const canPrev = firstWatchAt === null
+    ? false
+    : (() => {
+        const first = new Date(firstWatchAt);
+        const anchorStart = new Date(anchor.year, anchor.month, 1).getTime();
+        const firstStart = new Date(first.getFullYear(), first.getMonth(), 1).getTime();
+        return anchorStart > firstStart;
+      })();
+  const canNext = !isCurrentMonth;
 
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-5"
+      className="space-y-3"
     >
       <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-white/55 flex items-center gap-2 pl-1">
         <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />
         {t('watchHistory.timelineTitle')}
       </h3>
-      {byMonth.map(({ ym, films }, idx) => (
+
+      {/* Navigation entre mois : chevrons + label + bouton Aujourd'hui */}
+      <div className="flex items-center justify-between gap-2 px-1">
+        <button
+          type="button"
+          onClick={goPrev}
+          disabled={!canPrev}
+          aria-label={t('watchHistory.prevMonth')}
+          className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 text-white/75 disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" aria-hidden="true" />
+        </button>
+        <div className="flex-1 text-center min-w-0">
+          <p className="text-base sm:text-lg font-black capitalize tracking-tight tabular-nums" aria-live="polite">
+            {new Date(anchor.year, anchor.month, 1).toLocaleDateString(lang || 'fr', { month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={goNext}
+          disabled={!canNext}
+          aria-label={t('watchHistory.nextMonth')}
+          className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 text-white/75 disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+        >
+          <ChevronRight className="w-5 h-5" aria-hidden="true" />
+        </button>
+      </div>
+
+      {!isCurrentMonth && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={goToday}
+            className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-violet-500/15 text-violet-200 border border-violet-500/30 hover:bg-violet-500/25 active:scale-95 transition-all"
+          >
+            {t('watchHistory.todayJump')}
+          </button>
+        </div>
+      )}
+
+      {/* CalendarMonth avec animation slide a chaque changement d'ancre */}
+      <AnimatePresence mode="wait">
         <CalendarMonth
           key={ym}
           ym={ym}
-          films={films}
-          lang={lang}
+          films={filmsOfMonth}
           dayHeaders={dayHeaders}
           openFilm={openFilm}
           t={t}
-          delay={Math.min(0.35 + idx * 0.03, 0.7)}
+          delay={0}
         />
-      ))}
+      </AnimatePresence>
     </motion.section>
   );
 }
@@ -327,18 +412,16 @@ function CalendarMonths({ byMonth, lang, openFilm, t }: CalendarMonthsProps) {
 interface CalendarMonthProps {
   ym: string;
   films: SeenMovie[];
-  lang: string;
   dayHeaders: string[];
   openFilm: (id: number) => void;
   t: (k: string, opts?: Record<string, unknown>) => string;
   delay: number;
 }
 
-function CalendarMonth({ ym, films, lang, dayHeaders, openFilm, t, delay }: CalendarMonthProps) {
+function CalendarMonth({ ym, films, dayHeaders, openFilm, t, delay }: CalendarMonthProps) {
   const [y, m] = ym.split('-').map(Number);
   const year = y;
   const monthIdx = m - 1;
-  const monthLabel = new Date(year, monthIdx, 1).toLocaleDateString(lang || 'fr', { month: 'long', year: 'numeric' });
 
   // Position du 1er jour du mois dans la grille (0 = lundi)
   const firstDayOfWeek = (new Date(year, monthIdx, 1).getDay() + 6) % 7;
@@ -366,19 +449,27 @@ function CalendarMonth({ ym, films, lang, dayHeaders, openFilm, t, delay }: Cale
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.3, delay, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-3xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl p-4"
     >
-      <div className="flex items-baseline justify-between mb-3 pl-1">
-        <h4 className="text-base font-bold text-white capitalize tracking-tight">
-          {monthLabel}
-        </h4>
-        <span className="text-[11px] uppercase tracking-wider font-bold text-white/45">
-          {t('watchHistory.monthCount', { count: films.length })}
-        </span>
-      </div>
+      {/* Compteur films du mois en pillule discrete (le label du mois est
+          deja affiche dans le nav header au-dessus). */}
+      {films.length > 0 ? (
+        <div className="flex justify-end mb-3 pr-1">
+          <span className="text-[11px] uppercase tracking-wider font-bold text-violet-200/85 px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/25">
+            {t('watchHistory.monthCount', { count: films.length })}
+          </span>
+        </div>
+      ) : (
+        <div className="flex justify-end mb-3 pr-1">
+          <span className="text-[11px] uppercase tracking-wider font-bold text-white/35">
+            {t('watchHistory.monthEmpty')}
+          </span>
+        </div>
+      )}
 
       {/* En-tete jours de la semaine */}
       <div className="grid grid-cols-7 gap-1 mb-1.5" aria-hidden="true">

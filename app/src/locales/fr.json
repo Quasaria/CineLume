@@ -465,6 +465,10 @@
     "timelineTitle": "Ton fil chronologique",
     "monthCount_one": "{{count}} film",
     "monthCount_other": "{{count}} films",
+    "monthEmpty": "Rien ce mois-ci",
+    "prevMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "todayJump": "Aujourd'hui",
     "emptyTitle": "Ton calendrier est vide",
     "emptyHint": "Marque des films comme vus pour voir ta cinéphilie prendre forme ici."
   },
