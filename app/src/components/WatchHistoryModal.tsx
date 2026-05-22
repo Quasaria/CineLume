@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -8,17 +8,18 @@ import { ModalHeader } from '@/components/ui/ModalHeader';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useSwipeBack } from '@/hooks/useSwipeBack';
 import { useFocusRestore } from '@/hooks/useFocusRestore';
-import { computeWatchStats, computeHeatmap, dateKey } from '@/lib/watchStats';
+import { computeWatchStats, dateKey } from '@/lib/watchStats';
 import { fmtDateLocalized } from '@/lib/utils';
 import { getGenres, IMG, posterSrcSet } from '@/lib/tmdb';
+import type { SeenMovie } from '@/types/movie';
 
 /**
  * Vue calendrier/dashboard plein ecran de l'historique de visionnage.
  * Acces depuis le burger menu. Design premium qui s'inscrit dans la DA :
  * - gradient violet -> fuchsia -> cyan en accents
  * - glass morphism cards
- * - heatmap GitHub-style en intensite violet
- * - timeline par mois avec posters
+ * - calendrier mois-par-mois avec les affiches des films dans les
+ *   jours correspondants
  * Toute la modale est scrollable d'un bloc (pas de sub-scrolls).
  */
 export function WatchHistoryModal() {
@@ -29,7 +30,6 @@ export function WatchHistoryModal() {
   const openFilm = useAppStore((s) => s.openModal);
 
   const stats = useMemo(() => computeWatchStats(seen), [seen]);
-  const heatmap = useMemo(() => computeHeatmap(seen), [seen]);
 
   // Genres : on fetch la map id -> name de TMDB pour afficher les noms
   // (sinon on aurait juste des ids 28, 12, etc.).
@@ -88,11 +88,15 @@ export function WatchHistoryModal() {
               <>
                 <HeroStat stats={stats} t={t} />
                 <StatGrid stats={stats} t={t} i18n={i18n.language} />
-                <Heatmap heatmap={heatmap} t={t} lang={i18n.language} />
                 {stats.topGenres.length > 0 && genreMap.size > 0 && (
                   <GenreBreakdown topGenres={stats.topGenres} genreMap={genreMap} total={stats.total} t={t} />
                 )}
-                <Timeline byMonth={stats.byMonth} lang={i18n.language} openFilm={(id) => { close(); openFilm(id); }} t={t} />
+                <CalendarMonths
+                  byMonth={stats.byMonth}
+                  lang={i18n.language}
+                  openFilm={(id) => { close(); openFilm(id); }}
+                  t={t}
+                />
               </>
             )}
           </div>
@@ -213,158 +217,6 @@ function StatCard({ icon: Icon, label, value, suffix, accent, delay = 0, small }
   );
 }
 
-interface HeatmapProps {
-  heatmap: ReturnType<typeof computeHeatmap>;
-  t: (k: string) => string;
-  lang: string;
-}
-
-/**
- * Heatmap GitHub-style retravaillee : cells 16px (au lieu de 12), labels
- * mois alignes en haut sur la semaine ou commence chaque mois, labels jours
- * de la semaine a gauche, et scroll auto sur la semaine courante au mount
- * pour que l'user ait sa propre activite sous les yeux sans scroller.
- */
-function Heatmap({ heatmap, t, lang }: HeatmapProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const CELL = 16;
-  const GAP = 4;
-
-  // Niveaux d'intensite : 0 vide / 1-3 violet progressif / 4+ gradient.
-  // Niveau 1 boost (45 au lieu de 30) pour etre visible meme sur fond noir.
-  function cellClass(count: number): string {
-    if (count === 0) return 'bg-white/[0.06] border border-white/[0.04]';
-    if (count === 1) return 'bg-violet-500/45 border border-violet-500/55';
-    if (count <= 3) return 'bg-violet-500/75 border border-violet-500/85';
-    return 'bg-gradient-to-br from-violet-400 to-fuchsia-400 border border-transparent';
-  }
-
-  // Calcule la position de chaque label de mois : on cherche dans les cellules
-  // de la 1ere ligne (dayIdx === 0, lundi) le premier lundi de chaque mois.
-  const monthLabels = useMemo(() => {
-    const labels: Array<{ weekIdx: number; label: string }> = [];
-    let lastMonth = -1;
-    for (const cell of heatmap.cells) {
-      if (cell.dayIdx !== 0) continue;
-      const m = cell.date.getMonth();
-      if (m !== lastMonth) {
-        labels.push({
-          weekIdx: cell.weekIdx,
-          label: cell.date.toLocaleDateString(lang || 'fr', { month: 'short' }),
-        });
-        lastMonth = m;
-      }
-    }
-    // Si deux labels sont trop proches (premier mois partiel), on omet le 1er.
-    return labels.filter((l, i) => i === 0 ? l.weekIdx >= 1 : l.weekIdx - labels[i - 1].weekIdx >= 2);
-  }, [heatmap.cells, lang]);
-
-  // Labels jours : Lundi, Mercredi, Vendredi (toutes les autres lignes
-  // restent vides pour eviter d'encombrer).
-  const dayLabels = useMemo(() => {
-    const ref = new Date(2024, 0, 1); // 2024-01-01 = lundi
-    return [0, 2, 4].map((dayIdx) => {
-      const d = new Date(ref);
-      d.setDate(ref.getDate() + dayIdx);
-      return {
-        dayIdx,
-        label: d.toLocaleDateString(lang || 'fr', { weekday: 'short' }).slice(0, 3),
-      };
-    });
-  }, [lang]);
-
-  // Scroll horizontal vers la semaine courante (la derniere) au mount.
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    const root = scrollRef.current;
-    // Defer pour laisser le rendu se stabiliser
-    requestAnimationFrame(() => {
-      root.scrollLeft = root.scrollWidth - root.clientWidth;
-    });
-  }, [heatmap.weeks]);
-
-  const gridWidth = heatmap.weeks * (CELL + GAP);
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-      className="rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl p-5 mb-4 overflow-hidden"
-    >
-      <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-white/55 mb-4 flex items-center gap-2">
-        <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
-        {t('watchHistory.heatmapTitle')}
-      </h3>
-
-      <div
-        className="flex gap-1.5"
-        role="img"
-        aria-label={t('watchHistory.heatmapAria')}
-      >
-        {/* Colonne des labels jours, en dehors du scroll pour rester visible */}
-        <div className="flex flex-col shrink-0 pt-5" style={{ width: 24, gap: GAP }} aria-hidden="true">
-          {Array.from({ length: 7 }, (_, i) => {
-            const label = dayLabels.find((d) => d.dayIdx === i);
-            return (
-              <div
-                key={i}
-                className="text-[10px] font-bold text-white/55 flex items-center capitalize"
-                style={{ height: CELL }}
-              >
-                {label ? label.label.replace('.', '') : ''}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Zone scrollable : grille + labels mois alignes */}
-        <div ref={scrollRef} className="overflow-x-auto custom-scroll pb-1 flex-1">
-          <div className="relative" style={{ width: gridWidth, paddingTop: 20 }}>
-            <div className="absolute top-0 left-0 right-0 h-5 pointer-events-none" aria-hidden="true">
-              {monthLabels.map((m) => (
-                <span
-                  key={`${m.weekIdx}-${m.label}`}
-                  className="absolute text-[10px] uppercase tracking-wider font-bold text-white/60 capitalize"
-                  style={{ left: m.weekIdx * (CELL + GAP) }}
-                >
-                  {m.label.replace('.', '')}
-                </span>
-              ))}
-            </div>
-
-            <div
-              className="grid grid-flow-col"
-              style={{
-                gridTemplateRows: `repeat(7, ${CELL}px)`,
-                gridAutoColumns: `${CELL}px`,
-                gap: GAP,
-              }}
-            >
-              {heatmap.cells.map((cell) => (
-                <div
-                  key={cell.dateKey}
-                  className={`rounded-[4px] ${cellClass(cell.count)} transition-colors`}
-                  title={`${cell.dateKey} · ${cell.count}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Legende */}
-      <div className="flex items-center justify-end gap-1.5 mt-4 text-[10px] text-white/50 font-semibold">
-        <span>{t('watchHistory.less')}</span>
-        <span className="w-3 h-3 rounded-[3px] bg-white/[0.06] border border-white/[0.04]" />
-        <span className="w-3 h-3 rounded-[3px] bg-violet-500/45 border border-violet-500/55" />
-        <span className="w-3 h-3 rounded-[3px] bg-violet-500/75 border border-violet-500/85" />
-        <span className="w-3 h-3 rounded-[3px] bg-gradient-to-br from-violet-400 to-fuchsia-400" />
-        <span>{t('watchHistory.more')}</span>
-      </div>
-    </motion.section>
-  );
-}
 
 interface GenreBreakdownProps {
   topGenres: Array<{ id: number; count: number }>;
@@ -420,79 +272,194 @@ function GenreBreakdown({ topGenres, genreMap, total, t }: GenreBreakdownProps) 
   );
 }
 
-interface TimelineProps {
+// ---------------------------------------------------------------------------
+// Calendrier : mois-par-mois, grille 7 colonnes (lundi -> dimanche). Chaque
+// jour avec film montre l'affiche en cellule + numero du jour en coin.
+// ---------------------------------------------------------------------------
+
+interface CalendarMonthsProps {
   byMonth: ReturnType<typeof computeWatchStats>['byMonth'];
   lang: string;
   openFilm: (id: number) => void;
   t: (k: string, opts?: Record<string, unknown>) => string;
 }
 
-function Timeline({ byMonth, lang, openFilm, t }: TimelineProps) {
+function CalendarMonths({ byMonth, lang, openFilm, t }: CalendarMonthsProps) {
+  // Headers jours en lang locale : lundi -> dimanche, premiere lettre uniquement
+  // pour rester compact a 7 colonnes sur mobile (~36-40px par cellule).
+  const dayHeaders = useMemo(() => {
+    const ref = new Date(2024, 0, 1); // 2024-01-01 = lundi
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(ref);
+      d.setDate(ref.getDate() + i);
+      const long = d.toLocaleDateString(lang || 'fr', { weekday: 'narrow' });
+      return long.toUpperCase();
+    });
+  }, [lang]);
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className="space-y-5"
     >
       <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-white/55 flex items-center gap-2 pl-1">
         <TrendingUp className="w-3.5 h-3.5" aria-hidden="true" />
         {t('watchHistory.timelineTitle')}
       </h3>
-      {byMonth.map(({ ym, films }, idx) => {
-        const [y, m] = ym.split('-').map(Number);
-        const monthDate = new Date(y, m - 1, 1);
-        const monthLabel = monthDate.toLocaleDateString(lang || 'fr', { month: 'long', year: 'numeric' });
-        return (
-          <motion.div
-            key={ym}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: Math.min(0.45 + idx * 0.03, 0.8) }}
-          >
-            <div className="flex items-baseline justify-between mb-2.5 pl-1">
-              <h4 className="text-base font-bold text-white capitalize tracking-tight">
-                {monthLabel}
-              </h4>
-              <span className="text-[11px] uppercase tracking-wider font-bold text-white/45">
-                {t('watchHistory.monthCount', { count: films.length })}
-              </span>
-            </div>
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-              {films.map((f) => {
-                const watchedLabel = new Date(f.watchedAt).toLocaleDateString(lang || 'fr', { day: 'numeric', month: 'long' });
-                return (
-                <button
-                  key={f.id + '-' + f.watchedAt}
-                  type="button"
-                  onClick={() => openFilm(f.id)}
-                  aria-label={`${f.title} — ${watchedLabel}`}
-                  className="group relative aspect-[2/3] rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.06] hover:border-violet-400/60 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                >
-                  {f.poster_path ? (
-                    <img
-                      src={`${IMG}${f.poster_path}`}
-                      srcSet={posterSrcSet(f.poster_path)}
-                      sizes="(min-width:640px) 130px, 22vw"
-                      alt=""
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/30 text-xs">?</div>
-                  )}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent p-1.5 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
-                    <p className="text-[10px] font-bold text-white truncate">
-                      {new Date(f.watchedAt).getDate()}
-                    </p>
-                  </div>
-                </button>
-                );
-              })}
-            </div>
-          </motion.div>
-        );
-      })}
+      {byMonth.map(({ ym, films }, idx) => (
+        <CalendarMonth
+          key={ym}
+          ym={ym}
+          films={films}
+          lang={lang}
+          dayHeaders={dayHeaders}
+          openFilm={openFilm}
+          t={t}
+          delay={Math.min(0.35 + idx * 0.03, 0.7)}
+        />
+      ))}
     </motion.section>
   );
 }
+
+interface CalendarMonthProps {
+  ym: string;
+  films: SeenMovie[];
+  lang: string;
+  dayHeaders: string[];
+  openFilm: (id: number) => void;
+  t: (k: string, opts?: Record<string, unknown>) => string;
+  delay: number;
+}
+
+function CalendarMonth({ ym, films, lang, dayHeaders, openFilm, t, delay }: CalendarMonthProps) {
+  const [y, m] = ym.split('-').map(Number);
+  const year = y;
+  const monthIdx = m - 1;
+  const monthLabel = new Date(year, monthIdx, 1).toLocaleDateString(lang || 'fr', { month: 'long', year: 'numeric' });
+
+  // Position du 1er jour du mois dans la grille (0 = lundi)
+  const firstDayOfWeek = (new Date(year, monthIdx, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+
+  // Group films par jour (peut y en avoir plusieurs dans la meme journee)
+  const filmsByDay = useMemo(() => {
+    const map = new Map<number, SeenMovie[]>();
+    for (const f of films) {
+      const d = new Date(f.watchedAt).getDate();
+      const arr = map.get(d);
+      if (arr) arr.push(f);
+      else map.set(d, [f]);
+    }
+    return map;
+  }, [films]);
+
+  // Cellules de la grille : null pour les paddings du debut, sinon le numero du jour
+  const cells: Array<number | null> = useMemo(() => {
+    const arr: Array<number | null> = [];
+    for (let i = 0; i < firstDayOfWeek; i++) arr.push(null);
+    for (let d = 1; d <= daysInMonth; d++) arr.push(d);
+    return arr;
+  }, [firstDayOfWeek, daysInMonth]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay }}
+      className="rounded-3xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl p-4"
+    >
+      <div className="flex items-baseline justify-between mb-3 pl-1">
+        <h4 className="text-base font-bold text-white capitalize tracking-tight">
+          {monthLabel}
+        </h4>
+        <span className="text-[11px] uppercase tracking-wider font-bold text-white/45">
+          {t('watchHistory.monthCount', { count: films.length })}
+        </span>
+      </div>
+
+      {/* En-tete jours de la semaine */}
+      <div className="grid grid-cols-7 gap-1 mb-1.5" aria-hidden="true">
+        {dayHeaders.map((d, i) => (
+          <div key={i} className="text-center text-[10px] font-bold text-white/35 uppercase">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      {/* Grille des jours */}
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((day, i) => (
+          <CalendarCell
+            key={i}
+            day={day}
+            films={day !== null ? filmsByDay.get(day) : undefined}
+            onClick={(id) => openFilm(id)}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+interface CalendarCellProps {
+  day: number | null;
+  films: SeenMovie[] | undefined;
+  onClick: (id: number) => void;
+}
+
+function CalendarCell({ day, films, onClick }: CalendarCellProps) {
+  // Cellule de padding (premiers jours avant le 1er du mois)
+  if (day === null) {
+    return <div className="aspect-[3/4]" aria-hidden="true" />;
+  }
+  // Jour sans film
+  if (!films || films.length === 0) {
+    return (
+      <div className="aspect-[3/4] rounded-md bg-white/[0.03] border border-white/[0.04] flex items-center justify-center">
+        <span className="text-[11px] font-semibold text-white/35 tabular-nums">{day}</span>
+      </div>
+    );
+  }
+  // Jour avec film(s) : on affiche l'affiche du dernier vu, badge +N si plusieurs
+  const main = films[0]; // films deja tries du plus recent au plus ancien dans computeWatchStats
+  const extra = films.length - 1;
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(main.id)}
+      aria-label={`${main.title}${extra > 0 ? ` (+${extra})` : ''}`}
+      className="relative aspect-[3/4] rounded-md overflow-hidden bg-white/5 border border-white/[0.08] hover:border-violet-400/50 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+    >
+      {main.poster_path ? (
+        <img
+          src={`${IMG}${main.poster_path}`}
+          srcSet={posterSrcSet(main.poster_path)}
+          sizes="(min-width:768px) 90px, 13vw"
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-violet-500/20 to-fuchsia-500/15">
+          <span className="text-[9px] font-bold text-white/65 px-1 text-center leading-tight line-clamp-2">
+            {main.title}
+          </span>
+        </div>
+      )}
+      {/* Numero du jour, top-right en pastille glass */}
+      <span className="absolute top-0.5 right-0.5 min-w-[16px] px-1 py-0.5 rounded text-[9px] font-black text-white bg-black/65 tabular-nums leading-none">
+        {day}
+      </span>
+      {/* Badge +N si plusieurs films */}
+      {extra > 0 && (
+        <span className="absolute bottom-0.5 right-0.5 min-w-[18px] px-1 py-0.5 rounded text-[9px] font-black text-white bg-violet-500/85 tabular-nums leading-none">
+          +{extra}
+        </span>
+      )}
+    </button>
+  );
+}
+
