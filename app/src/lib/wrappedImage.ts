@@ -60,14 +60,18 @@ export async function generateWrappedImage(
   drawHeroStat(ctx, stats, options.labels);
 
   if (options.variant === 'simple') {
-    // Collage prend la moitie centrale, mis en avant
-    await drawPosterCollage(ctx, stats.topFilms.slice(0, 3), 1130, 660, options.labels);
+    // Simple : collage centre y=1180 (60px de marge apres le delta du hero
+    // a y=775), areaHeight 600. Label a y=850. Callout en dessous.
+    await drawPosterCollage(ctx, stats.topFilms.slice(0, 3), 1180, 600, options.labels);
     drawTopGenreCallout(ctx, stats, options.genreNames, 1540, options.labels);
     drawFooter(ctx, options);
   } else {
-    await drawPosterCollage(ctx, stats.topFilms.slice(0, 5), 1010, 500, options.labels);
-    drawTopGenresBars(ctx, stats, options.genreNames, 1320, options.labels);
-    drawSecondaryStats(ctx, stats, options.labels, 1610);
+    // Detailed : densite +eleve (collage + barres + stats + footer). On
+    // serre les sections : collage 400 au lieu de 500, bars rowH compact,
+    // stats juste en-dessous.
+    await drawPosterCollage(ctx, stats.topFilms.slice(0, 5), 1060, 400, options.labels);
+    drawTopGenresBars(ctx, stats, options.genreNames, 1280, options.labels);
+    drawSecondaryStats(ctx, stats, options.labels, 1590);
     drawFooter(ctx, options);
   }
 
@@ -185,23 +189,23 @@ async function loadPoster(path: string | null): Promise<HTMLImageElement | null>
     const img = new Image();
     img.crossOrigin = 'anonymous';
     let settled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const finish = (result: HTMLImageElement | null) => {
       if (settled) return;
       settled = true;
+      if (timeoutId !== null) clearTimeout(timeoutId);
       resolve(result);
     };
     img.onload = () => {
-      // Verifie qu'on a vraiment des pixels decodes : naturalWidth > 0
-      // sinon (canvas taint, image vide) on tombe sur fallback proprement.
-      if (img.naturalWidth > 0 && img.naturalHeight > 0) {
-        finish(img);
-      } else {
-        finish(null);
-      }
+      // naturalWidth > 0 : refuse silencieusement un canvas taint ou une
+      // image decodee a 0px (cas connu sur certains browsers).
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) finish(img);
+      else finish(null);
     };
     img.onerror = () => finish(null);
-    // 8s timeout pour eviter un hang si le reseau bloque.
-    setTimeout(() => finish(null), 8000);
+    // 5s timeout : un poster TMDB typique fait <500ms ; 5s laisse marge
+    // pour 3G lent sans faire poireauter trop longtemps en cas de blocage.
+    timeoutId = setTimeout(() => finish(null), 5000);
     img.src = `${TMDB_POSTER_BASE}${path}?canvas=1`;
   });
 }
@@ -439,7 +443,9 @@ function drawTopGenresBars(
   const barTrackX = barX + labelW + 24;
   const barTrackW = W - barTrackX - 100;
   const barH = 22;
-  const rowH = 78;
+  // Compact rowH=65 (au lieu de 78) pour faire rentrer 4 rangees + stats
+  // secondaires + footer sans chevauchement dans le canvas 1080x1920.
+  const rowH = 65;
   let rowY = y + 40;
 
   for (const g of genres) {
@@ -498,7 +504,9 @@ function drawSecondaryStats(
 
   const gap = 24;
   const cardW = (W - 200 - gap * 2) / 3;
-  const cardH = 200;
+  // Hauteur reduite a 170 (au lieu de 200) pour rentrer entre les bars
+  // et le footer sans chevauchement.
+  const cardH = 170;
   let x = 100;
   for (const it of items) {
     ctx.save();
@@ -510,18 +518,18 @@ function drawSecondaryStats(
     ctx.stroke();
     ctx.restore();
 
-    ctx.font = `900 56px ${FONT}`;
+    ctx.font = `900 52px ${FONT}`;
     const g = ctx.createLinearGradient(x, y, x + cardW, y + cardH);
     g.addColorStop(0, '#c4b5fd');
     g.addColorStop(1, '#67e8f9');
     ctx.fillStyle = g;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(it.value, x + cardW / 2, y + 80);
+    ctx.fillText(it.value, x + cardW / 2, y + 68);
 
-    ctx.font = `700 18px ${FONT}`;
+    ctx.font = `700 17px ${FONT}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillText(it.label, x + cardW / 2, y + 158);
+    ctx.fillText(it.label, x + cardW / 2, y + 132);
 
     ctx.textBaseline = 'alphabetic';
     x += cardW + gap;
