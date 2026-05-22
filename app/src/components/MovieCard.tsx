@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Heart, Star } from 'lucide-react';
+import { Heart, Star, Eye } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
@@ -22,6 +22,12 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
   const toggleFav = useAppStore((s) => s.toggleFav);
   const openModal = useAppStore((s) => s.openModal);
   const fav = useAppStore((s) => s.favorites.some((f) => f.id === movie.id));
+  // Mode "deja vu" : si l'option est active dans les parametres ET que le film
+  // est en seen, on grise legerement le poster + badge Eye discret pour
+  // signaler visuellement sans cacher le film (l'affiche reste lisible).
+  const markSeenInGrid = useAppStore((s) => s.markSeenInGrid);
+  const isSeen = useAppStore((s) => s.seen.some((f) => f.id === movie.id));
+  const dimSeen = markSeenInGrid && isSeen;
   // Pour surligner la portion du titre qui matche la recherche courante.
   // Lecture du searchQuery via selecteur granulaire (re-render uniquement
   // si la query change, pas a chaque mutation du store).
@@ -69,13 +75,25 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
             srcSet={posterSrcSet(movie.poster_path)}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
             alt={movie.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+              dimSeen ? 'opacity-55 saturate-[0.75]' : ''
+            }`}
             loading="lazy"
           />
+          {dimSeen && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30" aria-hidden="true">
+              <Eye className="w-5 h-5 text-emerald-300 drop-shadow" />
+            </div>
+          )}
         </div>
         <div className="flex-1 min-w-0 py-1">
-          <h3 className="text-white font-bold text-base mb-1 truncate group-hover:text-violet-300 transition-colors">
+          <h3 className="text-white font-bold text-base mb-1 truncate group-hover:text-violet-300 transition-colors flex items-center gap-1.5">
             {renderTitle()}
+            {dimSeen && (
+              <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                {t('seen.title')}
+              </span>
+            )}
           </h3>
           <p className="text-white/70 text-xs font-medium mb-2">{fmtDate(movie.release_date)}</p>
           <div className="flex items-center gap-2">
@@ -171,10 +189,20 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
           srcSet={posterSrcSet(movie.poster_path)}
           sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
           alt={movie.title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${
+            dimSeen ? 'opacity-55 saturate-[0.75]' : ''
+          }`}
           loading="lazy"
           decoding="async"
         />
+        {dimSeen && (
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-2 py-1 rounded-full bg-black/70 backdrop-blur-sm border border-white/15 flex items-center gap-1.5">
+            <Eye className="w-3 h-3 text-emerald-300" aria-hidden="true" />
+            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-200">
+              {t('seen.title')}
+            </span>
+          </div>
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-85 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity" />
 

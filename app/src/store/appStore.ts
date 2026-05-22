@@ -29,6 +29,7 @@ interface AppState {
   seen: SeenMovie[];
   customLists: CustomList[];
   blindMode: boolean;
+  markSeenInGrid: boolean;
   sortBy: 'popularity' | 'date' | 'rating';
   runtimeMax: number | null;  // minutes, null = no filter
   // Heures de calme pour les notifications : pas de notif entre ces heures.
@@ -101,6 +102,7 @@ interface AppState {
   openWrapped: () => void;
   closeWrapped: () => void;
   toggleBlindMode: () => void;
+  toggleMarkSeenInGrid: () => void;
   setSortBy: (s: 'popularity' | 'date' | 'rating') => void;
   setRuntimeMax: (n: number | null) => void;
   setNotifQuiet: (from: number | null, to: number | null) => void;
@@ -163,6 +165,9 @@ if (!savedTheme && typeof window !== 'undefined' && window.matchMedia) {
 }
 
 const savedBlindMode = localStorage.getItem('cinelume_blind_mode') === '1';
+// Default true : on prefere par defaut signaler discretement les films deja vus
+// sur la grille de decouverte. L'user peut desactiver dans les parametres.
+const savedMarkSeen = (localStorage.getItem('cinelume_mark_seen') ?? '1') === '1';
 if (savedBlindMode) {
   document.documentElement.classList.add('blind-mode');
 }
@@ -284,6 +289,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   seen: safeParseSeen(),
   customLists: safeParseCustomLists(),
   blindMode: savedBlindMode,
+  markSeenInGrid: savedMarkSeen,
   sortBy: (localStorage.getItem('cinelume_sort') as 'popularity' | 'date' | 'rating') || 'popularity',
   runtimeMax: (() => {
     const raw = localStorage.getItem('cinelume_runtime_max');
@@ -643,6 +649,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       document.documentElement.classList.remove('blind-mode');
     }
     set({ blindMode: next });
+  },
+
+  toggleMarkSeenInGrid: () => {
+    const next = !get().markSeenInGrid;
+    try {
+      localStorage.setItem('cinelume_mark_seen', next ? '1' : '0');
+    } catch {
+      // ignore
+    }
+    set({ markSeenInGrid: next });
   },
 
   setSortBy: (s) => {

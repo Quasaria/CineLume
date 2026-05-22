@@ -270,6 +270,8 @@
     "notificationsTestBody": "You'll be notified when a favorite of yours releases.",
     "blindMode": "Spoiler-free mode",
     "blindModeDesc": "Blur posters and titles, tap to reveal",
+    "markSeenInGrid": "Mark watched films",
+    "markSeenInGridDesc": "Show films you've already watched dimmed on the discovery grid",
     "statsTitle": "My stats",
     "statsTracked": "Tracked movies",
     "statsThisWeek": "This week",

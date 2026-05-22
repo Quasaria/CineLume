@@ -77,6 +77,8 @@ export function SettingsModal() {
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const blindMode = useAppStore((s) => s.blindMode);
   const toggleBlindMode = useAppStore((s) => s.toggleBlindMode);
+  const markSeenInGrid = useAppStore((s) => s.markSeenInGrid);
+  const toggleMarkSeenInGrid = useAppStore((s) => s.toggleMarkSeenInGrid);
   const favorites = useAppStore((s) => s.favorites);
   const watchlist = useAppStore((s) => s.watchlist);
   const customLists = useAppStore((s) => s.customLists);
@@ -339,6 +341,11 @@ export function SettingsModal() {
                     label={t('settings.blindMode')}
                     description={t('settings.blindModeDesc')}
                     right={<Switch checked={blindMode} onCheckedChange={toggleBlindMode} aria-label={t('settings.blindMode')} />}
+                  />
+                  <SettingRow
+                    label={t('settings.markSeenInGrid')}
+                    description={t('settings.markSeenInGridDesc')}
+                    right={<Switch checked={markSeenInGrid} onCheckedChange={toggleMarkSeenInGrid} aria-label={t('settings.markSeenInGrid')} />}
                   />
                 </SectionCard>
 
