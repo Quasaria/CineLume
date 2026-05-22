@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film, ArrowLeft } from 'lucide-react';
+import { Heart, Bookmark, Trash2, Calendar, Sparkles, Archive, Film, ArrowLeft, Eye } from 'lucide-react';
 import { useAppStore } from '@/store/appStore';
 import { IMG, posterSrcSet } from '@/lib/tmdb';
 import { fmtDateLocalized } from '@/lib/utils';
@@ -102,6 +102,9 @@ export function CollectionsModal() {
   const items: FavoriteMovie[] = tab === 'favorites' ? favorites : watchlist;
   const prefix = tab === 'favorites' ? 'favorites' : 'watchlist';
   const groups = useMemo(() => groupByRelease(items, prefix), [items, prefix]);
+  const seenIds = useAppStore((s) => s.seen);
+  // Set des ids vus pour lookup O(1) lors du rendu de chaque film.
+  const seenSet = useMemo(() => new Set(seenIds.map((s) => s.id)), [seenIds]);
   const fmtDate = (d?: string) => fmtDateLocalized(d);
   const contentRef = useRef<HTMLDivElement>(null);
   const dragHandlers = useDragToClose({ onClose: closeModal, contentRef });
@@ -229,6 +232,7 @@ export function CollectionsModal() {
                               </p>
                             );
                           }
+                          const isWatched = seenSet.has(f.id);
                           nodes.push(
                           <motion.div
                             key={f.id}
@@ -236,13 +240,13 @@ export function CollectionsModal() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0, x: -50 }}
-                            className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors"
+                            className={`flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors ${isWatched ? 'opacity-60' : ''}`}
                             onClick={() => {
                               closeModal();
                               openFilmModal(f.id);
                             }}
                           >
-                            <div className="w-10 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                            <div className="relative w-10 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
                               {f.poster_path && (
                                 <img
                                   src={`${IMG}${f.poster_path}`}
@@ -253,9 +257,21 @@ export function CollectionsModal() {
                                   loading="lazy"
                                 />
                               )}
+                              {isWatched && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/60" aria-hidden="true">
+                                  <Eye className="w-4 h-4 text-emerald-300" />
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-white truncate">{f.title}</p>
+                              <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5">
+                                {f.title}
+                                {isWatched && (
+                                  <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                    {t('seen.title')}
+                                  </span>
+                                )}
+                              </p>
                               <p className="text-xs text-white/60">{fmtDate(f.release_date)}</p>
                             </div>
                             <button
