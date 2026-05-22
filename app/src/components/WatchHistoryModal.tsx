@@ -93,7 +93,6 @@ export function WatchHistoryModal() {
                 )}
                 <CalendarMonths
                   seen={seen}
-                  firstWatchAt={stats.firstWatchAt}
                   lang={i18n.language}
                   openFilm={(id) => { close(); openFilm(id); }}
                   t={t}
@@ -280,13 +279,12 @@ function GenreBreakdown({ topGenres, genreMap, total, t }: GenreBreakdownProps) 
 
 interface CalendarMonthsProps {
   seen: SeenMovie[];
-  firstWatchAt: number | null;
   lang: string;
   openFilm: (id: number) => void;
   t: (k: string, opts?: Record<string, unknown>) => string;
 }
 
-function CalendarMonths({ seen, firstWatchAt, lang, openFilm, t }: CalendarMonthsProps) {
+function CalendarMonths({ seen, lang, openFilm, t }: CalendarMonthsProps) {
   // Anchor : on demarre sur le mois courant, l'user navigue librement
   // avec les chevrons. Pas de bornes dures - on borne uniquement le
   // bouton "next" pour ne pas aller dans le futur lointain (max = mois
@@ -328,18 +326,11 @@ function CalendarMonths({ seen, firstWatchAt, lang, openFilm, t }: CalendarMonth
     setAnchor({ year: t.getFullYear(), month: t.getMonth() });
   }
 
-  // Bornes : prev desactive si on est avant le premier film vu (et le mois
-  // courant n'a rien d'anterieur a montrer non plus). Next desactive si on
-  // est sur le mois courant (pas de futur).
+  // Bornes : next desactive si on est sur le mois courant (pas de futur a
+  // explorer). Prev jamais borne : l'user peut naviguer librement dans
+  // n'importe quel mois, meme ceux ou il n'a vu aucun film (le calendrier
+  // s'affiche vide avec le badge "Rien ce mois-ci").
   const isCurrentMonth = anchor.year === now.getFullYear() && anchor.month === now.getMonth();
-  const canPrev = firstWatchAt === null
-    ? false
-    : (() => {
-        const first = new Date(firstWatchAt);
-        const anchorStart = new Date(anchor.year, anchor.month, 1).getTime();
-        const firstStart = new Date(first.getFullYear(), first.getMonth(), 1).getTime();
-        return anchorStart > firstStart;
-      })();
   const canNext = !isCurrentMonth;
 
   return (
@@ -359,7 +350,6 @@ function CalendarMonths({ seen, firstWatchAt, lang, openFilm, t }: CalendarMonth
         <button
           type="button"
           onClick={goPrev}
-          disabled={!canPrev}
           aria-label={t('watchHistory.prevMonth')}
           className="min-w-11 min-h-11 flex items-center justify-center rounded-xl hover:bg-white/5 active:bg-white/10 text-white/75 disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
         >
