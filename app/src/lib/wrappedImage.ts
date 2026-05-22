@@ -60,13 +60,14 @@ export async function generateWrappedImage(
   drawHeroStat(ctx, stats, options.labels);
 
   if (options.variant === 'simple') {
-    await drawPosterStrip(ctx, stats.topFilms.slice(0, 3), 880, 320, options.labels);
-    drawTopGenreCallout(ctx, stats, options.genreNames, 1260, options.labels);
+    // Collage prend la moitie centrale, mis en avant
+    await drawPosterCollage(ctx, stats.topFilms.slice(0, 3), 1130, 660, options.labels);
+    drawTopGenreCallout(ctx, stats, options.genreNames, 1540, options.labels);
     drawFooter(ctx, options);
   } else {
-    await drawPosterStrip(ctx, stats.topFilms.slice(0, 5), 840, 280, options.labels);
-    drawTopGenresBars(ctx, stats, options.genreNames, 1170, options.labels);
-    drawSecondaryStats(ctx, stats, options.labels, 1490);
+    await drawPosterCollage(ctx, stats.topFilms.slice(0, 5), 1010, 500, options.labels);
+    drawTopGenresBars(ctx, stats, options.genreNames, 1320, options.labels);
+    drawSecondaryStats(ctx, stats, options.labels, 1610);
     drawFooter(ctx, options);
   }
 
@@ -172,20 +173,50 @@ function drawHeroStat(ctx: CanvasRenderingContext2D, stats: WrappedStats, labels
 
 async function loadPoster(path: string | null): Promise<HTMLImageElement | null> {
   if (!path) return null;
+  // Cache-buster `?canvas=1` : evite la pollution du SW cache. Les <img>
+  // reguliers de l'app chargent les posters TMDB sans crossOrigin, donc
+  // Workbox les cache en reponse opaque (cacheableResponse statuses [0,200]).
+  // Quand loadPoster reutiliserait le meme URL avec crossOrigin=anonymous,
+  // le SW retourne l'opaque cachee, le browser refuse (pas de header CORS
+  // accessible), img.onerror fire, le canvas tombe en fallback gradient.
+  // Le query param force une entree cache distincte, peuplee par une fetch
+  // CORS fraiche qui preserve les headers.
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = `${TMDB_POSTER_BASE}${path}`;
+    let settled = false;
+    const finish = (result: HTMLImageElement | null) => {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+    };
+    img.onload = () => {
+      // Verifie qu'on a vraiment des pixels decodes : naturalWidth > 0
+      // sinon (canvas taint, image vide) on tombe sur fallback proprement.
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+        finish(img);
+      } else {
+        finish(null);
+      }
+    };
+    img.onerror = () => finish(null);
+    // 8s timeout pour eviter un hang si le reseau bloque.
+    setTimeout(() => finish(null), 8000);
+    img.src = `${TMDB_POSTER_BASE}${path}?canvas=1`;
   });
 }
 
-async function drawPosterStrip(
+/**
+ * Collage de posters en eventail, fouillis volontaire. Le poster central
+ * (premier element) est le plus grand et droit ; les autres tournent autour
+ * en eventail avec rotation +/- 6-14 deg, tailles decroissantes, overlap
+ * lateral pour donner un effet pile de polaroids/scrapbook.
+ */
+async function drawPosterCollage(
   ctx: CanvasRenderingContext2D,
   films: WrappedStats['topFilms'],
-  y: number,
-  posterHeight: number,
+  centerY: number,
+  areaHeight: number,
   labels: WrappedImageLabels,
 ) {
   if (films.length === 0) return;
@@ -193,19 +224,66 @@ async function drawPosterStrip(
   ctx.font = `800 26px ${FONT}`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.textAlign = 'center';
-  ctx.fillText(label, W / 2, y - 36);
-
-  const aspectW = posterHeight * (2 / 3);
-  const gap = 24;
-  const total = aspectW * films.length + gap * (films.length - 1);
-  let x = (W - total) / 2;
+  ctx.fillText(label, W / 2, centerY - areaHeight / 2 - 24);
 
   const posters = await Promise.all(films.map((f) => loadPoster(f.poster_path)));
-  for (let i = 0; i < films.length; i++) {
-    const img = posters[i];
-    drawRoundedPoster(ctx, x, y, aspectW, posterHeight, img, films[i].title);
-    x += aspectW + gap;
+
+  // Layout : (renderIdx, posterIdx, relX, sizeRatio, angleDeg)
+  // L'ordre du tableau est l'ordre de rendu (back-to-front pour overlap correct).
+  const n = films.length;
+  type Item = { idx: number; relX: number; sizeRatio: number; angle: number };
+  const layouts: Record<number, Item[]> = {
+    1: [{ idx: 0, relX: 0, sizeRatio: 0.92, angle: -2 }],
+    2: [
+      { idx: 1, relX: 130, sizeRatio: 0.82, angle: 7 },
+      { idx: 0, relX: -130, sizeRatio: 0.92, angle: -5 },
+    ],
+    3: [
+      { idx: 1, relX: -230, sizeRatio: 0.74, angle: -11 },
+      { idx: 2, relX: 230, sizeRatio: 0.74, angle: 11 },
+      { idx: 0, relX: 0, sizeRatio: 0.96, angle: 2 },
+    ],
+    4: [
+      { idx: 2, relX: -290, sizeRatio: 0.68, angle: -14 },
+      { idx: 3, relX: 290, sizeRatio: 0.68, angle: 14 },
+      { idx: 1, relX: -130, sizeRatio: 0.84, angle: -5 },
+      { idx: 0, relX: 130, sizeRatio: 0.92, angle: 4 },
+    ],
+    5: [
+      { idx: 3, relX: -340, sizeRatio: 0.62, angle: -15 },
+      { idx: 4, relX: 340, sizeRatio: 0.62, angle: 15 },
+      { idx: 1, relX: -200, sizeRatio: 0.78, angle: -8 },
+      { idx: 2, relX: 200, sizeRatio: 0.78, angle: 8 },
+      { idx: 0, relX: 0, sizeRatio: 0.98, angle: -1 },
+    ],
+  };
+  const layout = layouts[Math.min(n, 5)] || layouts[5];
+
+  for (const item of layout) {
+    if (item.idx >= films.length) continue;
+    const baseH = areaHeight * item.sizeRatio;
+    const baseW = baseH * (2 / 3);
+    const x = W / 2 + item.relX - baseW / 2;
+    const y = centerY - baseH / 2;
+    drawTiltedPoster(ctx, x, y, baseW, baseH, item.angle, posters[item.idx], films[item.idx].title);
   }
+}
+
+function drawTiltedPoster(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  angleDeg: number,
+  img: HTMLImageElement | null,
+  fallbackTitle: string,
+) {
+  ctx.save();
+  ctx.translate(x + w / 2, y + h / 2);
+  ctx.rotate((angleDeg * Math.PI) / 180);
+  drawRoundedPoster(ctx, -w / 2, -h / 2, w, h, img, fallbackTitle);
+  ctx.restore();
 }
 
 function drawRoundedPoster(
