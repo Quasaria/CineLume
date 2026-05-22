@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -73,6 +73,10 @@ export function SwipeMode() {
   // la direction pour pouvoir revert correctement (retirer de la watchlist
   // si swipe droite, ou retirer du Set skipped si swipe gauche).
   const [history, setHistory] = useState<Array<{ id: number; direction: 'left' | 'right'; wasAdded: boolean }>>([]);
+  // Ref vers la card courante : permet de declencher l'animation de sortie
+  // depuis les boutons skip/like (pas seulement depuis le drag), pour que
+  // l'effet visuel soit le meme quelle que soit la facon de swiper.
+  const cardRef = useRef<SwipeCardHandle | null>(null);
 
   useBodyScrollLock(isSwipeOpen);
   useFocusRestore(isSwipeOpen);
@@ -201,10 +205,12 @@ export function SwipeMode() {
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        handleSwipe('left');
+        if (cardRef.current) cardRef.current.swipeOut('left');
+        else handleSwipe('left');
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        handleSwipe('right');
+        if (cardRef.current) cardRef.current.swipeOut('right');
+        else handleSwipe('right');
       }
     }
     document.addEventListener('keydown', onKey);
@@ -370,6 +376,7 @@ export function SwipeMode() {
                 )}
                 <SwipeCard
                   key={current.id}
+                  ref={cardRef}
                   movie={current}
                   onSwipe={handleSwipe}
                   onOpenDetails={() => { openModal(current.id); }}
@@ -392,7 +399,7 @@ export function SwipeMode() {
               </button>
               <button
                 type="button"
-                onClick={() => handleSwipe('left')}
+                onClick={() => cardRef.current ? cardRef.current.swipeOut('left') : handleSwipe('left')}
                 aria-label={t('swipe.swipeLeft')}
                 className="w-16 h-16 rounded-full bg-white/10 hover:bg-rose-500/30 border border-white/15 active:scale-95 transition-all flex items-center justify-center text-white"
               >
@@ -400,7 +407,7 @@ export function SwipeMode() {
               </button>
               <button
                 type="button"
-                onClick={() => handleSwipe('right')}
+                onClick={() => cardRef.current ? cardRef.current.swipeOut('right') : handleSwipe('right')}
                 aria-label={t('swipe.swipeRight')}
                 className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 active:scale-95 transition-all flex items-center justify-center text-white shadow-xl shadow-violet-500/40"
               >
@@ -448,12 +455,34 @@ interface SwipeCardProps {
   onOpenDetails: () => void;
 }
 
-function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
+/** Handle imperatif expose au parent pour declencher l'animation de
+ * sortie depuis les boutons skip/like (sans passer par le drag). */
+export interface SwipeCardHandle {
+  swipeOut: (direction: 'left' | 'right') => void;
+}
+
+const SwipeCard = forwardRef<SwipeCardHandle, SwipeCardProps>(function SwipeCard({ movie, onSwipe, onOpenDetails }, ref) {
   const { t, i18n } = useTranslation();
   const x = useMotionValue(0);
+  const y = useMotionValue(0);
   const rotate = useTransform(x, [-300, 0, 300], [-18, 0, 18]);
   const likeOpacity = useTransform(x, [40, 140], [0, 1]);
   const passOpacity = useTransform(x, [-140, -40], [1, 0]);
+  // Animation de sortie : la carte file dans la direction du swipe avec
+  // un leger tilt + decay vertical pour un effet plus organique.
+  function swipeOut(direction: 'left' | 'right') {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 600;
+    const targetX = direction === 'right' ? w + 240 : -(w + 240);
+    animate(x, targetX, {
+      type: 'spring',
+      stiffness: 260,
+      damping: 28,
+      velocity: x.getVelocity(),
+      onComplete: () => onSwipe(direction),
+    });
+    animate(y, 60, { type: 'spring', stiffness: 200, damping: 26 });
+  }
+  useImperativeHandle(ref, () => ({ swipeOut }));
 
   // Etat du drag (pointer events natifs au lieu de framer-motion drag, qui
   // ne fonctionnait pas fiablement sur Chrome Android). On detecte
@@ -508,11 +537,13 @@ function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
     dragStateRef.current = null;
     if (!wasHorizontal) return;
     if (dx > SWIPE_THRESHOLD) {
-      onSwipe('right');
+      swipeOut('right');
     } else if (dx < -SWIPE_THRESHOLD) {
-      onSwipe('left');
+      swipeOut('left');
     } else {
-      animate(x, 0, { type: 'spring', stiffness: 400, damping: 30 });
+      // Snap back fluide a la position de depart si l'user a pas swipe assez loin.
+      animate(x, 0, { type: 'spring', stiffness: 380, damping: 26 });
+      animate(y, 0, { type: 'spring', stiffness: 380, damping: 26 });
     }
   }
 
@@ -532,7 +563,7 @@ function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
 
   return (
     <motion.div
-      style={{ x, rotate, touchAction: 'pan-y' }}
+      style={{ x, y, rotate, touchAction: 'pan-y' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerEnd}
@@ -627,4 +658,4 @@ function SwipeCard({ movie, onSwipe, onOpenDetails }: SwipeCardProps) {
       </div>
     </motion.div>
   );
-}
+});
