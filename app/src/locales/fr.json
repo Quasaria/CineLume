@@ -270,6 +270,8 @@
     "notificationsTestBody": "Tu seras prévenu·e quand un de tes favoris sortira.",
     "blindMode": "Mode sans spoiler",
     "blindModeDesc": "Floute posters et titres, tap pour révéler",
+    "markSeenInGrid": "Marquer les films vus",
+    "markSeenInGridDesc": "Affiche les films déjà vus en grisé sur la grille de découverte",
     "statsTitle": "Mes statistiques",
     "statsTracked": "Films suivis",
     "statsThisWeek": "Cette semaine",
