@@ -81,8 +81,8 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
             loading="lazy"
           />
           {dimSeen && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30" aria-hidden="true">
-              <Eye className="w-5 h-5 text-emerald-300 drop-shadow" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/45" aria-hidden="true">
+              <Eye className="w-5 h-5 text-emerald-100 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
             </div>
           )}
         </div>
@@ -90,7 +90,7 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
           <h3 className="text-white font-bold text-base mb-1 truncate group-hover:text-violet-300 transition-colors flex items-center gap-1.5">
             {renderTitle()}
             {dimSeen && (
-              <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+              <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-emerald-500/25 text-emerald-100 border border-emerald-400/40 shrink-0">
                 {t('seen.title')}
               </span>
             )}
@@ -196,9 +196,9 @@ export function MovieCard({ movie, index, viewMode }: MovieCardProps) {
           decoding="async"
         />
         {dimSeen && (
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-2 py-1 rounded-full bg-black/70 backdrop-blur-sm border border-white/15 flex items-center gap-1.5">
-            <Eye className="w-3 h-3 text-emerald-300" aria-hidden="true" />
-            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-200">
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-2 py-1 rounded-full bg-black/85 backdrop-blur-sm border border-emerald-400/40 flex items-center gap-1.5 shadow-lg shadow-black/40">
+            <Eye className="w-3 h-3 text-emerald-100" aria-hidden="true" />
+            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-50 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
               {t('seen.title')}
             </span>
           </div>
