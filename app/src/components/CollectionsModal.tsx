@@ -240,13 +240,13 @@ export function CollectionsModal() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0, x: -50 }}
-                            className={`flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors ${isWatched ? 'opacity-60' : ''}`}
+                            className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer group transition-colors"
                             onClick={() => {
                               closeModal();
                               openFilmModal(f.id);
                             }}
                           >
-                            <div className="relative w-10 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
+                            <div className={`relative w-10 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0 ${isWatched ? 'opacity-50' : ''}`}>
                               {f.poster_path && (
                                 <img
                                   src={`${IMG}${f.poster_path}`}
@@ -263,16 +263,16 @@ export function CollectionsModal() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5">
-                                {f.title}
+                            <div className={`flex-1 min-w-0 ${isWatched ? 'opacity-60' : ''}`}>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-sm font-semibold text-white truncate flex-1 min-w-0">{f.title}</span>
                                 {isWatched && (
-                                  <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                  <span className="shrink-0 whitespace-nowrap text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                                     {t('seen.title')}
                                   </span>
                                 )}
-                              </p>
-                              <p className="text-xs text-white/60">{fmtDate(f.release_date)}</p>
+                              </div>
+                              <p className="text-xs text-white/60 truncate">{fmtDate(f.release_date)}</p>
                             </div>
                             <button
                               type="button"
