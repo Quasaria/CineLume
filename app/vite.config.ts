@@ -81,8 +81,16 @@ export default defineConfig(({ command }) => ({
         description: 'Application web gratuite pour suivre les sorties cinéma et streaming, semaine par semaine. Sans pub, sans abonnement, sans inscription. Favoris, listes, notifications.',
         theme_color: '#050508',
         background_color: '#050508',
-        display: 'standalone',
-        display_override: ['standalone', 'minimal-ui', 'browser'],
+        // 'fullscreen' : le contenu web occupe TOUT l'ecran, la status bar
+        // systeme Android (barre noire avec l'heure/batterie) est masquee.
+        // L'image hero remplit donc le haut de l'ecran jusqu'au bord physique.
+        // Sur Android la status bar PWA ne peut pas etre rendue translucide
+        // avec le contenu derriere (contrairement a iOS black-translucent),
+        // donc fullscreen est la seule facon d'avoir l'image edge-to-edge.
+        // display_override fournit un fallback vers standalone si fullscreen
+        // n'est pas supporte par le navigateur.
+        display: 'fullscreen',
+        display_override: ['fullscreen', 'standalone', 'minimal-ui', 'browser'],
         orientation: 'portrait',
         scope: '/CineLume/',
         start_url: '/CineLume/?utm_source=pwa',

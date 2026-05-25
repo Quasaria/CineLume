@@ -7,13 +7,10 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="96" fill="url(#g)"/>
-  <!-- C arc + play triangle centres visuellement autour de (256, 256).
-       Le C est un 3/4 cercle avec ouverture a droite, le triangle remplit
-       l'ouverture. Composition shiftee de +12px right par rapport au design
-       original pour compenser le poids visuel du C qui est concentre a
-       gauche, donnant un meilleur equilibre optique. -->
-  <g transform="translate(12 0)">
-    <path d="M380 145 a155 155 0 1 0 0 222" stroke="white" stroke-width="42" stroke-linecap="round" fill="none"/>
-    <path d="M260 200 L380 256 L260 312 Z" fill="white"/>
-  </g>
+  <!-- C arc + triangle play partagent EXACTEMENT le meme centre (256, 256).
+       Le C est un arc de 270deg (ouverture a droite) centre sur (256,256).
+       Le triangle a son centroid pile sur (256,256) : 2*216 + 336 = 768,
+       768/3 = 256. Composition optiquement equilibree, plus de decalage. -->
+  <path d="M362 150 A150 150 0 1 0 362 362" stroke="white" stroke-width="42" stroke-linecap="round" fill="none"/>
+  <path d="M216 184 L336 256 L216 328 Z" fill="white" stroke="white" stroke-width="26" stroke-linejoin="round"/>
 </svg>

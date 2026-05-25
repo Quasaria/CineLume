@@ -7,11 +7,9 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#g)"/>
-  <!-- Translate(96, 96) place le contenu dans la safe zone maskable centrale
-       (80% du canvas). Decalage supplementaire +8 sur x pour compenser le
-       poids visuel du C concentre a gauche. -->
-  <g transform="translate(104 96)">
-    <path d="M236 49 a107 107 0 1 0 0 154" stroke="white" stroke-width="30" stroke-linecap="round" fill="none"/>
-    <path d="M156 87 L236 120 L156 153 Z" fill="white"/>
-  </g>
+  <!-- Version maskable : meme composition centree (256,256) mais reduite
+       (rayon 140 au lieu de 150) pour tenir dans la safe zone maskable
+       (cercle central 80%). C et triangle co-centres sur (256,256). -->
+  <path d="M355 157 A140 140 0 1 0 355 355" stroke="white" stroke-width="38" stroke-linecap="round" fill="none"/>
+  <path d="M212 196 L344 256 L212 316 Z" fill="white" stroke="white" stroke-width="24" stroke-linejoin="round"/>
 </svg>
